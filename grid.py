@@ -24,7 +24,7 @@ class ButtonGrid:
                 btn = Square(master = frame, text = blank) #create a button inside frame 
                 btn.grid(row=row_index, column=col_index, sticky=N+S+E+W)
                 #Store row and column indices as a Button attribute
-                btn.position = (col_index, row_index)
+                btn.position = (row_index, col_index)
                 row.append(btn)
             grid.append(row)
 
