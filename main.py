@@ -57,94 +57,104 @@ def game():
             if square.category == 'mine':
                 num_mines += 1
     mines_found = 0
-    try:
-        while showed_game_over == False:
-            game_window.after(100)
 
-            now = datetime.now()
-            time = now - start
+    while showed_game_over == False:
+        game_window.after(100)
 
-            total_time.set(f'Time: {format_second(time.total_seconds())}')
+        now = datetime.now()
+        time = now - start
 
-            game_overs = [
-                square.game_over
-                for row in grid.grid
-                for square in row
-            ]
+        total_time.set(f'Time: {format_second(time.total_seconds())}')
 
-            for row in grid.grid:
-                # Clicks Zeros
-                for square in [square for square in row if (square.cget('text') == '0') and (square not in zeros_checked)]:
-                    zeros_checked.append(square)
-                    for square2 in [square2 for square2 in grid.around_square(*square.position) if (square2.category != 'mine') and (square2.num == None)]:
+        game_overs = [
+            square.game_over
+            for row in grid.grid
+            for square in row
+        ]
+
+        for row in grid.grid:
+            # Clicks Zeros
+            for square in [square for square in row if (square.cget('text') == '0') and (square not in zeros_checked)]:
+                zeros_checked.append(square)
+                for square2 in [square2 for square2 in grid.around_square(*square.position) if (square2.category != 'mine') and (square2.num == None)]:
+                    square2.clicked()
+                    # Clicks all numbers next to clicked zeros
+                    for square3 in [square3 for square3 in grid.around_square(*square2.position) if square3 in zeros_checked or square3.num != None]:
+                        square3.clicked()
+
+            for square in [square for square in row if square.completed == False]: # Checks all square if they are completed
+                mines_around_square = len([square for square in grid.around_square(*square.position) if (square.category == 'mine') and (square.clicked_on == True)])
+                if mines_around_square == square.num:
+                    square.completed = True
+
+            for square in [square for square in row if (square.chord)]: # Shows all squares around a square if it was middle clicked
+                if square.completed == False:
+                    precolors = []
+                    squares = [
+                        square
+                        for square in grid.around_square(*square.position)
+                            if square.clicked_on == False
+                    ]
+                    for square2 in squares:
+                        precolors.append(square2.cget('bg'))
+                        square2.config(bg='brown')
+                    game_window.update()
+                    game_window.after(1000)
+                    for square2 in squares:
+                        precolor = precolors[squares.index(square2)]
+                        square2.config(bg=precolor)
+                else:
+                    for square2 in [square for square in grid.around_square(*square.position) if not square.clicked_on]:
                         square2.clicked()
-                        # Clicks all numbers next to clicked zeros
-                        for square3 in [square3 for square3 in grid.around_square(*square2.position) if square3 in zeros_checked or square3.num != None]:
-                            square3.clicked()
-                    # elif square.chord == True: # Shows all squares around a square if it was middle clicked
-                    #     precolors = []
-                    #     squares = [
-                    #         square
-                    #         for square in grid.around_square(*square.position)
-                    #             if square.clicked_on == False
-                    #     ]
-                    #     for square2 in squares:
-                    #         precolors.append(square2.cget('bg'))
-                    #         square2.config(bg='brown')
-                    #     game_window.update()
-                    #     game_window.after(1000)
-                    #     for square2 in squares:
-                    #         precolor = precolors[squares.index(square2)]
-                    #         square2.config(bg=precolor)
+                    square.chord = False
 
-            squares_clicked_on = [
-                square
-                for row in grid.grid
-                for square in row
-                if square.clicked_on
-            ]
+        squares_clicked_on = [
+            square
+            for row in grid.grid
+            for square in row
+            if square.clicked_on
+        ]
 
-            squares_not_clicked_on = [
-                square
-                for row in grid.grid
-                for square in row
-                if square.clicked_on == False
-            ]
+        squares_not_clicked_on = [
+            square
+            for row in grid.grid
+            for square in row
+            if square.clicked_on == False
+        ]
 
-            if len(squares_clicked_on) == grid.grid_size ** 2 or all(square.category == 'bomb' for square in squares_not_clicked_on):
-                game_over = True
-                win = True
-            elif True in game_overs:
-                game_over = True
-                win = False
-            else:
-                game_over = False
-
-            if game_over:
-                for row in grid.grid:
-                    for square in row:
-                        if square.category == 'mine' and square.cget('text') != '🚩':
-                            square.clicked()
-                        elif square.category == 'mine' and square.cget('text') == '🚩':
-                            mines_found += 1
-                            square.config(text='✅')
-                        elif square.num != None and square.cget('text') == '🚩':
-                            square.config(text='❌')
-                showed_game_over = True
-            game_window.update()
-
-        if win:
-            Mbox(
-                'Game Over', f'Game Over.\nYou won!\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(time.total_seconds())}\nHighscore: {format_second(highscore)}', 0)
+        if len(squares_clicked_on) == grid.grid_size ** 2 or all(square.category == 'bomb' for square in squares_not_clicked_on):
+            game_over = True
+            win = True
+        elif True in game_overs:
+            game_over = True
+            win = False
         else:
-            Mbox(
-                'Game Over', f'Game Over.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(time.total_seconds())}\nHighscore: {format_second(highscore)}', 0)
-        if win and time.total_seconds() < highscore:
-            with open('highscore.txt', 'w') as f:
-                f.write(str(int(time.total_seconds())))
-        game_window.destroy()
-    except Exception:  # If user closed window
-        log.info(exc_info=True)
+            game_over = False
+
+        if game_over:
+            for row in grid.grid:
+                for square in row:
+                    if square.category == 'mine' and square.cget('text') != '🚩':
+                        square.clicked()
+                    elif square.category == 'mine' and square.cget('text') == '🚩':
+                        mines_found += 1
+                        square.config(text='✅')
+                    elif square.num != None and square.cget('text') == '🚩':
+                        square.config(text='❌')
+            showed_game_over = True
+        game_window.update()
+
+    if win:
+        Mbox(
+            'Game Over', f'Game Over.\nYou won!\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(time.total_seconds())}\nHighscore: {format_second(highscore)}', 0)
+    else:
+        Mbox(
+            'Game Over', f'Game Over.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(time.total_seconds())}\nHighscore: {format_second(highscore)}', 0)
+    if win and time.total_seconds() < highscore:
+        with open('highscore.txt', 'w') as f:
+            f.write(str(int(time.total_seconds())))
+    game_window.destroy()
+
     window.wait_window(game_window)
 
 

@@ -24,6 +24,7 @@ class Square(Button):
         super().__init__(master, text = text)
         
         self.bind('<Button-1>', self.clicked)
+        self.bind('<Button-2>', self.chord_self)
         self.bind('<Button-3>', self.flag)
     
     def flag(self, _ = ''):
@@ -32,6 +33,10 @@ class Square(Button):
             self.clicked_on = True
         elif self.cget('text') == '🚩':
             self.config(text="  " * 3)
+            self.clicked_on = False
+    
+    def chord_self(self, _ = ''):
+        self.chord = not self.chord
 
     def clicked(self, _ = ''):
         if self.category == 'mine':
@@ -39,9 +44,6 @@ class Square(Button):
             self.game_over = True
         elif self.num != None:
             self.config(text=str(self.num), bg=num_colors[self.num])
-            # self.label.game_over = False
-            # self.label.category = None
-            # self.label.num = self.num
         else:
             self.config(text='0')
         self.clicked_on = True
