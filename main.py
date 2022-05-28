@@ -1,7 +1,9 @@
+import logging
 from tkinter import *
 from grid import ButtonGrid
 import ctypes
 from datetime import datetime
+
 
 def Mbox(title, text, style):
     """
@@ -18,25 +20,30 @@ def Mbox(title, text, style):
     """
     return ctypes.windll.user32.MessageBoxW(0, text, title, style)
 
-def format_second(seconds:int):
+
+def format_second(seconds: int):
     seconds = int(seconds)
     minutes = int(seconds / 60)
     sec = seconds % 60
     if sec < 10:
         sec = f'0{sec % 60}'
-    
+
     return f'{minutes}:{sec}'
+
 
 def game():
     global difficulty
+    global window
 
-    game_window = Tk()
+    game_window = Toplevel(window)
+    log = logging.getLogger(__name__)
     game_window.title('Minesweeper')
     total_time = StringVar(game_window)
     start = datetime.now()
     game_window.grid_columnconfigure(1, weight=1)
 
-    Label(game_window, textvariable=total_time).grid(row=0, column=1, sticky=N+S+E+W)
+    Label(game_window, textvariable=total_time).grid(
+        row=0, column=1, sticky=N+S+E+W)
 
     grid = ButtonGrid(10 * difficulty, game_window)
     showed_game_over = False
@@ -52,7 +59,7 @@ def game():
     mines_found = 0
     try:
         while showed_game_over == False:
-            window.after(100)
+            game_window.after(100)
 
             now = datetime.now()
             time = now - start
@@ -62,11 +69,12 @@ def game():
             game_overs = [
                 square.game_over
                 for row in grid.grid
-                    for square in row
+                for square in row
             ]
 
             for row in grid.grid:
-                for square in [square for square in row if (square.cget('text') == '0') and (square not in zeros_checked)]: # Clicks Zeros
+                # Clicks Zeros
+                for square in [square for square in row if (square.cget('text') == '0') and (square not in zeros_checked)]:
                     zeros_checked.append(square)
                     for square2 in [square2 for square2 in grid.around_square(*square.position) if (square2.category != 'mine') and (square2.num == None)]:
                         square2.clicked()
@@ -92,15 +100,15 @@ def game():
             squares_clicked_on = [
                 square
                 for row in grid.grid
-                    for square in row
-                        if square.clicked_on
+                for square in row
+                if square.clicked_on
             ]
 
             squares_not_clicked_on = [
                 square
                 for row in grid.grid
-                    for square in row
-                        if square.clicked_on == False
+                for square in row
+                if square.clicked_on == False
             ]
 
             if len(squares_clicked_on) == grid.grid_size ** 2 or all(square.category == 'bomb' for square in squares_not_clicked_on):
@@ -124,22 +132,28 @@ def game():
                             square.config(text='❌')
                 showed_game_over = True
             game_window.update()
+
         if win:
-            Mbox('Game Over', f'Game Over.\nYou won!\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(time.total_seconds())}\nHighscore: {format_second(highscore)}', 0)
+            Mbox(
+                'Game Over', f'Game Over.\nYou won!\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(time.total_seconds())}\nHighscore: {format_second(highscore)}', 0)
         else:
-            Mbox('Game Over', f'Game Over.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(time.total_seconds())}\nHighscore: {format_second(highscore)}', 0)
+            Mbox(
+                'Game Over', f'Game Over.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(time.total_seconds())}\nHighscore: {format_second(highscore)}', 0)
         if win and time.total_seconds() < highscore:
             with open('highscore.txt', 'w') as f:
                 f.write(str(int(time.total_seconds())))
         game_window.destroy()
-    except TclError as error: # If user closed window
-        print(error)
+    except Exception:  # If user closed window
+        log.info(exc_info=True)
+    window.wait_window(game_window)
+
 
 def change_difficulty():
     global difficulty
     difficulty = radio_state.get()
 
-def load_highscore(txt_file:str):
+
+def load_highscore(txt_file: str):
     try:
         f = open(txt_file)
     except FileNotFoundError:
@@ -153,22 +167,26 @@ def load_highscore(txt_file:str):
     finally:
         return highscore
 
+
 window = Tk()
 window.title('Game Loader')
 window.config(padx=50, pady=20)
 
 Label(text='Select Difficulty').pack()
 
-#Variable to hold on to which radio button value is checked.
+# Variable to hold on to which radio button value is checked.
 radio_state = IntVar()
 
-radio_button1 = Radiobutton(text="Easy", value=1, variable=radio_state, command=change_difficulty)
+radio_button1 = Radiobutton(
+    text="Easy", value=1, variable=radio_state, command=change_difficulty)
 radio_button1.pack()
 
-radio_button2 = Radiobutton(text="Medium", value=2, variable=radio_state, command=change_difficulty)
+radio_button2 = Radiobutton(text="Medium", value=2,
+                            variable=radio_state, command=change_difficulty)
 radio_button2.pack()
 
-radio_button3 = Radiobutton(text='Hard', value=3, variable=radio_state, command=change_difficulty)
+radio_button3 = Radiobutton(
+    text='Hard', value=3, variable=radio_state, command=change_difficulty)
 radio_button3.pack()
 
 Button(window, text='Play!', command=game).pack()
