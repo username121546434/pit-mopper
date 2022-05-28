@@ -1,4 +1,3 @@
-import logging
 from tkinter import *
 from grid import ButtonGrid
 import ctypes
@@ -36,7 +35,7 @@ def game():
     global window
 
     game_window = Toplevel(window)
-    log = logging.getLogger(__name__)
+    game_window.iconbitmap("logo.ico")
     game_window.title('Minesweeper')
     total_time = StringVar(game_window)
     start = datetime.now()
@@ -181,6 +180,7 @@ def load_highscore(txt_file: str):
 window = Tk()
 window.title('Game Loader')
 window.config(padx=50, pady=20)
+window.iconbitmap("logo.ico")
 
 Label(text='Select Difficulty').pack()
 
