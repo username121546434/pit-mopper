@@ -81,18 +81,21 @@ def game():
                     for square3 in [square3 for square3 in grid.around_square(*square2.position) if square3 in zeros_checked or square3.num != None]:
                         square3.clicked()
 
-            for square in [square for square in row if square.completed == False]: # Checks all square if they are completed
-                mines_around_square = len([square for square in grid.around_square(*square.position) if (square.category == 'mine') and (square.clicked_on == True)])
+            # Checks all square if they are completed
+            for square in [square for square in row if square.completed == False]:
+                mines_around_square = len([square for square in grid.around_square(
+                    *square.position) if (square.category == 'mine') and (square.clicked_on == True)])
                 if mines_around_square == square.num or square.num == None:
                     square.completed = True
 
-            for square in [square for square in row if (square.chord)]: # Shows all squares around a square if it was middle clicked
+            # Shows all squares around a square if it was middle clicked
+            for square in [square for square in row if (square.chord)]:
                 if square.completed == False:
                     precolors = []
                     squares = [
                         square
                         for square in grid.around_square(*square.position)
-                            if square.clicked_on == False
+                        if square.clicked_on == False
                     ]
                     for square2 in squares:
                         precolors.append(square2.cget('bg'))

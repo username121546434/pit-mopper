@@ -2,8 +2,9 @@ from tkinter import *
 from squares import Square
 import random
 
+
 class ButtonGrid:
-    def __init__(self, grid_size, window:Tk):
+    def __init__(self, grid_size, window: Tk):
         self.grid_size = grid_size
         self.root = window
         self.grid = self.button_grid()
@@ -13,17 +14,18 @@ class ButtonGrid:
         Grid.columnconfigure(self.root, 1, weight=1)
         grid = []
         blank = "  " * 3
-        #Create & Configure frame 
-        frame=Frame(self.root)
+        # Create & Configure frame
+        frame = Frame(self.root)
         frame.grid(row=1, column=1, sticky=N+S+E+W)
         for row_index in range(self.grid_size):
             Grid.rowconfigure(frame, row_index, weight=1)
             row = []
             for col_index in range(self.grid_size):
                 Grid.columnconfigure(frame, col_index, weight=1)
-                btn = Square(master = frame, text = blank) #create a button inside frame 
+                # create a button inside frame
+                btn = Square(master=frame, text=blank)
                 btn.grid(row=row_index, column=col_index, sticky=N+S+E+W)
-                #Store row and column indices as a Button attribute
+                # Store row and column indices as a Button attribute
                 btn.position = (row_index, col_index)
                 row.append(btn)
             grid.append(row)
@@ -56,18 +58,18 @@ class ButtonGrid:
 
         return grid
 
-    def around_square(self, row_num:int, col_num:int, print_ = False) -> list[Square]:
+    def around_square(self, row_num: int, col_num: int, print_=False) -> list[Square]:
         around = []
         coors = []
 
-        coors.append((row_num + 1, col_num)) # Adds the square above
-        coors.append((row_num - 1, col_num)) # Adds the square below
-        coors.append((row_num, col_num + 1)) # Adds the square to the right
-        coors.append((row_num, col_num - 1)) # Adds the square to the left
-        coors.append((row_num + 1, col_num + 1)) # Adds the top right corner
-        coors.append((row_num + 1, col_num - 1)) # Adds the top left corner
-        coors.append((row_num - 1, col_num - 1)) # Adds the bottum left corner
-        coors.append((row_num - 1, col_num + 1)) # Adds the bottum right corner
+        coors.append((row_num + 1, col_num))  # Adds the square above
+        coors.append((row_num - 1, col_num))  # Adds the square below
+        coors.append((row_num, col_num + 1))  # Adds the square to the right
+        coors.append((row_num, col_num - 1))  # Adds the square to the left
+        coors.append((row_num + 1, col_num + 1))  # Adds the top right corner
+        coors.append((row_num + 1, col_num - 1))  # Adds the top left corner
+        coors.append((row_num - 1, col_num - 1))  # Adds the bottum left corner
+        coors.append((row_num - 1, col_num + 1))  # Adds the bottum right corner
 
         if print_:
             print(f'\nFor y:{row_num} x:{col_num}\n{coors}')
@@ -80,6 +82,7 @@ class ButtonGrid:
                 pass
 
         return around
+
 
 if __name__ == '__main__':
     ButtonGrid(10, Tk()).root.mainloop()
