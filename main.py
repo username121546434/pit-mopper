@@ -106,7 +106,7 @@ def game():
                         precolor = precolors[squares.index(square2)]
                         square2.config(bg=precolor)
                 else:
-                    for square2 in [square for square in grid.around_square(*square.position) if not square.clicked_on]:
+                    for square2 in [square for square in grid.around_square(*square.position) if not square.clicked_on and square.category != 'mine']:
                         square2.clicked()
                     square.chord = False
 
