@@ -2,6 +2,7 @@
 
 I have recreated the game "Mineseweeper" in python.
 
-## Examples
+## Previews
 
+Loading an Easy game
 ![Loading an Easy game](./images/easy%20mode.gif)
