@@ -33,6 +33,9 @@ def format_second(seconds: int):
 def game():
     global difficulty
     global window
+    global check_state
+
+    chording = check_state.get()
 
     game_window = Toplevel(window)
     game_window.iconbitmap("logo.ico")
@@ -80,35 +83,35 @@ def game():
                     # Clicks all numbers next to clicked zeros
                     for square3 in [square3 for square3 in grid.around_square(*square2.position) if square3 in zeros_checked or square3.num != None]:
                         square3.clicked()
+            if chording:
+                # Checks all square if they are completed
+                for square in [square for square in row if square.completed == False]:
+                    mines_around_square = [square for square in grid.around_square(
+                        *square.position) if (square.category == 'mine') and (square.clicked_on == True)]
+                    if (len(mines_around_square) == square.num and all(mine.category == 'mine' for mine in mines_around_square)) or square.num == None:
+                        square.completed = True
 
-            # Checks all square if they are completed
-            for square in [square for square in row if square.completed == False]:
-                mines_around_square = [square for square in grid.around_square(
-                    *square.position) if (square.category == 'mine') and (square.clicked_on == True)]
-                if (len(mines_around_square) == square.num and all(mine.category == 'mine' for mine in mines_around_square)) or square.num == None:
-                    square.completed = True
-
-            # Shows all squares around a square if it was middle clicked
-            for square in [square for square in row if (square.chord)]:
-                if square.completed == False:
-                    precolors = []
-                    squares = [
-                        square
-                        for square in grid.around_square(*square.position)
-                        if square.clicked_on == False
-                    ]
-                    for square2 in squares:
-                        precolors.append(square2.cget('bg'))
-                        square2.config(bg='brown')
-                    game_window.update()
-                    game_window.after(1000)
-                    for square2 in squares:
-                        precolor = precolors[squares.index(square2)]
-                        square2.config(bg=precolor)
-                else:
-                    for square2 in [square for square in grid.around_square(*square.position) if not square.clicked_on and square.category != 'mine']:
-                        square2.clicked()
-                    square.chord = False
+                # Shows all squares around a square if it was middle clicked
+                for square in [square for square in row if (square.chord)]:
+                    if square.completed == False:
+                        precolors = []
+                        squares = [
+                            square
+                            for square in grid.around_square(*square.position)
+                            if square.clicked_on == False
+                        ]
+                        for square2 in squares:
+                            precolors.append(square2.cget('bg'))
+                            square2.config(bg='brown')
+                        game_window.update()
+                        game_window.after(1000)
+                        for square2 in squares:
+                            precolor = precolors[squares.index(square2)]
+                            square2.config(bg=precolor)
+                    else:
+                        for square2 in [square for square in grid.around_square(*square.position) if not square.clicked_on and square.category != 'mine']:
+                            square2.clicked()
+                        square.chord = False
 
         squares_clicked_on = [
             square
@@ -172,7 +175,7 @@ def load_highscore(txt_file: str):
         f = open(txt_file, 'w')
         f.write('0')
         f.close()
-        highscore = 0
+        highscore = float('inf')
     else:
         with open(txt_file) as f:
             highscore = int(f.read())
@@ -184,6 +187,7 @@ window = Tk()
 window.title('Game Loader')
 window.config(padx=50, pady=20)
 window.iconbitmap("logo.ico")
+window.resizable(False, False)
 
 Label(text='Select Difficulty').pack()
 
@@ -202,6 +206,27 @@ radio_button3 = Radiobutton(
     text='Hard', value=3, variable=radio_state, command=change_difficulty)
 radio_button3.pack()
 
+check_state = BooleanVar()
+
 Button(window, text='Play!', command=game).pack()
+
+# create a menubar
+menubar = Menu(window)
+window.config(menu=menubar)
+
+# create the file_menu
+file_menu = Menu(
+    menubar,
+    tearoff=0
+)
+file_menu.add_command(label='Open')
+file_menu.add_command(label='Exit', command=window.destroy)
+
+settings = Menu(file_menu)
+settings.add_checkbutton(variable=check_state, label='Enable Chording')
+
+
+menubar.add_cascade(menu=file_menu, label='File')
+menubar.add_cascade(menu=settings, label='Settings')
 
 window.mainloop()
