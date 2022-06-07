@@ -83,9 +83,9 @@ def game():
 
             # Checks all square if they are completed
             for square in [square for square in row if square.completed == False]:
-                mines_around_square = len([square for square in grid.around_square(
-                    *square.position) if (square.category == 'mine') and (square.clicked_on == True)])
-                if mines_around_square == square.num or square.num == None:
+                mines_around_square = [square for square in grid.around_square(
+                    *square.position) if (square.category == 'mine') and (square.clicked_on == True)]
+                if (len(mines_around_square) == square.num and all(mine.category == 'mine' for mine in mines_around_square)) or square.num == None:
                     square.completed = True
 
             # Shows all squares around a square if it was middle clicked
