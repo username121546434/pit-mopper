@@ -1,7 +1,10 @@
+from functools import partial
+import pickle
 from tkinter import *
 from grid import ButtonGrid
 import ctypes
 from datetime import datetime
+from tkinter import filedialog
 
 
 def Mbox(title, text, style):
@@ -28,6 +31,26 @@ def format_second(seconds: int):
         sec = f'0{sec % 60}'
 
     return f'{minutes}:{sec}'
+
+
+def save_game(
+    start,
+    total_time,
+    grid,
+    zeros_checked,
+    num_mines,
+    chording,
+):
+    data = {
+        'start': start,
+        'total time': total_time,
+        'grid': grid,
+        'zeros checked': zeros_checked,
+        'num mines': num_mines,
+        'chording': chording
+    }
+    with filedialog.asksaveasfile('wb', filetypes=(('Minesweeper Files','*.min'),('Any File', '*.*'))) as fp:   #Pickling
+       pickle.dump(data, fp)
 
 
 def game():
@@ -59,6 +82,20 @@ def game():
             if square.category == 'mine':
                 num_mines += 1
     mines_found = 0
+
+    # create a menubar
+    menubar = Menu(game_window)
+    game_window.config(menu=menubar)
+
+    # create the file_menu
+    file_menu = Menu(
+        menubar,
+        tearoff=0
+    )
+    file_menu.add_command(label='Save As', command=partial(save_game, start, total_time, grid, zeros_checked, num_mines, chording))
+    file_menu.add_command(label='Exit', command=game_window.destroy)
+
+    menubar.add_cascade(menu=file_menu, label='File')
 
     while showed_game_over == False:
         game_window.after(100)
@@ -198,8 +235,8 @@ radio_button1 = Radiobutton(
     text="Easy", value=1, variable=radio_state, command=change_difficulty)
 radio_button1.pack()
 
-radio_button2 = Radiobutton(text="Medium", value=2,
-                            variable=radio_state, command=change_difficulty)
+radio_button2 = Radiobutton(
+    text="Medium", value=2, variable=radio_state, command=change_difficulty)
 radio_button2.pack()
 
 radio_button3 = Radiobutton(
