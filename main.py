@@ -7,6 +7,7 @@ import ctypes
 from datetime import datetime
 from tkinter import filedialog
 
+STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
 
 def Mbox(title, text, style):
     """
@@ -42,16 +43,37 @@ def save_game(
     num_mines,
     chording,
 ):
+    global difficulty
     data = {
         'start': start,
-        'total time': total_time,
+        'time played': total_time,
         'grid': PickleButtonGrid.from_grid(grid),
         'zeros checked': zeros_checked,
         'num mines': num_mines,
-        'chording': chording
+        'chording': chording,
+        'difficulty': difficulty
     }
-    with filedialog.asksaveasfile('wb', filetypes=(('Minesweeper Files', '*.min'), ('Any File', '*.*'))) as fp:  # Pickling
+    with filedialog.asksaveasfile('wb', filetypes=(('Minesweeper Game Files', '*.min'), ('Any File', '*.*'))) as fp:  # Pickling
         pickle.dump(data, fp)
+
+def load_game():
+    with filedialog.askopenfile('rb', filetypes=(('Minesweeper Game Files', '*.min'), ('Any File', '*.*'))) as fp: # Un Pickling
+        data = pickle.load(fp)
+        data:dict[str]
+
+    game_window = Toplevel(window)
+    game_window.iconbitmap("logo.ico")
+    game_window.title('Minesweeper')
+    total_time = StringVar(game_window)
+    grid = data['grid']
+    session_start = datetime.now()
+    start = data['start']
+    time = data['total time']
+    game_window.grid_columnconfigure(1, weight=1)
+
+    Label(game_window, textvariable=total_time).grid(
+        row=0, column=1, sticky=N+S+E+W)
+    
 
 
 def game():
@@ -84,6 +106,19 @@ def game():
                 num_mines += 1
     mines_found = 0
 
+    def more_info():
+        window = Toplevel(game_window)
+        window.config(padx=50, pady=20)
+        window.title('Additional Information')
+
+        Label(window, text=f'Total Mines: {num_mines}').pack()
+        Label(window, text=f'Mines found: {mines_found}').pack()
+        Label(window, text=f'Squares clicked on: {len(squares_clicked_on)}').pack()
+        Label(window, text=f'Squares not clicked on: {len(squares_not_clicked_on)}').pack()
+        Label(window, text=f'Started Game: {start.strftime(STRFTIME)}').pack()
+
+        window.wait_window()
+
     # create a menubar
     menubar = Menu(game_window)
     game_window.config(menu=menubar)
@@ -93,8 +128,9 @@ def game():
         menubar,
         tearoff=0
     )
-    file_menu.add_command(label='Save As', command=partial(save_game, start, total_time.get(), grid, [
+    file_menu.add_command(label='Save As', command=partial(save_game, start, time, grid, [
                           PickleSquare.from_square(square) for square in zeros_checked], num_mines, chording))
+    file_menu.add_command(label='Additional Information', command=more_info)
     file_menu.add_command(label='Exit', command=game_window.destroy)
 
     menubar.add_cascade(menu=file_menu, label='File')
@@ -122,6 +158,11 @@ def game():
                     # Clicks all numbers next to clicked zeros
                     for square3 in [square3 for square3 in grid.around_square(*square2.position) if square3 in zeros_checked or square3.num != None]:
                         square3.clicked()
+
+            for square in [square for square in row if square.category == 'mine']:
+                if square.category == 'mine' and square.cget('text') == '🚩':
+                    mines_found += 1
+
             if chording:
                 # Checks all square if they are completed
                 for square in [square for square in row if square.completed == False]:
@@ -258,7 +299,7 @@ file_menu = Menu(
     menubar,
     tearoff=0
 )
-file_menu.add_command(label='Open')
+file_menu.add_command(label='Open File', command=load_game)
 file_menu.add_command(label='Exit', command=window.destroy)
 
 settings = Menu(file_menu)

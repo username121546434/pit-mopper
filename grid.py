@@ -88,7 +88,7 @@ class ButtonGrid:
 class PickleButtonGrid:
     """Same as `ButtonGrid` but is used to pickle and save data"""
 
-    def __init__(self, grid_size: int, grid: list[list[Square]]) -> None:
+    def __init__(self, grid_size: int, grid: list[list[PickleSquare]]) -> None:
         self.grid_size = grid_size
         self.grid = grid
 
