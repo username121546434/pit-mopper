@@ -1,5 +1,5 @@
 from tkinter import *
-from squares import Square
+from squares import Square, PickleSquare
 import random
 
 
@@ -69,7 +69,8 @@ class ButtonGrid:
         coors.append((row_num + 1, col_num + 1))  # Adds the top right corner
         coors.append((row_num + 1, col_num - 1))  # Adds the top left corner
         coors.append((row_num - 1, col_num - 1))  # Adds the bottum left corner
-        coors.append((row_num - 1, col_num + 1))  # Adds the bottum right corner
+        # Adds the bottum right corner
+        coors.append((row_num - 1, col_num + 1))
 
         if print_:
             print(f'\nFor y:{row_num} x:{col_num}\n{coors}')
@@ -82,6 +83,29 @@ class ButtonGrid:
                 pass
 
         return around
+
+
+class PickleButtonGrid:
+    """Same as `ButtonGrid` but is used to pickle and save data"""
+
+    def __init__(self, grid_size: int, grid: list[list[Square]]) -> None:
+        self.grid_size = grid_size
+        self.grid = grid
+
+    def to_grid(self, window: Tk) -> ButtonGrid:
+        square = ButtonGrid(self.grid_size, window)
+        for key, value in self.__dict__.items():
+            square.__dict__[key] = value
+        return square
+    
+    @classmethod
+    def from_grid(cls, button_grid:ButtonGrid):
+        grid = [
+            [PickleSquare.from_square(square) for square in row]
+            for row in button_grid.grid
+        ]
+
+        return cls(button_grid.grid_size, grid)
 
 
 if __name__ == '__main__':

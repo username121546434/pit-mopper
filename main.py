@@ -1,7 +1,8 @@
 from functools import partial
 import pickle
 from tkinter import *
-from grid import ButtonGrid
+from grid import ButtonGrid, PickleButtonGrid
+from squares import PickleSquare
 import ctypes
 from datetime import datetime
 from tkinter import filedialog
@@ -44,13 +45,13 @@ def save_game(
     data = {
         'start': start,
         'total time': total_time,
-        'grid': grid,
+        'grid': PickleButtonGrid.from_grid(grid),
         'zeros checked': zeros_checked,
         'num mines': num_mines,
         'chording': chording
     }
-    with filedialog.asksaveasfile('wb', filetypes=(('Minesweeper Files','*.min'),('Any File', '*.*'))) as fp:   #Pickling
-       pickle.dump(data, fp)
+    with filedialog.asksaveasfile('wb', filetypes=(('Minesweeper Files', '*.min'), ('Any File', '*.*'))) as fp:  # Pickling
+        pickle.dump(data, fp)
 
 
 def game():
@@ -92,7 +93,8 @@ def game():
         menubar,
         tearoff=0
     )
-    file_menu.add_command(label='Save As', command=partial(save_game, start, total_time, grid, zeros_checked, num_mines, chording))
+    file_menu.add_command(label='Save As', command=partial(save_game, start, total_time.get(), grid, [
+                          PickleSquare.from_square(square) for square in zeros_checked], num_mines, chording))
     file_menu.add_command(label='Exit', command=game_window.destroy)
 
     menubar.add_cascade(menu=file_menu, label='File')

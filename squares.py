@@ -48,3 +48,34 @@ class Square(Button):
         else:
             self.config(text='0')
         self.clicked_on = True
+
+
+class PickleSquare:
+    """Same as `Square` but is used to pickle and save data"""
+
+    def __init__(self, category: str, position: tuple[int, int], num, chord=False, completed=False, clicked_on=False, game_over=False) -> None:
+        self.chord: bool = chord
+        self.completed: bool = completed
+        self.clicked_on: bool = clicked_on
+        self.category = category
+        self.position = position
+        self.game_over = game_over
+        self.num = num
+
+    def to_square(self) -> Square:
+        square = Square()
+        for key, value in self.__dict__.items():
+            square.__dict__[key] = value
+        return square
+
+    @classmethod
+    def from_square(cls, square: Square):
+        return cls(
+            square.category,
+            square.position,
+            square.num,
+            square.chord,
+            square.completed,
+            square.clicked_on,
+            square.game_over,
+        )
