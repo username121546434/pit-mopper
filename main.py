@@ -4,7 +4,7 @@ from tkinter import *
 from grid import ButtonGrid, PickleButtonGrid
 from squares import PickleSquare
 import ctypes
-from datetime import datetime
+from datetime import datetime, timedelta
 from tkinter import filedialog
 
 STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
@@ -53,26 +53,44 @@ def save_game(
         'chording': chording,
         'difficulty': difficulty
     }
-    with filedialog.asksaveasfile('wb', filetypes=(('Minesweeper Game Files', '*.min'), ('Any File', '*.*'))) as fp:  # Pickling
-        pickle.dump(data, fp)
+    with filedialog.asksaveasfile('wb', filetypes=(('Minesweeper Game Files', '*.min'), ('Any File', '*.*'))) as f:  # Pickling
+        pickle.dump(data, f)
 
 def load_game():
-    with filedialog.askopenfile('rb', filetypes=(('Minesweeper Game Files', '*.min'), ('Any File', '*.*'))) as fp: # Un Pickling
-        data = pickle.load(fp)
+    with filedialog.askopenfile('rb', filetypes=(('Minesweeper Game Files', '*.min'), ('Any File', '*.*'))) as f: # Un Pickling
+        data = pickle.load(f)
         data:dict[str]
 
     game_window = Toplevel(window)
     game_window.iconbitmap("logo.ico")
     game_window.title('Minesweeper')
     total_time = StringVar(game_window)
-    grid = data['grid']
+    grid = data['grid'].to_grid(game_window)
     session_start = datetime.now()
-    start = data['start']
-    time = data['total time']
+    start:datetime = data['start']
+    time:timedelta = data['total time']
+    num_mines:int = data['num mines']
+    zeros_checked = data['zeros checked']
     game_window.grid_columnconfigure(1, weight=1)
+    highscore_txt = 'highscore.txt'
+    highscore = load_highscore(highscore_txt)
 
     Label(game_window, textvariable=total_time).grid(
         row=0, column=1, sticky=N+S+E+W)
+    
+    def more_info():
+        window = Toplevel(game_window)
+        window.config(padx=50, pady=20)
+        window.title('Additional Information')
+
+        Label(window, text=f'Total Mines: {num_mines}').pack()
+        Label(window, text=f'Mines found: {mines_found}').pack()
+        Label(window, text=f'Squares clicked on: {len(squares_clicked_on)}').pack()
+        Label(window, text=f'Squares not clicked on: {len(squares_not_clicked_on)}').pack()
+        Label(window, text=f'Started Game: {start.strftime(STRFTIME)}').pack()
+        Label(window, text=f'Session started: {session_start.strftime(STRFTIME)}')
+
+        window.wait_window()
     
 
 

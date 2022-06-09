@@ -4,10 +4,13 @@ import random
 
 
 class ButtonGrid:
-    def __init__(self, grid_size, window: Tk):
+    def __init__(self, grid_size, window: Tk, grid:list | None = None):
         self.grid_size = grid_size
         self.root = window
-        self.grid = self.button_grid()
+        if grid == None:
+            self.grid = self.button_grid()
+        else:
+            self.grid = grid
 
     def button_grid(self) -> list[list[Square]]:
         Grid.rowconfigure(self.root, 1, weight=1)
@@ -93,7 +96,7 @@ class PickleButtonGrid:
         self.grid = grid
 
     def to_grid(self, window: Tk) -> ButtonGrid:
-        square = ButtonGrid(self.grid_size, window)
+        square = ButtonGrid(self.grid_size, window, self.grid)
         for key, value in self.__dict__.items():
             square.__dict__[key] = value
         return square
