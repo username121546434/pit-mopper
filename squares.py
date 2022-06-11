@@ -66,8 +66,8 @@ class PickleSquare:
         self.num = num
         self.flaged = flaged
 
-    def to_square(self, window) -> Square:
-        square = Square(window)
+    def to_square(self, master) -> Square:
+        square = Square(master)
         for key, value in self.__dict__.items():
             square.__dict__[key] = value
         return square

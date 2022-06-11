@@ -67,7 +67,8 @@ def load_game():
     game_window = Toplevel(window)
     game_window.iconbitmap("logo.ico")
     game_window.title('Minesweeper')
-    grid = data['grid'].to_grid(game_window)
+    grid = data['grid'].grid
+    button_grid = ButtonGrid(data['grid'].grid_size, game_window, grid)
     start: datetime = data['start']
     time = data['time played']
     num_mines: int = data['num mines']
@@ -76,7 +77,7 @@ def load_game():
     game_window.grid_columnconfigure(1, weight=1)
 
     mines_found = 0
-    for row in grid.grid:
+    for row in button_grid.grid:
         for square in row:
             if square.category == 'mine' and square.cget('text') == '🚩':
                 mines_found += 1
@@ -84,7 +85,7 @@ def load_game():
     create_game(
         game_window,
         start,
-        grid,
+        button_grid,
         zeros_checked,
         num_mines,
         chording,

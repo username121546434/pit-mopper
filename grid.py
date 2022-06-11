@@ -4,14 +4,13 @@ import random
 
 
 class ButtonGrid:
-    def __init__(self, grid_size, window: Tk | Toplevel, grid: list[list[Square]] | None = None):
+    def __init__(self, grid_size, window: Tk | Toplevel, grid: list[list[PickleSquare]] | None = None):
         self.grid_size = grid_size
         self.root = window
         if grid == None:
             self.grid = self.button_grid()
         else:
-            self.grid = grid
-            self.grid = self.setup_grid()
+            self.grid = self.setup_grid(grid)
 
     def button_grid(self) -> list[list[Square]]:
         Grid.rowconfigure(self.root, 1, weight=1)
@@ -62,27 +61,29 @@ class ButtonGrid:
 
         return grid
     
-    def setup_grid(self) -> list[list[Square]]:
+    def setup_grid(self, grid: list[list[PickleSquare]]) -> list[list[Square]]:
         Grid.rowconfigure(self.root, 1, weight=1)
         Grid.columnconfigure(self.root, 1, weight=1)
-        grid = []
+        new_grid = []
         # Create & Configure frame
         frame = Frame(self.root)
         frame.grid(row=1, column=1, sticky=N+S+E+W)
         for row_index in range(self.grid_size):
             Grid.rowconfigure(frame, row_index, weight=1)
-            row = self.grid[row_index]
+            row = grid[row_index]
+            new_row = []
             for col_index in range(self.grid_size):
                 btn = row[col_index]
+                new_btn = btn.to_square(frame)
                 Grid.columnconfigure(frame, col_index, weight=1)
-                btn.grid(row=row_index+2, column=col_index, sticky=N+S+E+W)
-                if btn.flaged:
-                    btn.flag()
-                elif btn.clicked_on:
-                    btn.clicked()
-                row.append(btn)
-            grid.append(row)
-        return grid
+                new_btn.grid(row=row_index, column=col_index, sticky=N+S+E+W)
+                if new_btn.flaged:
+                    new_btn.flag()
+                elif new_btn.clicked_on:
+                    new_btn.clicked()
+                new_row.append(new_btn)
+            new_grid.append(new_row)
+        return new_grid
 
     def around_square(self, row_num: int, col_num: int, print_=False) -> list[Square]:
         around = []
@@ -118,13 +119,8 @@ class PickleButtonGrid:
         self.grid_size = grid_size
         self.grid = grid
 
-    def to_grid(self, window: Tk) -> ButtonGrid:
-        grid = [
-            [square.to_square(window) for square in row]
-            for row in self.grid
-        ]
-
-        return ButtonGrid(self.grid_size, window, grid)
+    def to_grid(self, window) -> ButtonGrid:
+        return ButtonGrid(self.grid_size, window, self.grid)
 
     @classmethod
     def from_grid(cls, button_grid: ButtonGrid):
