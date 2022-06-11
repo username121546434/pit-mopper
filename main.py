@@ -3,7 +3,6 @@ import pickle
 from tkinter import *
 from grid import ButtonGrid, PickleButtonGrid
 from squares import PickleSquare, Square
-import ctypes
 from datetime import datetime, timedelta
 from tkinter import filedialog, messagebox
 
@@ -49,7 +48,7 @@ def save_game(
     global difficulty
     data = {
         'start': start,
-        'time played': total_time.total_seconds(),
+        'time played': total_time,
         'grid': PickleButtonGrid.from_grid(grid),
         'zeros checked': zeros_checked,
         'num mines': num_mines,
@@ -69,21 +68,19 @@ def load_game():
     game_window.iconbitmap("logo.ico")
     game_window.title('Minesweeper')
     grid = data['grid'].to_grid(game_window)
-    session_start = datetime.now()
     start: datetime = data['start']
-    time: timedelta = data['time played']
+    time = data['time played']
     num_mines: int = data['num mines']
     zeros_checked = data['zeros checked']
     chording = data['chording']
     game_window.grid_columnconfigure(1, weight=1)
-    #print(grid.grid)
 
     mines_found = 0
     for row in grid.grid:
         for square in row:
             if square.category == 'mine' and square.cget('text') == '🚩':
                 mines_found += 1
-    
+
     create_game(
         game_window,
         start,
@@ -92,8 +89,7 @@ def load_game():
         num_mines,
         chording,
         mines_found,
-        session_start,
-        time
+        additional_time = time,
     )
 
 
@@ -138,9 +134,9 @@ def create_game(
     num_mines: int,
     chording: bool,
     mines_found: int,
-    session_start: datetime = datetime(1,1,1),
-    current_time: int | float | datetime = datetime(1,1,1)
+    additional_time: float = 0.0
 ):
+    session_start: datetime = datetime.now()
     squares_clicked_on = [
         square
         for row in grid.grid
@@ -159,13 +155,13 @@ def create_game(
 
     Label(game_window, textvariable=total_time).grid(
         row=0, column=1, sticky=N+S+E+W)
-    
-    if current_time != datetime(1,1,1):
-        total_time.set(f'Time: {format_second(int(current_time))}')
+
+    if additional_time != 0.0:
+        total_time.set(f'Time: {format_second(int(additional_time))}')
 
     highscore_txt = 'highscore.txt'
     highscore = load_highscore(highscore_txt)
-    time = datetime.now() - session_start
+    seconds = additional_time
 
     # create a menubar
     menubar = Menu(game_window)
@@ -176,25 +172,27 @@ def create_game(
         menubar,
         tearoff=0
     )
-    file_menu.add_command(label='Save As', command=partial(save_game, start, time, grid, [
+    file_menu.add_command(label='Save As', command=partial(save_game, start, seconds, grid, [
                           PickleSquare.from_square(square) for square in zeros_checked], num_mines, chording))
     file_menu.add_command(label='Additional Information', command=partial(
         more_info, num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start))
     file_menu.add_command(label='Exit', command=game_window.destroy)
 
     menubar.add_cascade(menu=file_menu, label='File')
+    previous_sec = datetime.now()
+    previous_sec = previous_sec.replace(microsecond=0)
 
     while showed_game_over == False:
         game_window.after(100)
 
-        if session_start != datetime(1,1,1):
-            now = datetime.now()
-            time = now - session_start + timedelta(seconds=current_time)
-        else:
-            now = datetime.now()
-            time = now - start
+        now = datetime.now()
+        now = now.replace(microsecond=0)
+        if now == previous_sec + timedelta(seconds=1):
+            previous_sec = now
+            seconds = (now - session_start).total_seconds() + additional_time
 
-        total_time.set(f'Time: {format_second(time.total_seconds())}')
+
+        total_time.set(f'Time: {format_second(seconds)}')
 
         game_overs = [
             square.game_over
@@ -285,13 +283,13 @@ def create_game(
 
     if win:
         messagebox.showinfo(
-            'Game Over', f'Game Over.\nYou won!\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(time.total_seconds())}\nHighscore: {format_second(highscore)}')
+            'Game Over', f'Game Over.\nYou won!\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}')
     else:
         messagebox.showinfo(
-            'Game Over', f'Game Over.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(time.total_seconds())}\nHighscore: {format_second(highscore)}')
-    if win and time.total_seconds() < highscore:
+            'Game Over', f'Game Over.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}')
+    if win and seconds < highscore:
         with open('highscore.txt', 'w') as f:
-            f.write(str(int(time.total_seconds())))
+            f.write(str(int(seconds)))
     game_window.destroy()
 
 

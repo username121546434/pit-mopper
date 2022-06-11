@@ -4,7 +4,7 @@ import random
 
 
 class ButtonGrid:
-    def __init__(self, grid_size, window: Tk, grid: list[list[Square]] | None = None):
+    def __init__(self, grid_size, window: Tk | Toplevel, grid: list[list[Square]] | None = None):
         self.grid_size = grid_size
         self.root = window
         if grid == None:
@@ -75,8 +75,10 @@ class ButtonGrid:
             for col_index in range(self.grid_size):
                 btn = row[col_index]
                 Grid.columnconfigure(frame, col_index, weight=1)
-                btn.grid(row=row_index, column=col_index, sticky=N+S+E+W)
-                if btn.clicked_on:
+                btn.grid(row=row_index+2, column=col_index, sticky=N+S+E+W)
+                if btn.flaged:
+                    btn.flag()
+                elif btn.clicked_on:
                     btn.clicked()
                 row.append(btn)
             grid.append(row)

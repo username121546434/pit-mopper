@@ -17,6 +17,7 @@ class Square(Button):
         self.category: str | None = None
         self.num: int | None = None
         self.game_over = False
+        self.flaged = False
         self.position: tuple[int, int]
         self.chord: bool = False
         self.completed: bool = False
@@ -32,9 +33,11 @@ class Square(Button):
         if self.cget('text').replace(' ', '') == '':
             self.config(text='🚩')
             self.clicked_on = True
+            self.flaged = True
         elif self.cget('text') == '🚩':
             self.config(text="  " * 3)
             self.clicked_on = False
+            self.flaged = False
 
     def chord_self(self, _=''):
         self.chord = not self.chord
@@ -53,7 +56,7 @@ class Square(Button):
 class PickleSquare:
     """Same as `Square` but is used to pickle and save data"""
 
-    def __init__(self, category: str, position: tuple[int, int], num, chord=False, completed=False, clicked_on=False, game_over=False) -> None:
+    def __init__(self, category: str, position: tuple[int, int], num, chord=False, completed=False, clicked_on=False, game_over=False, flaged:bool = False) -> None:
         self.chord: bool = chord
         self.completed: bool = completed
         self.clicked_on: bool = clicked_on
@@ -61,6 +64,7 @@ class PickleSquare:
         self.position = position
         self.game_over = game_over
         self.num = num
+        self.flaged = flaged
 
     def to_square(self, window) -> Square:
         square = Square(window)
@@ -78,4 +82,5 @@ class PickleSquare:
             square.completed,
             square.clicked_on,
             square.game_over,
+            square.flaged
         )
