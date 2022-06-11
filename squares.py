@@ -62,8 +62,8 @@ class PickleSquare:
         self.game_over = game_over
         self.num = num
 
-    def to_square(self) -> Square:
-        square = Square()
+    def to_square(self, window) -> Square:
+        square = Square(window)
         for key, value in self.__dict__.items():
             square.__dict__[key] = value
         return square

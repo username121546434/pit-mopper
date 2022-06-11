@@ -4,13 +4,14 @@ import random
 
 
 class ButtonGrid:
-    def __init__(self, grid_size, window: Tk, grid:list | None = None):
+    def __init__(self, grid_size, window: Tk, grid: list[list[Square]] | None = None):
         self.grid_size = grid_size
         self.root = window
         if grid == None:
             self.grid = self.button_grid()
         else:
             self.grid = grid
+            self.grid = self.setup_grid()
 
     def button_grid(self) -> list[list[Square]]:
         Grid.rowconfigure(self.root, 1, weight=1)
@@ -60,6 +61,26 @@ class ButtonGrid:
                         square.num = num_mines
 
         return grid
+    
+    def setup_grid(self) -> list[list[Square]]:
+        Grid.rowconfigure(self.root, 1, weight=1)
+        Grid.columnconfigure(self.root, 1, weight=1)
+        grid = []
+        # Create & Configure frame
+        frame = Frame(self.root)
+        frame.grid(row=1, column=1, sticky=N+S+E+W)
+        for row_index in range(self.grid_size):
+            Grid.rowconfigure(frame, row_index, weight=1)
+            row = self.grid[row_index]
+            for col_index in range(self.grid_size):
+                btn = row[col_index]
+                Grid.columnconfigure(frame, col_index, weight=1)
+                btn.grid(row=row_index, column=col_index, sticky=N+S+E+W)
+                if btn.clicked_on:
+                    btn.clicked()
+                row.append(btn)
+            grid.append(row)
+        return grid
 
     def around_square(self, row_num: int, col_num: int, print_=False) -> list[Square]:
         around = []
@@ -96,13 +117,15 @@ class PickleButtonGrid:
         self.grid = grid
 
     def to_grid(self, window: Tk) -> ButtonGrid:
-        square = ButtonGrid(self.grid_size, window, self.grid)
-        for key, value in self.__dict__.items():
-            square.__dict__[key] = value
-        return square
-    
+        grid = [
+            [square.to_square(window) for square in row]
+            for row in self.grid
+        ]
+
+        return ButtonGrid(self.grid_size, window, grid)
+
     @classmethod
-    def from_grid(cls, button_grid:ButtonGrid):
+    def from_grid(cls, button_grid: ButtonGrid):
         grid = [
             [PickleSquare.from_square(square) for square in row]
             for row in button_grid.grid
