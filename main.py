@@ -9,14 +9,17 @@ from tkinter import filedialog, messagebox
 STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
 
 
-def format_second(seconds: int):
-    seconds = int(seconds)
-    minutes = int(seconds / 60)
-    sec = seconds % 60
-    if sec < 10:
-        sec = f'0{sec % 60}'
+def format_second(seconds: int | float):
+    if seconds != float('inf'):
+        seconds = int(seconds)
+        minutes = int(seconds / 60)
+        sec = seconds % 60
+        if sec < 10:
+            sec = f'0{sec % 60}'
 
-    return f'{minutes}:{sec}'
+        return f'{minutes}:{sec}'
+    else:
+        return 'None'
 
 
 def more_info(
@@ -281,6 +284,8 @@ def create_game(
                         square.config(text='❌')
             showed_game_over = True
         game_window.update()
+    print(seconds)
+    print(highscore)
 
     if win:
         messagebox.showinfo(
@@ -289,7 +294,7 @@ def create_game(
         messagebox.showinfo(
             'Game Over', f'Game Over.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}')
     if win and seconds < highscore:
-        with open('highscore.txt', 'w') as f:
+        with open(highscore_txt, 'w') as f:
             f.write(str(int(seconds)))
     game_window.destroy()
 
@@ -304,14 +309,11 @@ def load_highscore(txt_file: str):
         f = open(txt_file)
     except FileNotFoundError:
         f = open(txt_file, 'w')
-        f.write('0')
         f.close()
-        highscore = float('inf')
+        return float('inf')
     else:
         with open(txt_file) as f:
-            highscore = int(f.read())
-    finally:
-        return highscore
+            return float(f.read())
 
 
 window = Tk()
