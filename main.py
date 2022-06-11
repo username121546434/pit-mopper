@@ -5,9 +5,10 @@ from grid import ButtonGrid, PickleButtonGrid
 from squares import PickleSquare, Square
 from datetime import datetime, timedelta
 from tkinter import filedialog, messagebox
+import os
 
 STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
-
+CURRENT_DIR = os.getcwd()
 
 def format_second(seconds: int | float):
     if seconds != float('inf'):
@@ -163,7 +164,7 @@ def create_game(
     if additional_time != 0.0:
         total_time.set(f'Time: {format_second(int(additional_time))}')
 
-    highscore_txt = 'highscore.txt'
+    highscore_txt = os.path.join(CURRENT_DIR, 'highscore.txt')
     highscore = load_highscore(highscore_txt)
     seconds = additional_time
 
@@ -284,8 +285,6 @@ def create_game(
                         square.config(text='❌')
             showed_game_over = True
         game_window.update()
-    print(seconds)
-    print(highscore)
 
     if win:
         messagebox.showinfo(
@@ -294,8 +293,8 @@ def create_game(
         messagebox.showinfo(
             'Game Over', f'Game Over.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}')
     if win and seconds < highscore:
-        with open(highscore_txt, 'w') as f:
-            f.write(str(int(seconds)))
+        with open(highscore_txt, 'wb') as f:
+            pickle.dump(seconds, f)
     game_window.destroy()
 
 
@@ -307,13 +306,12 @@ def change_difficulty():
 def load_highscore(txt_file: str):
     try:
         f = open(txt_file)
-    except FileNotFoundError:
-        f = open(txt_file, 'w')
         f.close()
+    except FileNotFoundError:
         return float('inf')
     else:
-        with open(txt_file) as f:
-            return float(f.read())
+        with open(txt_file, 'rb') as f:
+            return pickle.load(f)
 
 
 window = Tk()
