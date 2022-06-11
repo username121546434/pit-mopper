@@ -10,6 +10,7 @@ import os
 STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
 CURRENT_DIR = os.getcwd()
 
+
 def format_second(seconds: int | float):
     if seconds != float('inf'):
         seconds = int(seconds)
@@ -94,7 +95,7 @@ def load_game():
         num_mines,
         chording,
         mines_found,
-        additional_time = time,
+        additional_time=time,
     )
 
 
@@ -192,10 +193,9 @@ def create_game(
 
         now = datetime.now()
         now = now.replace(microsecond=0)
-        if now == previous_sec + timedelta(seconds=1):
+        if now > previous_sec:
             previous_sec = now
             seconds = (now - session_start).total_seconds() + additional_time
-
 
         total_time.set(f'Time: {format_second(seconds)}')
 
@@ -263,8 +263,17 @@ def create_game(
             for square in row
             if square.clicked_on == False
         ]
+        squares_flaged = [
+            square
+            for row in grid.grid
+            for square in row
+            if square.flaged
+        ]
 
-        if len(squares_clicked_on) == grid.grid_size ** 2 or all(square.category == 'bomb' for square in squares_not_clicked_on):
+        if (
+            (len(squares_clicked_on) == grid.grid_size ** 2 and all(square.category == 'mine' for square in squares_flaged)) or
+                (all(square.category == 'mine' for square in squares_not_clicked_on) and len(squares_not_clicked_on) == num_mines)
+        ):
             game_over = True
             win = True
         elif True in game_overs:
