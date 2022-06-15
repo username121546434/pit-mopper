@@ -7,7 +7,7 @@ block_cipher = None
 a = Analysis(['C:\\Users\\athar\\Desktop\\Python\\minesweeper-python\\main.py'],
              pathex=[],
              binaries=[],
-             datas=[],
+             datas=["C:\\Users\\athar\\Desktop\\Python\\minesweeper-python\\logo.ico", '.'],
              hiddenimports=[],
              hookspath=[],
              hooksconfig={},
@@ -17,7 +17,6 @@ a = Analysis(['C:\\Users\\athar\\Desktop\\Python\\minesweeper-python\\main.py'],
              win_private_assemblies=False,
              cipher=block_cipher,
              noarchive=False)
-a.datas += [('logo.ico', "C:\\Users\\athar\\Desktop\\Python\\minesweeper-python\\logo.ico", '.')]
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
