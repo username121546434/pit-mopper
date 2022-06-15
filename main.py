@@ -6,10 +6,20 @@ from squares import PickleSquare, Square
 from datetime import datetime, timedelta
 from tkinter import filedialog, messagebox
 import os
+import sys
 
 STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
 CURRENT_DIR = os.getcwd()
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 def format_second(seconds: int | float):
     if seconds != float('inf'):
@@ -70,7 +80,7 @@ def load_game():
         data: dict[str]
 
     game_window = Toplevel(window)
-    game_window.iconbitmap("logo.ico")
+    game_window.iconbitmap(resource_path("logo.ico"))
     game_window.title('Minesweeper')
     grid = data['grid'].grid
     button_grid = ButtonGrid(data['grid'].grid_size, game_window, grid)
@@ -107,7 +117,7 @@ def game():
     chording = check_state.get()
 
     game_window = Toplevel(window)
-    game_window.iconbitmap("logo.ico")
+    game_window.iconbitmap(resource_path("logo.ico"))
     game_window.title('Minesweeper')
     start = datetime.now()
     game_window.grid_columnconfigure(1, weight=1)
