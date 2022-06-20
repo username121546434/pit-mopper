@@ -1,4 +1,19 @@
 from tkinter import *
+from load_font import load_font
+import sys
+import os
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+font_family, font_name = load_font(resource_path(r"DSEG7ClassicMini-Bold.ttf"))
 
 num_colors = {
     1: 'blue',
@@ -23,7 +38,7 @@ class Square(Button):
         self.completed: bool = False
         self.clicked_on: bool = False
 
-        super().__init__(master, text=text)
+        super().__init__(master, text=text, font=(font_name, 12))
 
         self.bind('<Button-1>', self.clicked)
         self.bind('<Button-2>', self.chord_self)
