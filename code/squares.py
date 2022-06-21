@@ -13,7 +13,7 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
-font_family, font_name = load_font(resource_path(r"DSEG7ClassicMini-Bold.ttf"))
+font_family, font_name = load_font(resource_path(r"data\fonts\DSEG7ClassicMini-Bold.ttf"))
 
 num_colors = {
     1: 'blue',

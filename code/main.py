@@ -80,7 +80,7 @@ def load_game():
         data: dict[str]
 
     game_window = Toplevel(window)
-    game_window.iconbitmap(resource_path("logo.ico"))
+    game_window.iconbitmap(resource_path("images\\logo.ico"))
     game_window.title('Minesweeper')
     grid = data['grid'].grid
     button_grid = ButtonGrid(data['grid'].grid_size, game_window, grid)
@@ -117,7 +117,7 @@ def game():
     chording = check_state.get()
 
     game_window = Toplevel(window)
-    game_window.iconbitmap(resource_path("logo.ico"))
+    game_window.iconbitmap(resource_path("data\\images\\logo.ico"))
     game_window.title('Minesweeper')
     start = datetime.now()
     game_window.grid_columnconfigure(1, weight=1)
