@@ -7,9 +7,11 @@ from datetime import datetime, timedelta
 from tkinter import filedialog, messagebox
 import os
 import sys
+from updater import check_for_updates
 
 STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
 CURRENT_DIR = os.getcwd()
+__version__ = '1.0.0'
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -333,10 +335,20 @@ def load_highscore(txt_file: str):
             return pickle.load(f)
 
 
+def zip_or_installer():
+    # Checks whether the current minesweeper is from the zip download or from the installer
+    # returns False if it was downloaded through the installer and False if from zip file
+    if os.getcwd() == os.path.expanduser(r'~\AppData\Local\Programs\Minesweeper') or \
+        os.getcwd() == r'C:\Program Files (x86)\Minesweeper':
+        return False
+    else:
+        return True
+
+
 window = Tk()
 window.title('Game Loader')
 window.config(padx=50, pady=20)
-window.iconbitmap("logo.ico")
+window.iconbitmap(resource_path(r"data\images\logo.ico"))
 window.resizable(False, False)
 
 Label(text='Select Difficulty').pack()
@@ -374,6 +386,7 @@ file_menu.add_command(label='Exit', command=window.destroy)
 
 settings = Menu(file_menu)
 settings.add_checkbutton(variable=check_state, label='Enable Chording')
+settings.add_command(label='Check for Updates', command=partial(check_for_updates, '0.01', zip_or_installer()))
 
 
 menubar.add_cascade(menu=file_menu, label='File')
