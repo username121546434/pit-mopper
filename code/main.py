@@ -8,6 +8,7 @@ from tkinter import filedialog, messagebox
 import os
 import sys
 from updater import check_for_updates
+from windows_tools.installed_software import get_installed_software
 
 STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
 CURRENT_DIR = os.getcwd()
@@ -338,11 +339,12 @@ def load_highscore(txt_file: str):
 def zip_or_installer():
     # Checks whether the current minesweeper is from the zip download or from the installer
     # returns False if it was downloaded through the installer and False if from zip file
-    if os.getcwd() == os.path.expanduser(r'~\AppData\Local\Programs\Minesweeper') or \
-        os.getcwd() == r'C:\Program Files (x86)\Minesweeper':
-        return False
-    else:
-        return True
+    return_value = True
+    # print(get_installed_software())
+    for app in get_installed_software():
+        if 'Minesweeper' in app:
+            return_value = False
+    return return_value
 
 
 window = Tk()
