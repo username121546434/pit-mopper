@@ -342,7 +342,7 @@ def zip_or_installer():
     return_value = True
     # print(get_installed_software())
     for app in get_installed_software():
-        if 'Minesweeper' in app:
+        if 'Minesweeper' in app['name']:
             return_value = False
     return return_value
 
@@ -388,7 +388,7 @@ file_menu.add_command(label='Exit', command=window.destroy)
 
 settings = Menu(file_menu)
 settings.add_checkbutton(variable=check_state, label='Enable Chording')
-settings.add_command(label='Check for Updates', command=partial(check_for_updates, '0.01', zip_or_installer()))
+settings.add_command(label='Check for Updates', command=partial(check_for_updates, '0.0.0', zip_or_installer(), window))
 
 
 menubar.add_cascade(menu=file_menu, label='File')
