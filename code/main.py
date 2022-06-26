@@ -12,7 +12,8 @@ from windows_tools.installed_software import get_installed_software
 
 STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
 CURRENT_DIR = os.getcwd()
-__version__ = '1.0.0'
+__version__ = '1.1.0-beta-1'
+HIGHSCORE_TXT = os.path.join(CURRENT_DIR, 'highscore.txt')
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -178,8 +179,7 @@ def create_game(
     if additional_time != 0.0:
         total_time.set(f'Time: {format_second(int(additional_time))}')
 
-    highscore_txt = os.path.join(CURRENT_DIR, 'highscore.txt')
-    highscore = load_highscore(highscore_txt)
+    highscore = load_highscore(HIGHSCORE_TXT)
     seconds = additional_time
 
     # create a menubar
@@ -315,7 +315,7 @@ def create_game(
         messagebox.showinfo(
             'Game Over', f'Game Over.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}')
     if win and seconds < highscore:
-        with open(highscore_txt, 'wb') as f:
+        with open(HIGHSCORE_TXT, 'wb') as f:
             pickle.dump(seconds, f)
     game_window.destroy()
 
@@ -388,7 +388,7 @@ file_menu.add_command(label='Exit', command=window.destroy)
 
 settings = Menu(file_menu)
 settings.add_checkbutton(variable=check_state, label='Enable Chording')
-settings.add_command(label='Check for Updates', command=partial(check_for_updates, '0.0.0', zip_or_installer(), window))
+settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, zip_or_installer(), window))
 
 
 menubar.add_cascade(menu=file_menu, label='File')

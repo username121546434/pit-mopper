@@ -1,7 +1,7 @@
 import os
 import sys
 import requests
-from pkg_resources import parse_version
+from packaging.version import Version
 from tkinter import *
 from tkinter.ttk import *
 from tkinter import messagebox
@@ -13,10 +13,14 @@ def check_for_updates(current_version: str, download_zip: bool, master: Tk | Top
     response.raise_for_status()
     latest_version = response.json()[0]["tag_name"][1:]
     is_beta = response.json()[0]["prerelease"]
-    choice = messagebox.askyesno(title='Update Available',
-                            message=f'You have version {current_version} but {latest_version} is available. Do you want to update?\nIs Beta: {is_beta}')
 
-    if parse_version(latest_version) > parse_version(current_version) and choice:
+    if Version(latest_version) > Version(current_version):
+        choice = messagebox.askyesno(title='Update Available',
+                                message=f'You have version {current_version} but {latest_version} is available. Do you want to update?\nIs Beta: {is_beta}')
+    else:
+        choice = False
+
+    if Version(latest_version) > Version(current_version) and choice:
         messagebox.showinfo(title='Update', message='Press "Ok" to update Minesweeper')
         if download_zip:
             asset = [
