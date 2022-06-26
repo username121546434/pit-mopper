@@ -7,7 +7,7 @@ block_cipher = None
 a = Analysis(['C:\\Users\\athar\\Desktop\\Python\\minesweeper-python\\code\\main.py'],
              pathex=[],
              binaries=[],
-             datas=[("C:\\Users\\athar\\Desktop\\Python\\minesweeper-python\\code\\logo.ico", '.')],
+             datas=[("C:\\Users\\athar\\Desktop\\Python\\minesweeper-python\\code\\data\\images\\logo.ico", '.')],
              hiddenimports=[],
              hookspath=[],
              hooksconfig={},
@@ -37,4 +37,4 @@ exe = EXE(pyz,
           disable_windowed_traceback=False,
           target_arch=None,
           codesign_identity=None,
-          entitlements_file=None , icon="C:\\Users\\athar\\Desktop\\Python\\minesweeper-python\\code\\logo.ico")
+          entitlements_file=None , icon="C:\\Users\\athar\\Desktop\\Python\\minesweeper-python\\code\\data\\images\\logo.ico")
