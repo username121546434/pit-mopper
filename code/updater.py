@@ -6,21 +6,41 @@ from tkinter import *
 from tkinter.ttk import *
 from tkinter import messagebox
 from zipfile import ZipFile
+import markdown
+from bs4 import BeautifulSoup
 
+def md_to_text(md):
+    """Takes markdown text and converts it to plain text"""
+    html = markdown.markdown(md)
+    soup = BeautifulSoup(html, features='html.parser')
+    return soup.get_text()
 
 def check_for_updates(current_version: str, download_zip: bool, master: Tk | Toplevel):
     response = requests.get('https://api.github.com/repos/username121546434/minesweeper-python/releases')
     response.raise_for_status()
     latest_version = response.json()[0]["tag_name"][1:]
     is_beta = response.json()[0]["prerelease"]
+    body = md_to_text(response.json()[0]['body'])
 
     if Version(latest_version) > Version(current_version):
-        choice = messagebox.askyesno(title='Update Available',
-                                message=f'You have version {current_version} but {latest_version} is available. Do you want to update?\nIs Beta: {is_beta}')
-    else:
-        choice = False
+        window = Toplevel(master)
+        window.title('Update Available')
+        choice = BooleanVar(window)
 
-    if Version(latest_version) > Version(current_version) and choice:
+        Label(window, text=f'You have version {current_version} but {latest_version} is available. Do you want to update?').pack()
+        Label(window, text='Patch notes are below.').pack()
+
+        text = Text(window, height=len(body.splitlines()), width=max(len(line) for line in [line.strip() for line in body.splitlines()]))
+        text.focus()
+        text.insert('end', f'You have version {current_version} but {latest_version} is available. Do you want to update?\nPatch notes are below.\n\n{body}')
+        text.pack()
+
+        Checkbutton(window, onvalue=True, offvalue=False, variable=choice, text='Update?').pack()
+
+        Button(window, text='Continue', command=window.destroy).pack()
+        master.wait_window(window)
+
+    if Version(latest_version) > Version(current_version) and choice.get():
         messagebox.showinfo(title='Update', message='Press "Ok" to update Minesweeper')
         if download_zip:
             asset = [
@@ -36,10 +56,10 @@ def check_for_updates(current_version: str, download_zip: bool, master: Tk | Top
             ][0]
         download_url = asset['browser_download_url']
         filename = asset['name']
+        progress_window = Toplevel(master)
+        progress_window.title('Updater')
         download = requests.get(download_url, stream=True)
-        window = Toplevel(master)
-        window.title('Updater')
-        progress = Progressbar(window, mode='determinate', length=200)
+        progress = Progressbar(progress_window, mode='determinate', length=200)
         progress.pack()
         total_size = int(download.headers.get('content-length'))
         increment = (1 / total_size) * 100
@@ -47,8 +67,8 @@ def check_for_updates(current_version: str, download_zip: bool, master: Tk | Top
             for data in download.iter_content(chunk_size=1000):
                 progress['value'] += increment * len(data)
                 f.write(data)
-                window.update()
-        window.destroy()
+                progress_window.update()
+        progress_window.destroy()
         if download_zip:
             with ZipFile(os.path.expanduser(f'~\\Downloads\\{filename}')) as zip_file:
                 dir = filename[:-3]
@@ -60,5 +80,9 @@ def check_for_updates(current_version: str, download_zip: bool, master: Tk | Top
             os.startfile(os.path.expanduser(f'~\\Downloads\\{filename}'))
             sys.exit()
     else:
-        if not choice:
+        try:
+            _ = choice
+        except NameError:
             messagebox.showinfo(title='Update', message='There are no updates available')
+        else:
+            messagebox.showinfo(title='Update Rejected', message='You have rejected the update')

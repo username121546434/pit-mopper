@@ -3,7 +3,7 @@ import pickle
 from tkinter import *
 from grid import ButtonGrid, PickleButtonGrid
 from squares import PickleSquare, Square
-from datetime import datetime, timedelta
+from datetime import datetime
 from tkinter import filedialog, messagebox
 import os
 import sys
@@ -12,7 +12,7 @@ from windows_tools.installed_software import get_installed_software
 
 STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
 CURRENT_DIR = os.getcwd()
-__version__ = '1.1.0-beta-1'
+__version__ = '1.1.0'
 HIGHSCORE_TXT = os.path.join(CURRENT_DIR, 'highscore.txt')
 
 def resource_path(relative_path):
