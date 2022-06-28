@@ -34,7 +34,7 @@ def md_to_text(text):
 def check_for_updates(current_version: str, download_zip: bool, master: Tk | Toplevel):
     response = requests.get('https://api.github.com/repos/username121546434/minesweeper-python/releases')
     response.raise_for_status()
-    latest_version = response.json()[0]["tag_name"][1:]
+    latest_version = response.json()[0]["tag_name"]
     is_beta = response.json()[0]["prerelease"]
     body = md_to_text(response.json()[0]['body'])
 
