@@ -6,14 +6,30 @@ from tkinter import *
 from tkinter.ttk import *
 from tkinter import messagebox
 from zipfile import ZipFile
-import markdown
-from bs4 import BeautifulSoup
+from markdown import Markdown
+from io import StringIO
 
-def md_to_text(md):
-    """Takes markdown text and converts it to plain text"""
-    html = markdown.markdown(md)
-    soup = BeautifulSoup(html, features='html.parser')
-    return soup.get_text()
+
+def unmark_element(element, stream=None):
+    if stream is None:
+        stream = StringIO()
+    if element.text:
+        stream.write(element.text)
+    for sub in element:
+        unmark_element(sub, stream)
+    if element.tail:
+        stream.write(element.tail)
+    return stream.getvalue()
+
+
+# patching Markdown
+Markdown.output_formats["plain"] = unmark_element
+__md = Markdown(output_format="plain")
+__md.stripTopLevelTags = False
+
+
+def md_to_text(text):
+    return __md.convert(text)
 
 def check_for_updates(current_version: str, download_zip: bool, master: Tk | Toplevel):
     response = requests.get('https://api.github.com/repos/username121546434/minesweeper-python/releases')
@@ -26,9 +42,6 @@ def check_for_updates(current_version: str, download_zip: bool, master: Tk | Top
         window = Toplevel(master)
         window.title('Update Available')
         choice = BooleanVar(window)
-
-        Label(window, text=f'You have version {current_version} but {latest_version} is available. Do you want to update?').pack()
-        Label(window, text='Patch notes are below.').pack()
 
         text = Text(window, height=len(body.splitlines()), width=max(len(line) for line in [line.strip() for line in body.splitlines()]))
         text.focus()

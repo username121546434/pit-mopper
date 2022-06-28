@@ -15,15 +15,17 @@ CURRENT_DIR = os.getcwd()
 __version__ = '1.1.0'
 HIGHSCORE_TXT = os.path.join(CURRENT_DIR, 'highscore.txt')
 
+
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
-    except Exception:
+    except AttributeError:
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
+
 
 def format_second(seconds: int | float):
     if seconds != float('inf'):
@@ -389,7 +391,6 @@ file_menu.add_command(label='Exit', command=window.destroy)
 settings = Menu(file_menu)
 settings.add_checkbutton(variable=check_state, label='Enable Chording')
 settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, zip_or_installer(), window))
-
 
 menubar.add_cascade(menu=file_menu, label='File')
 menubar.add_cascade(menu=settings, label='Settings')
