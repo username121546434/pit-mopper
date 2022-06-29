@@ -6,7 +6,6 @@ from squares import PickleSquare, Square
 from datetime import datetime
 from tkinter import filedialog, messagebox
 import os
-import sys
 from updater import check_for_updates
 from windows_tools.installed_software import get_installed_software
 
@@ -14,17 +13,7 @@ STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
 CURRENT_DIR = os.getcwd()
 __version__ = '1.1.0'
 HIGHSCORE_TXT = os.path.join(CURRENT_DIR, 'highscore.txt')
-
-
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except AttributeError:
-        base_path = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
+LOGO = "images\\logo.ico"
 
 
 def format_second(seconds: int | float):
@@ -86,7 +75,7 @@ def load_game():
         data: dict[str]
 
     game_window = Toplevel(window)
-    game_window.iconbitmap(resource_path("images\\logo.ico"))
+    game_window.iconbitmap(LOGO)
     game_window.title('Minesweeper')
     grid = data['grid'].grid
     button_grid = ButtonGrid(data['grid'].grid_size, game_window, grid)
@@ -118,12 +107,12 @@ def load_game():
 def game():
     global difficulty
     global window
-    global check_state
+    global chord_state
 
-    chording = check_state.get()
+    chording = chord_state.get()
 
     game_window = Toplevel(window)
-    game_window.iconbitmap(resource_path("data\\images\\logo.ico"))
+    game_window.iconbitmap(LOGO)
     game_window.title('Minesweeper')
     start = datetime.now()
     game_window.grid_columnconfigure(1, weight=1)
@@ -352,7 +341,7 @@ def zip_or_installer():
 window = Tk()
 window.title('Game Loader')
 window.config(padx=50, pady=20)
-window.iconbitmap(resource_path(r"data\images\logo.ico"))
+window.iconbitmap(LOGO)
 window.resizable(False, False)
 
 Label(text='Select Difficulty').pack()
@@ -372,7 +361,7 @@ radio_button3 = Radiobutton(
     text='Hard', value=3, variable=radio_state, command=change_difficulty)
 radio_button3.pack()
 
-check_state = BooleanVar()
+chord_state = BooleanVar()
 
 Button(window, text='Play!', command=game).pack()
 
@@ -389,7 +378,7 @@ file_menu.add_command(label='Open File', command=load_game)
 file_menu.add_command(label='Exit', command=window.destroy)
 
 settings = Menu(file_menu)
-settings.add_checkbutton(variable=check_state, label='Enable Chording')
+settings.add_checkbutton(variable=chord_state, label='Enable Chording')
 settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, zip_or_installer(), window))
 
 menubar.add_cascade(menu=file_menu, label='File')

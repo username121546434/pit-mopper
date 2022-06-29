@@ -1,19 +1,7 @@
 from tkinter import *
 from load_font import load_font
-import sys
-import os
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
-
-font_family, font_name = load_font(resource_path(r"data\fonts\DSEG7ClassicMini-Bold.ttf"))
+font_family, font_name = load_font(r"data\fonts\DSEG7ClassicMini-Bold.ttf")
 
 num_colors = {
     1: 'blue',
