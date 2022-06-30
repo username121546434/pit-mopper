@@ -13,7 +13,8 @@ STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
 CURRENT_DIR = os.getcwd()
 __version__ = '1.1.0'
 HIGHSCORE_TXT = os.path.join(CURRENT_DIR, 'highscore.txt')
-LOGO = "images\\logo.ico"
+LOGO = "data\\images\\logo.ico"
+MAX_ROWS_AND_COLS = 1000
 
 
 def format_second(seconds: int | float):
@@ -63,7 +64,7 @@ def save_game(
         'zeros checked': zeros_checked,
         'num mines': num_mines,
         'chording': chording,
-        'difficulty': difficulty
+        'difficulty': difficulty.get()
     }
     with filedialog.asksaveasfile('wb', filetypes=(('Minesweeper Game Files', '*.min'), ('Any File', '*.*'))) as f:  # Pickling
         pickle.dump(data, f)
@@ -117,7 +118,7 @@ def game():
     start = datetime.now()
     game_window.grid_columnconfigure(1, weight=1)
 
-    grid = ButtonGrid(10 * difficulty, game_window)
+    grid = ButtonGrid(difficulty.get(), game_window)
     zeros_checked = []
     num_mines = 0
 
@@ -275,7 +276,7 @@ def create_game(
         ]
 
         if (
-            (len(squares_clicked_on) == grid.grid_size ** 2 and all(square.category == 'mine' for square in squares_flaged)) or
+            (len(squares_clicked_on) == grid.grid_size[0] * grid.grid_size[1] and all(square.category == 'mine' for square in squares_flaged)) or
                 (all(square.category == 'mine' for square in squares_not_clicked_on) and len(squares_not_clicked_on) == num_mines)
         ):
             game_over = True
@@ -311,9 +312,14 @@ def create_game(
     game_window.destroy()
 
 
-def change_difficulty():
+def change_difficulty(from_spinbox:bool = False):
+    global game_size
     global difficulty
-    difficulty = radio_state.get()
+    if not from_spinbox:
+        difficulty.set(tuple(int(i) for i in difficulty.get().split(' ')))
+    else:
+        difficulty.set((rows.get(), cols.get()))
+    game_size.set(f'You game size will be {difficulty.get()[0]} rows and {difficulty.get()[1]} columns')
 
 
 def load_highscore(txt_file: str):
@@ -347,19 +353,30 @@ window.resizable(False, False)
 Label(text='Select Difficulty').pack()
 
 # Variable to hold on to which radio button value is checked.
-radio_state = IntVar()
+difficulty = Variable(window, (None, None))
 
-radio_button1 = Radiobutton(
-    text="Easy", value=1, variable=radio_state, command=change_difficulty)
-radio_button1.pack()
+Radiobutton(
+    text="Easy", value=(10, 10), variable=difficulty, command=change_difficulty
+).pack()
 
-radio_button2 = Radiobutton(
-    text="Medium", value=2, variable=radio_state, command=change_difficulty)
-radio_button2.pack()
+Radiobutton(
+    text="Medium", value=(20, 20), variable=difficulty, command=change_difficulty
+).pack()
 
-radio_button3 = Radiobutton(
-    text='Hard', value=3, variable=radio_state, command=change_difficulty)
-radio_button3.pack()
+Radiobutton(
+    text='Hard', value=(30, 30), variable=difficulty, command=change_difficulty
+).pack()
+
+game_size = StringVar(window, f'You game size will be {difficulty.get()[0]} rows and {difficulty.get()[1]} columns')
+
+Label(window, textvariable=game_size).pack()
+Label(window, text='Or you can set a custom size below.(Top one is rows and the other one is columns)')
+
+cols = IntVar()
+rows = IntVar()
+
+Spinbox(window, from_=1, to=MAX_ROWS_AND_COLS, textvariable=rows, width=5, command=partial(change_difficulty, True)).pack()
+Spinbox(window, from_=1, to=MAX_ROWS_AND_COLS, textvariable=cols, width=5, command=partial(change_difficulty, True)).pack()
 
 chord_state = BooleanVar()
 

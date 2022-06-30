@@ -4,7 +4,7 @@ import random
 
 
 class ButtonGrid:
-    def __init__(self, grid_size, window: Tk | Toplevel, grid: list[list[PickleSquare]] | None = None):
+    def __init__(self, grid_size: tuple[int, int], window: Tk | Toplevel, grid: list[list[PickleSquare]] | None = None):
         self.grid_size = grid_size
         self.root = window
         if grid == None:
@@ -20,10 +20,10 @@ class ButtonGrid:
         # Create & Configure frame
         frame = Frame(self.root)
         frame.grid(row=1, column=1, sticky=N+S+E+W)
-        for row_index in range(self.grid_size):
+        for row_index in range(self.grid_size[0]):
             Grid.rowconfigure(frame, row_index, weight=1)
             row = []
-            for col_index in range(self.grid_size):
+            for col_index in range(self.grid_size[0]):
                 Grid.columnconfigure(frame, col_index, weight=1)
                 # create a button inside frame
                 btn = Square(master=frame, text=blank)
@@ -39,7 +39,7 @@ class ButtonGrid:
                 col_num = row.index(square)
                 dice = random.randint(1, 4)
                 coor = (row_num, col_num)
-                if dice == 2 and all(1 < num < self.grid_size - 1 for num in coor):
+                if dice == 2 and all(1 < num < size - 1 for num, size in zip(coor, self.grid_size)):
                     square.category = 'mine'
 
         self.grid = grid
