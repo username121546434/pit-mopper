@@ -14,7 +14,8 @@ CURRENT_DIR = os.getcwd()
 __version__ = '1.1.0'
 HIGHSCORE_TXT = os.path.join(CURRENT_DIR, 'highscore.txt')
 LOGO = "data\\images\\logo.ico"
-MAX_ROWS_AND_COLS = 1000
+MAX_ROWS_AND_COLS = 75
+MIN_ROWS_AND_COLS = 7
 
 
 def format_second(seconds: int | float):
@@ -118,6 +119,10 @@ def game():
     start = datetime.now()
     game_window.grid_columnconfigure(1, weight=1)
 
+    if difficulty.get() < (8, 8):
+        messagebox.showwarning(title='Size too small', message='Warning: It is rare but 7x7 and 7x8 and 8x7 games might crash or not work properly.\nIt is recommended to use 8x8 or higher')
+    elif difficulty.get()[0] != difficulty.get()[1]:
+        messagebox.showwarning(title='Size not square', message='Warning: The game works best when the size is a perfect square, this is not a square so it may have some bugs.')    
     grid = ButtonGrid(difficulty.get(), game_window)
     zeros_checked = []
     num_mines = 0
@@ -203,7 +208,7 @@ def create_game(
             previous_sec = now
             seconds = (now - session_start).total_seconds() + additional_time
 
-        percent = round(len(squares_flaged)/num_mines * 100, 2)
+        percent = round(((len(squares_flaged))/num_mines) * 100, 2)
         total_time.set(f'Time: {format_second(seconds)}  🚩 {len(squares_flaged)}/{num_mines} 💣 ({percent}%)')
 
         game_overs = [
@@ -277,10 +282,8 @@ def create_game(
             if square.flaged
         ]
 
-        if (
-            (len(squares_clicked_on) == grid.grid_size[0] * grid.grid_size[1] and all(square.category == 'mine' for square in squares_flaged)) or
-                (all(square.category == 'mine' for square in squares_not_clicked_on) and len(squares_not_clicked_on) == num_mines)
-        ):
+        if (len(squares_clicked_on) == (grid.grid_size[0] * grid.grid_size[1]) and all(square.category == 'mine' for square in squares_flaged)) or \
+                (all(square.category == 'mine' for square in squares_not_clicked_on) and len(squares_not_clicked_on) == num_mines):
             game_over = True
             win = True
         elif True in game_overs:
@@ -377,8 +380,8 @@ Label(window, text='Or you can set a custom size below.(Top one is rows and the 
 cols = IntVar()
 rows = IntVar()
 
-Spinbox(window, from_=1, to=MAX_ROWS_AND_COLS, textvariable=rows, width=4, command=partial(change_difficulty, True)).pack()
-Spinbox(window, from_=1, to=MAX_ROWS_AND_COLS, textvariable=cols, width=4, command=partial(change_difficulty, True)).pack()
+Spinbox(window, from_=MIN_ROWS_AND_COLS, to=MAX_ROWS_AND_COLS, textvariable=rows, width=4, command=partial(change_difficulty, True)).pack()
+Spinbox(window, from_=MIN_ROWS_AND_COLS, to=MAX_ROWS_AND_COLS, textvariable=cols, width=4, command=partial(change_difficulty, True)).pack()
 
 chord_state = BooleanVar()
 
@@ -396,7 +399,7 @@ file_menu = Menu(
 file_menu.add_command(label='Open File', command=load_game)
 file_menu.add_command(label='Exit', command=window.destroy)
 
-settings = Menu(file_menu)
+settings = Menu(menubar)
 settings.add_checkbutton(variable=chord_state, label='Enable Chording')
 settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, zip_or_installer(), window))
 

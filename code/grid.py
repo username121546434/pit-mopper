@@ -39,7 +39,7 @@ class ButtonGrid:
                 col_num = row.index(square)
                 dice = random.randint(1, 4)
                 coor = (row_num, col_num)
-                if dice == 2 and all(1 < num < size - 1 for num, size in zip(coor, self.grid_size)):
+                if dice == 2 and all(1 < num < size - 1 for num, size in zip(coor, self.grid_size[::-1])):
                     square.category = 'mine'
 
         self.grid = grid
