@@ -169,7 +169,7 @@ def create_game(
         row=0, column=1, sticky=N+S+E+W)
 
     if additional_time != 0.0:
-        total_time.set(f'Time: {format_second(int(additional_time))}')
+        total_time.set(f'Time: {format_second(int(additional_time))} 🚩0/{num_mines}💣')
 
     highscore = load_highscore(HIGHSCORE_TXT)
     seconds = additional_time
@@ -192,6 +192,7 @@ def create_game(
     menubar.add_cascade(menu=file_menu, label='File')
     previous_sec = datetime.now()
     previous_sec = previous_sec.replace(microsecond=0)
+    squares_flaged = []
 
     while showed_game_over == False:
         game_window.after(100)
@@ -202,7 +203,8 @@ def create_game(
             previous_sec = now
             seconds = (now - session_start).total_seconds() + additional_time
 
-        total_time.set(f'Time: {format_second(seconds)}')
+        percent = round(len(squares_flaged)/num_mines * 100, 2)
+        total_time.set(f'Time: {format_second(seconds)}  🚩 {len(squares_flaged)}/{num_mines} 💣 ({percent}%)')
 
         game_overs = [
             square.game_over
@@ -305,7 +307,7 @@ def create_game(
             'Game Over', f'Game Over.\nYou won!\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}')
     else:
         messagebox.showinfo(
-            'Game Over', f'Game Over.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}')
+            'Game Over', f'Game Over.\nYou lost.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}')
     if win and seconds < highscore:
         with open(HIGHSCORE_TXT, 'wb') as f:
             pickle.dump(seconds, f)
@@ -375,8 +377,8 @@ Label(window, text='Or you can set a custom size below.(Top one is rows and the 
 cols = IntVar()
 rows = IntVar()
 
-Spinbox(window, from_=1, to=MAX_ROWS_AND_COLS, textvariable=rows, width=5, command=partial(change_difficulty, True)).pack()
-Spinbox(window, from_=1, to=MAX_ROWS_AND_COLS, textvariable=cols, width=5, command=partial(change_difficulty, True)).pack()
+Spinbox(window, from_=1, to=MAX_ROWS_AND_COLS, textvariable=rows, width=4, command=partial(change_difficulty, True)).pack()
+Spinbox(window, from_=1, to=MAX_ROWS_AND_COLS, textvariable=cols, width=4, command=partial(change_difficulty, True)).pack()
 
 chord_state = BooleanVar()
 
