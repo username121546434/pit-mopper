@@ -32,7 +32,14 @@ def md_to_text(text):
     return __md.convert(text)
 
 def check_for_updates(current_version: str, download_zip: bool, master: Tk | Toplevel):
-    response = requests.get('https://api.github.com/repos/username121546434/minesweeper-python/releases')
+    try:
+        response = requests.get('https://api.github.com/repos/username121546434/minesweeper-python/releases')
+    except requests.exceptions.ConnectionError as error:
+        messagebox.showerror(title='Failed to Check for Updates', message=f'''This is most likely because you do not have an internet connection.
+If you do have an internet connection, then here are details so you can report a bug:
+
+{error}''')
+        return None
     response.raise_for_status()
     latest_version = response.json()[0]["tag_name"]
     is_beta = response.json()[0]["prerelease"]
