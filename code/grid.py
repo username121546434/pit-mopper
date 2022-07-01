@@ -23,7 +23,7 @@ class ButtonGrid:
         for row_index in range(self.grid_size[0]):
             Grid.rowconfigure(frame, row_index, weight=1)
             row = []
-            for col_index in range(self.grid_size[0]):
+            for col_index in range(self.grid_size[1]):
                 Grid.columnconfigure(frame, col_index, weight=1)
                 # create a button inside frame
                 btn = Square(master=frame, text=blank)

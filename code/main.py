@@ -399,9 +399,11 @@ file_menu = Menu(
 file_menu.add_command(label='Open File', command=load_game)
 file_menu.add_command(label='Exit', command=window.destroy)
 
-settings = Menu(menubar)
+settings = Menu(menubar, tearoff=0)
 settings.add_checkbutton(variable=chord_state, label='Enable Chording')
+settings.add_separator()
 settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, zip_or_installer(), window))
+settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Minesweeper Version: {__version__}'))
 
 menubar.add_cascade(menu=file_menu, label='File')
 menubar.add_cascade(menu=settings, label='Settings')
