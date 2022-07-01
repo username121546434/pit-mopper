@@ -15,7 +15,7 @@ __version__ = '1.1.0'
 HIGHSCORE_TXT = os.path.join(CURRENT_DIR, 'highscore.txt')
 LOGO = "data\\images\\logo.ico"
 MAX_ROWS_AND_COLS = 75
-MIN_ROWS_AND_COLS = 7
+MIN_ROWS_AND_COLS = 6
 
 
 def format_second(seconds: int | float):
@@ -119,10 +119,10 @@ def game():
     start = datetime.now()
     game_window.grid_columnconfigure(1, weight=1)
 
-    if difficulty.get() < (8, 8):
-        messagebox.showwarning(title='Size too small', message='Warning: It is rare but 7x7 and 7x8 and 8x7 games might crash or not work properly.\nIt is recommended to use 8x8 or higher')
-    elif difficulty.get()[0] != difficulty.get()[1]:
-        messagebox.showwarning(title='Size not square', message='Warning: The game works best when the size is a perfect square, this is not a square so it may have some bugs.')    
+    if difficulty.get() < (7, 7):
+        messagebox.showwarning(title='Size too small', message='Warning: It is rare but 6x6 and 6x7 and 7x6 games might crash or not work properly.\nIt is recommended to use 7x7 or higher')
+    elif difficulty.get() >= (40, 40):
+        messagebox.showwarning(title='Size too big', message='Warning: When the game is a size of 40x40 or above, the expierence might be so laggy it is unplayable.')    
     grid = ButtonGrid(difficulty.get(), game_window)
     zeros_checked = []
     num_mines = 0
@@ -221,11 +221,8 @@ def create_game(
             # Clicks Zeros
             for square in [square for square in row if (square.cget('text') == '0') and (square not in zeros_checked)]:
                 zeros_checked.append(square)
-                for square2 in [square2 for square2 in grid.around_square(*square.position) if (square2.category != 'mine') and (square2.num == None)]:
+                for square2 in [square2 for square2 in grid.around_square(*square.position) if (square2.category != 'mine')]:
                     square2.clicked()
-                    # Clicks all numbers next to clicked zeros
-                    for square3 in [square3 for square3 in grid.around_square(*square2.position) if square3 in zeros_checked or square3.num != None]:
-                        square3.clicked()
 
             for square in [square for square in row if square.category == 'mine']:
                 if square.category == 'mine' and square.cget('text') == '🚩':

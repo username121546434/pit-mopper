@@ -39,7 +39,7 @@ class ButtonGrid:
                 col_num = row.index(square)
                 dice = random.randint(1, 4)
                 coor = (row_num, col_num)
-                if dice == 2 and all(1 < num < size - 1 for num, size in zip(coor, self.grid_size[::-1])):
+                if dice == 2 and all(1 < num < size - 1 for num, size in zip(coor, self.grid_size)):
                     square.category = 'mine'
 
         self.grid = grid
@@ -96,13 +96,23 @@ class ButtonGrid:
         coors.append((row_num + 1, col_num + 1))  # Adds the top right corner
         coors.append((row_num + 1, col_num - 1))  # Adds the top left corner
         coors.append((row_num - 1, col_num - 1))  # Adds the bottum left corner
-        # Adds the bottum right corner
-        coors.append((row_num - 1, col_num + 1))
-
-        if print_:
-            print(f'\nFor y:{row_num} x:{col_num}\n{coors}')
-
+        coors.append((row_num - 1, col_num + 1))  # Adds the bottum right corner
+        
+        filtered_coors = []
         for coor in coors:
+            row, col = coor
+            try:
+                _ = self.grid[row][col]
+            except IndexError:
+                pass
+            else:
+                if coor[0] >= 0 and coor[1] >= 0:
+                    filtered_coors.append(coor)
+        
+        if print_:
+            print(f'\nFor y:{row_num} x:{col_num}\n{filtered_coors}')
+
+        for coor in filtered_coors:
             row, col = coor
             try:
                 around.append(self.grid[row][col])
