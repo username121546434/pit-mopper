@@ -42,7 +42,6 @@ If you do have an internet connection, then here are details so you can report a
         return None
     response.raise_for_status()
     latest_version = response.json()[0]["tag_name"]
-    is_beta = response.json()[0]["prerelease"]
     body = md_to_text(response.json()[0]['body'])
 
     if Version(latest_version) > Version(current_version):
