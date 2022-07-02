@@ -335,6 +335,20 @@ def load_highscore(txt_file: str):
             return pickle.load(f)
 
 
+def change_theme(_=None):
+    if dark_mode_state.get():
+        window.config(bg='#282828')
+        for child in window.winfo_children():
+            print(type(child))
+            if not isinstance(child, Square) and not isinstance(child, Toplevel):
+                child.config(bg='#282828', fg='white')
+    else:
+        window.config(bg='white')
+        for child in window.winfo_children():
+            if not isinstance(child, Square) and not isinstance(child, Toplevel):
+                child.config(bg='white', fg='black')
+
+
 def zip_or_installer():
     # Checks whether the current minesweeper is from the zip download or from the installer
     # returns False if it was downloaded through the installer and True if from zip file
@@ -380,7 +394,8 @@ rows = IntVar()
 Spinbox(window, from_=MIN_ROWS_AND_COLS, to=MAX_ROWS_AND_COLS, textvariable=rows, width=4, command=partial(change_difficulty, True)).pack()
 Spinbox(window, from_=MIN_ROWS_AND_COLS, to=MAX_ROWS_AND_COLS, textvariable=cols, width=4, command=partial(change_difficulty, True)).pack()
 
-chord_state = BooleanVar()
+chord_state = BooleanVar(window)
+dark_mode_state = BooleanVar(window)
 
 Button(window, text='Play!', command=game).pack()
 
@@ -398,6 +413,7 @@ file_menu.add_command(label='Exit', command=window.destroy, accelerator='Ctrl+Q'
 
 settings = Menu(menubar, tearoff=0)
 settings.add_checkbutton(variable=chord_state, label='Enable Chording', accelerator='C')
+settings.add_checkbutton(variable=dark_mode_state, label='Enable Dark Mode', command=change_theme)
 settings.add_separator()
 settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, zip_or_installer(), window), accelerator='Ctrl+U')
 settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Minesweeper Version: {__version__}'), accelerator='Ctrl+I')
