@@ -16,6 +16,7 @@ HIGHSCORE_TXT = os.path.join(CURRENT_DIR, 'highscore.txt')
 LOGO = "data\\images\\logo.ico"
 MAX_ROWS_AND_COLS = 75
 MIN_ROWS_AND_COLS = 6
+DARK_MODE_BG = '#282828'
 
 
 def format_second(seconds: int | float):
@@ -334,19 +335,57 @@ def load_highscore(txt_file: str):
         with open(txt_file, 'rb') as f:
             return pickle.load(f)
 
+# Sum of the min & max of (a, b, c)
+def hilo(a, b, c):
+    if c < b: b, c = c, b
+    if b < a: a, b = b, a
+    if c < b: b, c = c, b
+    return a + c
+
+def complement(r, g, b):
+    k = hilo(r, g, b)
+    return tuple(k - u for u in (r, g, b))
+
 
 def change_theme(_=None):
     if dark_mode_state.get():
-        window.config(bg='#282828')
+        window.config(bg=DARK_MODE_BG)
         for child in window.winfo_children():
-            print(type(child))
-            if not isinstance(child, Square) and not isinstance(child, Toplevel):
-                child.config(bg='#282828', fg='white')
+            if not isinstance(child, Toplevel):
+                child.config(bg=DARK_MODE_BG, fg='white')
+            elif isinstance(child, Toplevel):
+                child.config(bg=DARK_MODE_BG)
+                print(child.winfo_children())
+                for child2 in child.winfo_children():
+                    print(type(child2))
+                    if not isinstance(child2, Square) and not isinstance(child2, Frame) and not isinstance(child2, Label) and not isinstance(child2, Menu):
+                        child.config(bg=DARK_MODE_BG, fg='black')
+                    elif isinstance(child2, Frame):
+                        child.config(bg=DARK_MODE_BG)
+                    elif isinstance(child2, Frame):
+                        for square in child2.winfo_children():
+                            print(type(square))
+                            square.config(bg=complement(window.winfo_rgb(square.cget('background'))), fg=complement(window.winfo_rgb(square.cget('foreground'))))
     else:
-        window.config(bg='white')
+        window.config(bg=DEFAULT_BG)
         for child in window.winfo_children():
-            if not isinstance(child, Square) and not isinstance(child, Toplevel):
+            if not isinstance(child, Toplevel) and not isinstance(child, Spinbox):
+                child.config(bg=DEFAULT_BG, fg='black')
+            elif isinstance(child, Spinbox):
                 child.config(bg='white', fg='black')
+            elif isinstance(child, Toplevel):
+                child.config(bg=DEFAULT_BG)
+                print(child.winfo_children())
+                for child2 in child.winfo_children():
+                    print(type(child2))
+                    if not isinstance(child2, Square) and not isinstance(child2, Frame) and not isinstance(child2, Label) and not isinstance(child2, Menu):
+                        child.config(bg=DEFAULT_BG, fg='black')
+                    elif not isinstance(child2, Square):
+                        child.config(bg=DEFAULT_BG)
+                    elif isinstance(child2, Frame):
+                        for square in child2.winfo_children():
+                            print(type(square))
+                            square.config(bg=complement(window.winfo_rgb(square.cget('background'))), fg=complement(window.winfo_rgb(square.cget('foreground'))))
 
 
 def zip_or_installer():
@@ -365,6 +404,10 @@ window.title('Game Loader')
 window.config(padx=50, pady=20)
 window.iconbitmap(LOGO)
 window.resizable(False, False)
+
+bg = window.cget('background')
+rgb = window.winfo_rgb(bg)
+DEFAULT_BG = "#%x%x%x" % rgb
 
 Label(text='Select Difficulty').pack()
 
