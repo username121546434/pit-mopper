@@ -11,9 +11,22 @@ num_colors = {
     5: 'pink',
     6: 'red',
     7: 'yellow',
-    8: 'gray'
+    8: 'gray',
 }
 
+dark_mode_colors = {
+    1: 'DarkBlue',
+    2: 'DarkGreen',
+    3: 'DarkMagenta',
+    4: 'DarkOrange',
+    5: 'DeepPink',
+    6: 'DarkRed',
+    7: 'Goldenrod',
+    8: 'DarkGrey'
+}
+
+DARK_MODE_BG = '#282828'
+LIGHT_MODE_BG = '#f0f0f0f0f0f0'
 
 class Square(Button):
     def __init__(self, master: Misc | None = ..., text='') -> None:
@@ -25,6 +38,7 @@ class Square(Button):
         self.chord: bool = False
         self.completed: bool = False
         self.clicked_on: bool = False
+        self.dark_mode: bool = False
 
         super().__init__(master, text=text, font=(font_name, 12))
 
@@ -32,34 +46,60 @@ class Square(Button):
         self.bind('<Button-2>', self.chord_self)
         self.bind('<Button-3>', self.flag)
 
-    def flag(self, _=''):
+    def flag(self, _=None):
         if self.cget('text').replace(' ', '') == '':
+            if self.dark_mode:
+                self.config(fg='white')
+            else:
+                self.config(fg='black')
             self.config(text='🚩')
             self.clicked_on = True
             self.flaged = True
         elif self.cget('text') == '🚩':
+            if self.dark_mode:
+                self.config(fg='black')
             self.config(text="  " * 3)
             self.clicked_on = False
             self.flaged = False
 
-    def chord_self(self, _=''):
+    def chord_self(self, _=None):
         self.chord = not self.chord
 
-    def clicked(self, _=''):
+    def clicked(self, _=None):
         if self.category == 'mine':
             self.config(text='💣', bg='red')
             self.game_over = True
         elif self.num != None:
-            self.config(text=str(self.num), bg=num_colors[self.num])
+            if self.dark_mode:
+                self.config(text=str(self.num), bg=dark_mode_colors[self.num])
+            else:
+                self.config(text=str(self.num), bg=num_colors[self.num])
         else:
+            if self.dark_mode:
+                self.config(bg=DARK_MODE_BG)
+            else:
+                self.config(bg=LIGHT_MODE_BG)
             self.config(text='0')
         self.clicked_on = True
+    
+    def switch_theme(self):
+        self.dark_mode = not self.dark_mode
+        if not self.dark_mode:
+            if self.clicked_on and self.num != None:
+                self.config(bg=num_colors[self.num])
+            else:
+                self.config(bg=LIGHT_MODE_BG)
+        elif self.dark_mode:
+            if self.clicked_on and self.num != None:
+                self.config(bg=dark_mode_colors[self.num])
+            else:
+                self.config(bg=DARK_MODE_BG)
 
 
 class PickleSquare:
     """Same as `Square` but is used to pickle and save data"""
 
-    def __init__(self, category: str, position: tuple[int, int], num, chord=False, completed=False, clicked_on=False, game_over=False, flaged:bool = False) -> None:
+    def __init__(self, category: str, position: tuple[int, int], num, chord=False, completed=False, clicked_on=False, game_over=False, flaged:bool = False, dark_mode:bool = False) -> None:
         self.chord: bool = chord
         self.completed: bool = completed
         self.clicked_on: bool = clicked_on
@@ -68,6 +108,7 @@ class PickleSquare:
         self.game_over = game_over
         self.num = num
         self.flaged = flaged
+        self.dark_mode = dark_mode
 
     def to_square(self, master) -> Square:
         square = Square(master)
@@ -85,5 +126,6 @@ class PickleSquare:
             square.completed,
             square.clicked_on,
             square.game_over,
-            square.flaged
+            square.flaged,
+            square.dark_mode
         )

@@ -9,6 +9,7 @@ import os
 from updater import check_for_updates
 from windows_tools.installed_software import get_installed_software
 from colorsys import rgb_to_hsv, hsv_to_rgb
+import ctypes as ct
 
 STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
 CURRENT_DIR = os.getcwd()
@@ -36,6 +37,24 @@ def format_second(seconds: int | float):
         return f'{minutes}:{sec}'
     else:
         return 'None'
+
+
+def dark_title_bar(window):
+    """
+    MORE INFO:
+    https://docs.microsoft.com/en-us/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute
+    """
+    # https://stackoverflow.com/a/70724666
+    window.update()
+    DWMWA_USE_IMMERSIVE_DARK_MODE = 20
+    set_window_attribute = ct.windll.dwmapi.DwmSetWindowAttribute
+    get_parent = ct.windll.user32.GetParent
+    hwnd = get_parent(window.winfo_id())
+    rendering_policy = DWMWA_USE_IMMERSIVE_DARK_MODE
+    value = 2
+    value = ct.c_int(value)
+    set_window_attribute(hwnd, rendering_policy, ct.byref(value),
+                         ct.sizeof(value))
 
 
 def more_info(
@@ -130,7 +149,7 @@ def game(_=None):
         messagebox.showwarning(title='Size too small', message='Warning: It is rare but 6x6 and 6x7 and 7x6 games might crash or not work properly.\nIt is recommended to use 7x7 or higher')
     elif difficulty.get() >= (40, 40):
         messagebox.showwarning(title='Size too big', message='Warning: When the game is a size of 40x40 or above, the expierence might be so laggy it is unplayable.')    
-    grid = ButtonGrid(difficulty.get(), game_window)
+    grid = ButtonGrid(difficulty.get(), game_window, dark_mode=dark_mode_state.get())
     zeros_checked = []
     num_mines = 0
 
@@ -160,6 +179,8 @@ def create_game(
     mines_found: int,
     additional_time: float = 0.0
 ):
+    if dark_mode_state.get():
+        dark_title_bar(game_window)
     session_start: datetime = datetime.now()
     squares_clicked_on = [
         square
@@ -177,7 +198,7 @@ def create_game(
     showed_game_over = False
     total_time = StringVar(game_window)
 
-    Label(game_window, textvariable=total_time).grid(
+    label = Label(game_window, textvariable=total_time).grid(
         row=0, column=1, sticky=N+S+E+W)
 
     if additional_time != 0.0:
@@ -353,33 +374,37 @@ def change_theme(_=None):
     if dark_mode_state.get():
         CURRENT_BG = DARK_MODE_BG
         CURRENT_FG = DARK_MODE_FG
+        dark_title_bar(window)
     else:
         CURRENT_BG = DEFAULT_BG
         CURRENT_FG = DEFAULT_FG
+        window.resizable(False, False)
 
     window.config(bg=CURRENT_BG)
     for child in window.winfo_children():
-        if not isinstance(child, Toplevel) and not isinstance(child, Spinbox):
+        if not isinstance(child, Toplevel) and not isinstance(child, Spinbox) and not isinstance(child, Menu):
             child.config(bg=CURRENT_BG, fg=CURRENT_FG)
         elif isinstance(child, Spinbox):
             if CURRENT_BG == DEFAULT_BG:
                 child.config(bg='white', fg=CURRENT_FG)
             else:
                 child.config(bg=CURRENT_BG, fg=CURRENT_FG)
+        elif isinstance(child, Menu):
+            child.config(bg=CURRENT_BG, fg=CURRENT_FG, activebackground=CURRENT_BG, activeforeground=CURRENT_FG)
         elif isinstance(child, Toplevel):
+            if CURRENT_BG == DARK_MODE_BG:
+                dark_title_bar(child)
+            else:
+                child.resizable(True, True)
             child.config(bg=CURRENT_BG)
             for child2 in child.winfo_children():
-                print(child2)
                 if not isinstance(child2, Frame) and not isinstance(child2, Label) and not isinstance(child2, Menu):
                     child.config(bg=CURRENT_BG, fg=CURRENT_FG)
                 elif not isinstance(child2, Frame):
                     child.config(bg=CURRENT_BG)
                 elif isinstance(child2, Frame):
-                    print(child2.winfo_children())
                     for square in child2.winfo_children():
-                        print(type(square))
-                        complementary_bg = rgb_to_hsv(*complementary(*window.winfo_rgb(square.cget('background'))))
-                        square.config(bg=complementary_bg, fg=CURRENT_FG)
+                        square.switch_theme()
 
 
 def zip_or_installer():

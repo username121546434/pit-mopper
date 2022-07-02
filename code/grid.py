@@ -4,13 +4,18 @@ import random
 
 
 class ButtonGrid:
-    def __init__(self, grid_size: tuple[int, int], window: Tk | Toplevel, grid: list[list[PickleSquare]] | None = None):
+    def __init__(self, grid_size: tuple[int, int], window: Tk | Toplevel, grid: list[list[PickleSquare]] | None = None, dark_mode:bool = False):
         self.grid_size = grid_size
         self.root = window
         if grid == None:
             self.grid = self.button_grid()
         else:
             self.grid = self.setup_grid(grid)
+        
+        if dark_mode:
+            for row in self.grid:
+                for square in row:
+                    square.switch_theme()
 
     def button_grid(self) -> list[list[Square]]:
         Grid.rowconfigure(self.root, 1, weight=1)
