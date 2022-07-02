@@ -337,7 +337,7 @@ def load_highscore(txt_file: str):
 
 def zip_or_installer():
     # Checks whether the current minesweeper is from the zip download or from the installer
-    # returns False if it was downloaded through the installer and False if from zip file
+    # returns False if it was downloaded through the installer and True if from zip file
     return_value = True
     # print(get_installed_software())
     for app in get_installed_software():
