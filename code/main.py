@@ -8,6 +8,7 @@ from tkinter import filedialog, messagebox
 import os
 from updater import check_for_updates
 from windows_tools.installed_software import get_installed_software
+from colorsys import rgb_to_hsv, hsv_to_rgb
 
 STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
 CURRENT_DIR = os.getcwd()
@@ -17,6 +18,11 @@ LOGO = "data\\images\\logo.ico"
 MAX_ROWS_AND_COLS = 75
 MIN_ROWS_AND_COLS = 6
 DARK_MODE_BG = '#282828'
+DARK_MODE_FG = '#FFFFFF'
+DEFAULT_BG = '#FBF8F1'
+DEFAULT_FG = '#000000'
+CURRENT_BG = DEFAULT_BG
+CURRENT_FG = DEFAULT_FG
 
 
 def format_second(seconds: int | float):
@@ -335,57 +341,45 @@ def load_highscore(txt_file: str):
         with open(txt_file, 'rb') as f:
             return pickle.load(f)
 
-# Sum of the min & max of (a, b, c)
-def hilo(a, b, c):
-    if c < b: b, c = c, b
-    if b < a: a, b = b, a
-    if c < b: b, c = c, b
-    return a + c
 
-def complement(r, g, b):
-    k = hilo(r, g, b)
-    return tuple(k - u for u in (r, g, b))
+def complementary(r, g, b):
+   """returns RGB components of complementary color"""
+   # https://stackoverflow.com/a/40234511
+   hsv = rgb_to_hsv(r, g, b)
+   return hsv_to_rgb((hsv[0] + 0.5) % 1, hsv[1], hsv[2])
 
 
 def change_theme(_=None):
     if dark_mode_state.get():
-        window.config(bg=DARK_MODE_BG)
-        for child in window.winfo_children():
-            if not isinstance(child, Toplevel):
-                child.config(bg=DARK_MODE_BG, fg='white')
-            elif isinstance(child, Toplevel):
-                child.config(bg=DARK_MODE_BG)
-                print(child.winfo_children())
-                for child2 in child.winfo_children():
-                    print(type(child2))
-                    if not isinstance(child2, Square) and not isinstance(child2, Frame) and not isinstance(child2, Label) and not isinstance(child2, Menu):
-                        child.config(bg=DARK_MODE_BG, fg='black')
-                    elif isinstance(child2, Frame):
-                        child.config(bg=DARK_MODE_BG)
-                    elif isinstance(child2, Frame):
-                        for square in child2.winfo_children():
-                            print(type(square))
-                            square.config(bg=complement(window.winfo_rgb(square.cget('background'))), fg=complement(window.winfo_rgb(square.cget('foreground'))))
+        CURRENT_BG = DARK_MODE_BG
+        CURRENT_FG = DARK_MODE_FG
     else:
-        window.config(bg=DEFAULT_BG)
-        for child in window.winfo_children():
-            if not isinstance(child, Toplevel) and not isinstance(child, Spinbox):
-                child.config(bg=DEFAULT_BG, fg='black')
-            elif isinstance(child, Spinbox):
-                child.config(bg='white', fg='black')
-            elif isinstance(child, Toplevel):
-                child.config(bg=DEFAULT_BG)
-                print(child.winfo_children())
-                for child2 in child.winfo_children():
-                    print(type(child2))
-                    if not isinstance(child2, Square) and not isinstance(child2, Frame) and not isinstance(child2, Label) and not isinstance(child2, Menu):
-                        child.config(bg=DEFAULT_BG, fg='black')
-                    elif not isinstance(child2, Square):
-                        child.config(bg=DEFAULT_BG)
-                    elif isinstance(child2, Frame):
-                        for square in child2.winfo_children():
-                            print(type(square))
-                            square.config(bg=complement(window.winfo_rgb(square.cget('background'))), fg=complement(window.winfo_rgb(square.cget('foreground'))))
+        CURRENT_BG = DEFAULT_BG
+        CURRENT_FG = DEFAULT_FG
+
+    window.config(bg=CURRENT_BG)
+    for child in window.winfo_children():
+        if not isinstance(child, Toplevel) and not isinstance(child, Spinbox):
+            child.config(bg=CURRENT_BG, fg=CURRENT_FG)
+        elif isinstance(child, Spinbox):
+            if CURRENT_BG == DEFAULT_BG:
+                child.config(bg='white', fg=CURRENT_FG)
+            else:
+                child.config(bg=CURRENT_BG, fg=CURRENT_FG)
+        elif isinstance(child, Toplevel):
+            child.config(bg=CURRENT_BG)
+            for child2 in child.winfo_children():
+                print(child2)
+                if not isinstance(child2, Frame) and not isinstance(child2, Label) and not isinstance(child2, Menu):
+                    child.config(bg=CURRENT_BG, fg=CURRENT_FG)
+                elif not isinstance(child2, Frame):
+                    child.config(bg=CURRENT_BG)
+                elif isinstance(child2, Frame):
+                    print(child2.winfo_children())
+                    for square in child2.winfo_children():
+                        print(type(square))
+                        complementary_bg = rgb_to_hsv(*complementary(*window.winfo_rgb(square.cget('background'))))
+                        square.config(bg=complementary_bg, fg=CURRENT_FG)
 
 
 def zip_or_installer():
@@ -405,9 +399,6 @@ window.config(padx=50, pady=20)
 window.iconbitmap(LOGO)
 window.resizable(False, False)
 
-bg = window.cget('background')
-rgb = window.winfo_rgb(bg)
-DEFAULT_BG = "#%x%x%x" % rgb
 
 Label(text='Select Difficulty').pack()
 
@@ -429,7 +420,6 @@ Radiobutton(
 game_size = StringVar(window, f'You game size will be {difficulty.get()[0]} rows and {difficulty.get()[1]} columns')
 
 Label(window, textvariable=game_size).pack()
-Label(window, text='Or you can set a custom size below.(Top one is rows and the other one is columns)')
 
 cols = IntVar()
 rows = IntVar()
