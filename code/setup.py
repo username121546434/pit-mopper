@@ -2,7 +2,7 @@ from cx_Freeze import setup, Executable
 
 base = None    
 
-executables = [Executable("./code/main.py", base='Win32GUI', icon='./code/data/images/logo.ico')]
+executables = [Executable("./minesweeper-python/code/main.py", base='Win32GUI', icon='./minesweeper-python/code/data/images/logo.ico')]
 
 packages = [
     "functools",
@@ -11,11 +11,15 @@ packages = [
     'os',
     'sys',
     'windows_tools.installed_software',
-    'importlib',
-    'importlib.util'
+    'datetime',
+    'ctypes',
+    'grid',
+    'updater',
+    'squares',
+    'load_font'
 ]
 include_files = [
-    './code/data'
+    './minesweeper-python/code/data'
 ]
 options = {
     'build_exe': {    
@@ -27,7 +31,7 @@ options = {
 setup(
     name = "Minesweeper",
     options = options,
-    version = "1.1.0",
+    version = "1.2.0",
     description = '',
     executables = executables
-)
+) 
