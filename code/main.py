@@ -11,9 +11,11 @@ from windows_tools.installed_software import get_installed_software
 from colorsys import rgb_to_hsv, hsv_to_rgb
 import ctypes as ct
 
+__version__ = '1.2.0'
+__license__ = 'GNU GPL v3, see LICENSE.txt for more info'
+
 STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
 CURRENT_DIR = os.getcwd()
-__version__ = '1.1.0'
 HIGHSCORE_TXT = os.path.join(CURRENT_DIR, 'highscore.txt')
 LOGO = "data\\images\\logo.ico"
 MAX_ROWS_AND_COLS = 75
