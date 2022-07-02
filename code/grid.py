@@ -68,11 +68,11 @@ class ButtonGrid:
         # Create & Configure frame
         frame = Frame(self.root)
         frame.grid(row=1, column=1, sticky=N+S+E+W)
-        for row_index in range(self.grid_size):
+        for row_index in range(self.grid_size[0]):
             Grid.rowconfigure(frame, row_index, weight=1)
             row = grid[row_index]
             new_row = []
-            for col_index in range(self.grid_size):
+            for col_index in range(self.grid_size[1]):
                 btn = row[col_index]
                 new_btn = btn.to_square(frame)
                 Grid.columnconfigure(frame, col_index, weight=1)

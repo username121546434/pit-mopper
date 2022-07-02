@@ -71,7 +71,7 @@ def save_game(
         pickle.dump(data, f)
 
 
-def load_game():
+def load_game(_=None):
     with filedialog.askopenfile('rb', filetypes=(('Minesweeper Game Files', '*.min'), ('Any File', '*.*'))) as f:  # Un Pickling
         data = pickle.load(f)
         data: dict[str]
@@ -106,7 +106,7 @@ def load_game():
     )
 
 
-def game():
+def game(_=None):
     global difficulty
     global window
     global chord_state
@@ -393,14 +393,22 @@ file_menu = Menu(
     menubar,
     tearoff=0
 )
-file_menu.add_command(label='Open File', command=load_game)
-file_menu.add_command(label='Exit', command=window.destroy)
+file_menu.add_command(label='Open File', command=load_game, accelerator='Ctrl+O')
+file_menu.add_command(label='Exit', command=window.destroy, accelerator='Ctrl+Q')
 
 settings = Menu(menubar, tearoff=0)
-settings.add_checkbutton(variable=chord_state, label='Enable Chording')
+settings.add_checkbutton(variable=chord_state, label='Enable Chording', accelerator='C')
 settings.add_separator()
-settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, zip_or_installer(), window))
-settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Minesweeper Version: {__version__}'))
+settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, zip_or_installer(), window), accelerator='Ctrl+U')
+settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Minesweeper Version: {__version__}'), accelerator='Ctrl+I')
+
+# Keyboard Shortcuts
+window.bind_all('<Control-i>', lambda _: partial(messagebox.showinfo, title='Version Info', message=f'Minesweeper Version: {__version__}').__call__())
+window.bind_all('<Control-u>', lambda _: partial(check_for_updates, __version__, zip_or_installer(), window).__call__())
+window.bind_all('<Control-q>', lambda _: window.destroy())
+window.bind_all('<Control-o>', load_game)
+window.bind_all('<space>', game)
+window.bind_all('c', lambda _: chord_state.set(not chord_state.get()))
 
 menubar.add_cascade(menu=file_menu, label='File')
 menubar.add_cascade(menu=settings, label='Settings')
