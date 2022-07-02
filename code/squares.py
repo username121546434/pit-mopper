@@ -87,11 +87,15 @@ class Square(Button):
         if not self.dark_mode:
             if self.clicked_on and self.num != None:
                 self.config(bg=num_colors[self.num])
+            elif self.flaged:
+                self.config(fg='black', bg=LIGHT_MODE_BG)
             else:
                 self.config(bg=LIGHT_MODE_BG)
         elif self.dark_mode:
             if self.clicked_on and self.num != None:
                 self.config(bg=dark_mode_colors[self.num])
+            elif self.flaged:
+                self.config(fg='white', bg=DARK_MODE_BG)
             else:
                 self.config(bg=DARK_MODE_BG)
 

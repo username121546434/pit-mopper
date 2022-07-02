@@ -370,7 +370,7 @@ def complementary(r, g, b):
    return hsv_to_rgb((hsv[0] + 0.5) % 1, hsv[1], hsv[2])
 
 
-def change_theme(_=None):
+def change_theme(*_):
     if dark_mode_state.get():
         CURRENT_BG = DARK_MODE_BG
         CURRENT_FG = DARK_MODE_FG
@@ -389,8 +389,6 @@ def change_theme(_=None):
                 child.config(bg='white', fg=CURRENT_FG)
             else:
                 child.config(bg=CURRENT_BG, fg=CURRENT_FG)
-        elif isinstance(child, Menu):
-            child.config(bg=CURRENT_BG, fg=CURRENT_FG, activebackground=CURRENT_BG, activeforeground=CURRENT_FG)
         elif isinstance(child, Toplevel):
             if CURRENT_BG == DARK_MODE_BG:
                 dark_title_bar(child)
@@ -453,6 +451,7 @@ Spinbox(window, from_=MIN_ROWS_AND_COLS, to=MAX_ROWS_AND_COLS, textvariable=cols
 
 chord_state = BooleanVar(window)
 dark_mode_state = BooleanVar(window)
+dark_mode_state.trace('w', change_theme)  
 
 Button(window, text='Play!', command=game).pack()
 
@@ -470,7 +469,7 @@ file_menu.add_command(label='Exit', command=window.destroy, accelerator='Ctrl+Q'
 
 settings = Menu(menubar, tearoff=0)
 settings.add_checkbutton(variable=chord_state, label='Enable Chording', accelerator='C')
-settings.add_checkbutton(variable=dark_mode_state, label='Enable Dark Mode', command=change_theme)
+settings.add_checkbutton(variable=dark_mode_state, label='Dark Mode', accelerator='Ctrl+D')
 settings.add_separator()
 settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, zip_or_installer(), window), accelerator='Ctrl+U')
 settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Minesweeper Version: {__version__}'), accelerator='Ctrl+I')
@@ -481,7 +480,8 @@ window.bind_all('<Control-u>', lambda _: partial(check_for_updates, __version__,
 window.bind_all('<Control-q>', lambda _: window.destroy())
 window.bind_all('<Control-o>', load_game)
 window.bind_all('<space>', game)
-window.bind_all('c', lambda _: chord_state.set(not chord_state.get()))
+window.bind_all('<Control-a>', lambda _: chord_state.set(not chord_state.get()))
+window.bind_all('<Control-d>', lambda _: dark_mode_state.set(not dark_mode_state.get()))
 
 menubar.add_cascade(menu=file_menu, label='File')
 menubar.add_cascade(menu=settings, label='Settings')
