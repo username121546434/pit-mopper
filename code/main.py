@@ -19,7 +19,7 @@ MAX_ROWS_AND_COLS = 75
 MIN_ROWS_AND_COLS = 6
 DARK_MODE_BG = '#282828'
 DARK_MODE_FG = '#FFFFFF'
-DEFAULT_BG = '#FBF8F1'
+DEFAULT_BG = '#f0f0f0f0f0f0'
 DEFAULT_FG = '#000000'
 CURRENT_BG = DEFAULT_BG
 CURRENT_FG = DEFAULT_FG
@@ -398,7 +398,6 @@ window.title('Game Loader')
 window.config(padx=50, pady=20)
 window.iconbitmap(LOGO)
 window.resizable(False, False)
-
 
 Label(text='Select Difficulty').pack()
 
