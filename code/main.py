@@ -86,6 +86,7 @@ def save_game(
     chording,
 ):
     global difficulty
+    print(start, total_time, grid, zeros_checked, num_mines, chording, sep='\n\n')
     data = {
         'start': start,
         'time played': total_time,
@@ -218,7 +219,8 @@ def create_game(
         menubar,
         tearoff=0
     )
-    file_menu.add_command(label='Save As', command=partial(save_game, start, seconds, grid, [
+    game_window.bind('<Control-s>', lambda _: save_game(start, seconds, grid, zeros_checked, num_mines, chording))
+    file_menu.add_command(label='Save As', accelerator='Ctrl+S', command=partial(save_game, start, seconds, grid, [
                           PickleSquare.from_square(square) for square in zeros_checked], num_mines, chording))
     file_menu.add_command(label='Additional Information', command=partial(
         more_info, num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start))
@@ -470,7 +472,7 @@ file_menu.add_command(label='Open File', command=load_game, accelerator='Ctrl+O'
 file_menu.add_command(label='Exit', command=window.destroy, accelerator='Ctrl+Q')
 
 settings = Menu(menubar, tearoff=0)
-settings.add_checkbutton(variable=chord_state, label='Enable Chording', accelerator='C')
+settings.add_checkbutton(variable=chord_state, label='Enable Chording', accelerator='Ctrl+A')
 settings.add_checkbutton(variable=dark_mode_state, label='Dark Mode', accelerator='Ctrl+D')
 settings.add_separator()
 settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, zip_or_installer(), window), accelerator='Ctrl+U')
