@@ -71,9 +71,9 @@ class Square(Button):
             self.game_over = True
         elif self.num != None:
             if self.dark_mode:
-                self.config(text=str(self.num), bg=dark_mode_colors[self.num])
+                self.config(text=str(self.num), bg=dark_mode_colors[self.num], fg=DARK_MODE_BG)
             else:
-                self.config(text=str(self.num), bg=num_colors[self.num])
+                self.config(text=str(self.num), bg=num_colors[self.num], fg=LIGHT_MODE_BG)
         else:
             if self.dark_mode:
                 self.config(bg=DARK_MODE_BG)
