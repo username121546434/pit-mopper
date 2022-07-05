@@ -18,13 +18,13 @@ class ButtonGrid:
                     square.switch_theme()
 
     def button_grid(self) -> list[list[Square]]:
-        Grid.rowconfigure(self.root, 1, weight=1)
+        Grid.rowconfigure(self.root, 2, weight=1)
         Grid.columnconfigure(self.root, 1, weight=1)
         grid = []
         blank = "  " * 3
         # Create & Configure frame
         frame = Frame(self.root)
-        frame.grid(row=1, column=1, sticky=N+S+E+W)
+        frame.grid(row=2, column=1, sticky=N+S+E+W)
         for row_index in range(self.grid_size[0]):
             Grid.rowconfigure(frame, row_index, weight=1)
             row = []

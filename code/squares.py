@@ -73,7 +73,7 @@ class Square(Button):
             if self.dark_mode:
                 self.config(text=str(self.num), bg=dark_mode_colors[self.num], fg=DARK_MODE_BG)
             else:
-                self.config(text=str(self.num), bg=num_colors[self.num], fg=LIGHT_MODE_BG)
+                self.config(text=str(self.num), bg=num_colors[self.num], fg='black')
         else:
             if self.dark_mode:
                 self.config(bg=DARK_MODE_BG)

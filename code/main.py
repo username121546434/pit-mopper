@@ -9,6 +9,7 @@ import os
 from updater import check_for_updates
 from windows_tools.installed_software import get_installed_software
 import ctypes as ct
+from custom_menubar import CustomMenuBar
 
 __version__ = '1.2.0'
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
@@ -200,8 +201,13 @@ def create_game(
     showed_game_over = False
     total_time = StringVar(game_window)
 
-    label = Label(game_window, textvariable=total_time).grid(
-        row=0, column=1, sticky=N+S+E+W)
+    if dark_mode_state.get():
+        Label(game_window, textvariable=total_time, bg=DARK_MODE_BG, fg=DARK_MODE_FG).grid(
+            row=1, column=1, sticky=N+S+E+W, pady=(5, 0))
+        game_window.config(bg=DARK_MODE_BG)
+    else:
+        Label(game_window, textvariable=total_time, bg=DEFAULT_BG, fg=DEFAULT_FG).grid(
+            row=1, column=1, sticky=N+S+E+W, pady=(5, 0))
 
     if additional_time != 0.0:
         total_time.set(f'Time: {format_second(int(additional_time))} 🚩0/{num_mines}💣')
@@ -210,8 +216,10 @@ def create_game(
     seconds = additional_time
 
     # create a menubar
-    menubar = Menu(game_window)
-    game_window.config(menu=menubar)
+    menubar = CustomMenuBar(game_window)
+    if dark_mode_state.get():
+        menubar.change_bg_fg(bg=DARK_MODE_BG, fg=DARK_MODE_FG)
+    menubar.place(x=0, y=0)
 
     # create the file_menu
     file_menu = Menu(
@@ -225,7 +233,7 @@ def create_game(
         more_info, num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start))
     file_menu.add_command(label='Exit', command=game_window.destroy)
 
-    menubar.add_cascade(menu=file_menu, label='File')
+    menubar.add_menu(menu=file_menu, title='File')
     previous_sec = datetime.now()
     previous_sec = previous_sec.replace(microsecond=0)
     squares_flaged = []
@@ -378,8 +386,10 @@ def change_theme(*_):
 
     window.config(bg=CURRENT_BG)
     for child in window.winfo_children():
-        if not isinstance(child, Toplevel) and not isinstance(child, Spinbox) and not isinstance(child, Menu):
+        if not isinstance(child, Toplevel) and not isinstance(child, Spinbox) and not isinstance(child, CustomMenuBar):
             child.config(bg=CURRENT_BG, fg=CURRENT_FG)
+        elif isinstance(child, CustomMenuBar):
+            child.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG)
         elif isinstance(child, Spinbox):
             if CURRENT_BG == DEFAULT_BG:
                 child.config(bg='white', fg=CURRENT_FG)
@@ -392,10 +402,11 @@ def change_theme(*_):
                 child.resizable(True, True)
             child.config(bg=CURRENT_BG)
             for child2 in child.winfo_children():
-                if not isinstance(child2, Frame) and not isinstance(child2, Label) and not isinstance(child2, Menu):
-                    child.config(bg=CURRENT_BG, fg=CURRENT_FG)
-                elif not isinstance(child2, Frame):
-                    child.config(bg=CURRENT_BG)
+                if not isinstance(child2, Frame) and not isinstance(child2, CustomMenuBar):
+                    print(child2)
+                    child2.config(bg=CURRENT_BG, fg=CURRENT_FG)
+                elif isinstance(child2, CustomMenuBar):
+                    child2.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG)
                 elif isinstance(child2, Frame):
                     for square in child2.winfo_children():
                         square.switch_theme()
@@ -414,11 +425,10 @@ def zip_or_installer():
 
 window = Tk()
 window.title('Game Loader')
-window.config(padx=50, pady=20)
 window.iconbitmap(LOGO)
 window.resizable(False, False)
 
-Label(text='Select Difficulty').pack()
+Label(text='Select Difficulty').pack(pady=(25, 0))
 
 # Variable to hold on to which radio button value is checked.
 difficulty = Variable(window, (None, None))
@@ -437,7 +447,7 @@ Radiobutton(
 
 game_size = StringVar(window, f'You game size will be {difficulty.get()[0]} rows and {difficulty.get()[1]} columns')
 
-Label(window, textvariable=game_size).pack()
+Label(window, textvariable=game_size).pack(padx=20)
 
 cols = IntVar()
 rows = IntVar()
@@ -449,11 +459,11 @@ chord_state = BooleanVar(window)
 dark_mode_state = BooleanVar(window)
 dark_mode_state.trace('w', change_theme)  
 
-Button(window, text='Play!', command=game).pack()
+Button(window, text='Play!', command=game).pack(pady=(0, 20))
 
 # create a menubar
-menubar = Menu(window)
-window.config(menu=menubar)
+menubar = CustomMenuBar(window)
+menubar.place(x=0, y=0)
 
 # create the file_menu
 file_menu = Menu(
@@ -479,7 +489,7 @@ window.bind_all('<space>', game)
 window.bind_all('<Control-a>', lambda _: chord_state.set(not chord_state.get()))
 window.bind_all('<Control-d>', lambda _: dark_mode_state.set(not dark_mode_state.get()))
 
-menubar.add_cascade(menu=file_menu, label='File')
-menubar.add_cascade(menu=settings, label='Settings')
+menubar.add_menu(menu=file_menu, title='File')
+menubar.add_menu(menu=settings, title='Settings')
 
 window.mainloop()
