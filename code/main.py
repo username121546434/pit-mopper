@@ -8,7 +8,6 @@ from tkinter import filedialog, messagebox
 import os
 from updater import check_for_updates
 from windows_tools.installed_software import get_installed_software
-from colorsys import rgb_to_hsv, hsv_to_rgb
 import ctypes as ct
 
 __version__ = '1.2.0'
@@ -365,13 +364,6 @@ def load_highscore(txt_file: str):
     else:
         with open(txt_file, 'rb') as f:
             return pickle.load(f)
-
-
-def complementary(r, g, b):
-   """returns RGB components of complementary color"""
-   # https://stackoverflow.com/a/40234511
-   hsv = rgb_to_hsv(r, g, b)
-   return hsv_to_rgb((hsv[0] + 0.5) % 1, hsv[1], hsv[2])
 
 
 def change_theme(*_):

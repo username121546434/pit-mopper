@@ -148,4 +148,4 @@ class PickleButtonGrid:
 
 
 if __name__ == '__main__':
-    ButtonGrid(10, Tk()).root.mainloop()
+    ButtonGrid((10, 10), Tk()).root.mainloop()
