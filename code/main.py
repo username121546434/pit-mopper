@@ -201,13 +201,9 @@ def create_game(
     showed_game_over = False
     total_time = StringVar(game_window)
 
-    if dark_mode_state.get():
-        Label(game_window, textvariable=total_time, bg=DARK_MODE_BG, fg=DARK_MODE_FG).grid(
-            row=1, column=1, sticky=N+S+E+W, pady=(5, 0))
-        game_window.config(bg=DARK_MODE_BG)
-    else:
-        Label(game_window, textvariable=total_time, bg=DEFAULT_BG, fg=DEFAULT_FG).grid(
-            row=1, column=1, sticky=N+S+E+W, pady=(5, 0))
+    Label(game_window, textvariable=total_time, bg=CURRENT_BG, fg=CURRENT_FG).grid(
+        row=1, column=1, sticky=N+S+E+W, pady=(5, 0))
+    game_window.config(bg=CURRENT_BG)
 
     if additional_time != 0.0:
         total_time.set(f'Time: {format_second(int(additional_time))} 🚩0/{num_mines}💣')
@@ -216,9 +212,7 @@ def create_game(
     seconds = additional_time
 
     # create a menubar
-    menubar = CustomMenuBar(game_window)
-    if dark_mode_state.get():
-        menubar.change_bg_fg(bg=DARK_MODE_BG, fg=DARK_MODE_FG)
+    menubar = CustomMenuBar(game_window, bg=CURRENT_BG, fg=CURRENT_FG)
     menubar.place(x=0, y=0)
 
     # create the file_menu
@@ -375,6 +369,7 @@ def load_highscore(txt_file: str):
 
 
 def change_theme(*_):
+    global CURRENT_BG, CURRENT_FG
     if dark_mode_state.get():
         CURRENT_BG = DARK_MODE_BG
         CURRENT_FG = DARK_MODE_FG
@@ -403,7 +398,6 @@ def change_theme(*_):
             child.config(bg=CURRENT_BG)
             for child2 in child.winfo_children():
                 if not isinstance(child2, Frame) and not isinstance(child2, CustomMenuBar):
-                    print(child2)
                     child2.config(bg=CURRENT_BG, fg=CURRENT_FG)
                 elif isinstance(child2, CustomMenuBar):
                     child2.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG)
