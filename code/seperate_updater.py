@@ -14,7 +14,6 @@ else:
     download_zip = True
 
 response = requests.get('https://api.github.com/repos/username121546434/minesweeper-python/releases')
-messagebox.showinfo(title='Update', message='Press "Ok" to update Minesweeper')
 if download_zip:
     asset = [
         asset

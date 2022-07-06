@@ -208,7 +208,15 @@ def create_game(
     if additional_time != 0.0:
         total_time.set(f'Time: {format_second(int(additional_time))} 🚩0/{num_mines}💣')
 
-    highscore = load_highscore(HIGHSCORE_TXT)
+    highscore_data = load_highscore(HIGHSCORE_TXT)
+    game_size_str = f'{difficulty.get()[0]}x{difficulty.get()[1]}'
+    if not isinstance(highscore_data, float):
+        try:
+            highscore = highscore_data[game_size_str]
+        except KeyError:
+            highscore = float('inf')
+    else:
+        highscore = float('inf')
     seconds = additional_time
 
     # create a menubar
@@ -343,7 +351,12 @@ def create_game(
             'Game Over', f'Game Over.\nYou lost.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}')
     if win and seconds < highscore:
         with open(HIGHSCORE_TXT, 'wb') as f:
-            pickle.dump(seconds, f)
+            if isinstance(highscore_data, dict):
+                new_highscore_data = highscore_data.copy()
+            else:
+                new_highscore_data = {}
+            new_highscore_data[game_size_str] = seconds
+            pickle.dump(new_highscore_data, f)
     game_window.destroy()
 
 
@@ -357,7 +370,7 @@ def change_difficulty(from_spinbox:bool = False):
     game_size.set(f'You game size will be {difficulty.get()[0]} rows and {difficulty.get()[1]} columns')
 
 
-def load_highscore(txt_file: str):
+def load_highscore(txt_file: str) -> dict[str, float | int] | float:
     try:
         f = open(txt_file)
         f.close()
@@ -403,7 +416,10 @@ def change_theme(*_):
                     child2.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG)
                 elif isinstance(child2, Frame):
                     for square in child2.winfo_children():
-                        square.switch_theme()
+                        if isinstance(square, Square):
+                            square.switch_theme()
+                        elif isinstance(square, Label):
+                            square.config(bg=CURRENT_BG, fg=CURRENT_FG)
 
 
 def zip_or_installer():
@@ -415,6 +431,44 @@ def zip_or_installer():
         if 'Minesweeper' in app['name']:
             return_value = False
     return return_value
+
+
+def show_highscores():
+    highscore_data = load_highscore(HIGHSCORE_TXT)
+
+    if isinstance(highscore_data, dict):
+        data = [['Game Size', 'Seconds']]
+        for key, value in highscore_data.items():
+            data.append([key, str(round(value, 1))])
+
+        new_window = Toplevel(window)
+        new_window.title('Highscores')
+        new_window.iconbitmap(LOGO)
+        new_window.config(padx=20, pady=20)
+        frame = Frame(new_window, bg='black')
+        new_window.grid_columnconfigure(0, weight=1)
+        new_window.grid_rowconfigure(0, weight=1)
+        frame.grid(row=0, column=0)
+    
+        if dark_mode_state.get():
+            frame.config(bg=DARK_MODE_FG)
+            dark_title_bar(new_window)
+            bg_of_labels = DARK_MODE_BG
+            fg_of_labels = DARK_MODE_FG
+        else:
+            bg_of_labels = DEFAULT_BG
+            fg_of_labels = DEFAULT_FG
+
+        for y, row in enumerate(data):
+            Grid.rowconfigure(frame, y, weight=1)
+            for x, item in enumerate(row):
+                Grid.columnconfigure(frame, x, weight=1)
+                Label(frame, text=str(item), bg=bg_of_labels, fg=fg_of_labels).grid(row=y, column=x, padx=1, pady=1, sticky='nsew')
+        new_window.update()
+        window.wait_window(new_window)
+    else:
+        messagebox.showinfo('Highscores', 'No highscores were found, play a game and win it to get some')
+
 
 
 window = Tk()
@@ -465,6 +519,8 @@ file_menu = Menu(
     tearoff=0
 )
 file_menu.add_command(label='Open File', command=load_game, accelerator='Ctrl+O')
+file_menu.add_command(label='Highscores', command=show_highscores)
+file_menu.add_separator()
 file_menu.add_command(label='Exit', command=window.destroy, accelerator='Ctrl+Q')
 
 settings = Menu(menubar, tearoff=0)
