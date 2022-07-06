@@ -43,6 +43,9 @@ def new_client(conn:socket.socket):
             print(e)
             print('Unknown error with client, disconnecting immeidietly')
             break
+    
+    print('Disconnecting...')
+    conn.close()
 
 
 while True:
