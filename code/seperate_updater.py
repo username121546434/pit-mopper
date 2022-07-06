@@ -49,5 +49,5 @@ if download_zip:
         zip_file.extractall(dir)
     messagebox.showinfo(title='Update', message=f'''The update has completed, you can find it in {dir}. You can delete the previous update or keep it in case you get issues with the new one.''')
 else:
-    os.startfile(f'~\\Downloads\\{filename}')
+    os.startfile(os.path.expanduser(f'~\\Downloads\\{filename}'))
     sys.exit()
