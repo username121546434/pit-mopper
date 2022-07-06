@@ -1,6 +1,7 @@
 from tkinter import *
 from squares import Square, PickleSquare
 import random
+from functools import partial
 
 
 class ButtonGrid:
@@ -22,6 +23,7 @@ class ButtonGrid:
         Grid.columnconfigure(self.root, 1, weight=1)
         grid = []
         blank = "  " * 3
+        button_pressed = Variable(self.root, None)
         # Create & Configure frame
         frame = Frame(self.root)
         frame.grid(row=2, column=1, sticky=N+S+E+W)
@@ -35,16 +37,28 @@ class ButtonGrid:
                 btn.grid(row=row_index, column=col_index, sticky=N+S+E+W)
                 # Store row and column indices as a Button attribute
                 btn.position = (row_index, col_index)
+                btn.config(command=partial(button_pressed.set, btn.position))
                 row.append(btn)
             grid.append(row)
 
+
+        self.grid = grid
+        self.root.wait_variable(button_pressed)
+        coordinates = button_pressed.get()
+
+        corners = (
+            (0, 0),
+            (self.grid_size[0] - 1, self.grid_size[1] - 1),
+            (self.grid_size[0] - 1, 0),
+            (0, self.grid_size[1] - 1)
+        )
         for row in grid:
             row_num = grid.index(row)
             for square in row:
                 col_num = row.index(square)
                 dice = random.randint(1, 4)
                 coor = (row_num, col_num)
-                if dice == 2 and all(1 < num < size - 1 for num, size in zip(coor, self.grid_size)):
+                if dice == 2 and square not in self.around_square(*coordinates) and coor not in corners:
                     square.category = 'mine'
 
         self.grid = grid
