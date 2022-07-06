@@ -433,7 +433,7 @@ def zip_or_installer():
     return return_value
 
 
-def show_highscores():
+def show_highscores(_=None):
     highscore_data = load_highscore(HIGHSCORE_TXT)
 
     if isinstance(highscore_data, dict):
@@ -519,7 +519,7 @@ file_menu = Menu(
     tearoff=0
 )
 file_menu.add_command(label='Open File', command=load_game, accelerator='Ctrl+O')
-file_menu.add_command(label='Highscores', command=show_highscores)
+file_menu.add_command(label='Highscores', command=show_highscores, accelerator='Ctrl+H')
 file_menu.add_separator()
 file_menu.add_command(label='Exit', command=window.destroy, accelerator='Ctrl+Q')
 
@@ -538,6 +538,7 @@ window.bind_all('<Control-o>', load_game)
 window.bind_all('<space>', game)
 window.bind_all('<Control-a>', lambda _: chord_state.set(not chord_state.get()))
 window.bind_all('<Control-d>', lambda _: dark_mode_state.set(not dark_mode_state.get()))
+window.bind_all('<Control-h>', show_highscores)
 
 menubar.add_menu(menu=file_menu, title='File')
 menubar.add_menu(menu=settings, title='Settings')
