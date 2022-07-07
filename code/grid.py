@@ -2,13 +2,19 @@ from tkinter import *
 from squares import Square, PickleSquare
 import random
 from functools import partial
+from tkinter import messagebox
 
 
 class ButtonGrid:
-    def __init__(self, grid_size: tuple[int, int], window: Tk | Toplevel, grid: list[list[PickleSquare]] | None = None, dark_mode:bool = False):
+    def __init__(self, grid_size: tuple[int, int], window: Tk | Toplevel, grid: list[list[PickleSquare]] | None = None, dark_mode:bool = False, num_mines:int = -1):
         self.grid_size = grid_size
         self.root = window
         self.dark_mode = dark_mode
+        if num_mines == 0 or num_mines == 1:
+            messagebox.showerror('Mines are too low', "You can't have 0 or 1 mine on a game")
+            window.destroy()
+            return None
+        self.num_mines = num_mines
         if grid == None:
             self.grid = self.button_grid()
         else:
@@ -50,14 +56,27 @@ class ButtonGrid:
             (self.grid_size[0] - 1, 0),
             (0, self.grid_size[1] - 1)
         )
-        for row in grid:
-            row_num = grid.index(row)
-            for square in row:
-                col_num = row.index(square)
-                dice = random.randint(1, 9)
-                coor = (row_num, col_num)
-                if dice == 2 and square not in self.around_square(*coordinates) and coor not in corners and coor != coordinates:
-                    square.category = 'mine'
+        if self.num_mines != -1:
+            mines_so_far = 0
+            while mines_so_far < self.num_mines:
+                for row in grid:
+                    row_num = grid.index(row)
+                    for square in row:
+                        col_num = row.index(square)
+                        dice = random.randint(1, 9)
+                        coor = (row_num, col_num)
+                        if dice == 2 and square not in self.around_square(*coordinates) and coor not in corners and coor != coordinates and mines_so_far < self.num_mines:
+                            mines_so_far += 1
+                            square.category = 'mine'
+        else:
+            for row in grid:
+                row_num = grid.index(row)
+                for square in row:
+                    col_num = row.index(square)
+                    dice = random.randint(1, 9)
+                    coor = (row_num, col_num)
+                    if dice == 2 and square not in self.around_square(*coordinates) and coor not in corners and coor != coordinates:
+                        square.category = 'mine'
 
         self.grid = grid
 

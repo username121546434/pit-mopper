@@ -50,6 +50,7 @@ If you do have an internet connection, then here are details so you can report a
         text = Text(window, height=len(body.splitlines()), width=max(len(line) for line in [line.strip() for line in body.splitlines()]))
         text.focus()
         text.insert('end', f'You have version {current_version} but {latest_version} is available. Do you want to update?\nPatch notes are below.\n\n{body}')
+        text.config(state='disabled')
         text.pack()
 
         Checkbutton(window, onvalue=True, offvalue=False, variable=choice, text='Update?').pack()

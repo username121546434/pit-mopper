@@ -158,7 +158,7 @@ def game(_=None):
         messagebox.showwarning(title='Size too small', message='Warning: It is rare but 6x6 and 6x7 and 7x6 games might crash or not work properly.\nIt is recommended to use 7x7 or higher')
     elif difficulty.get() >= (40, 40):
         messagebox.showwarning(title='Size too big', message='Warning: When the game is a size of 40x40 or above, the expierence might be so laggy it is unplayable.')    
-    grid = ButtonGrid(difficulty.get(), game_window, dark_mode=dark_mode_state.get())
+    grid = ButtonGrid(difficulty.get(), game_window, dark_mode=dark_mode_state.get(), num_mines=mines.get())
     zeros_checked = []
     num_mines = 0
 
@@ -214,6 +214,7 @@ def create_game(
 
     highscore_data = load_highscore(HIGHSCORE_TXT)
     game_size_str = f'{difficulty.get()[0]}x{difficulty.get()[1]}'
+    game_window.title(f'{game_size_str} Minesweeper Game')
     if not isinstance(highscore_data, float):
         try:
             highscore = highscore_data[game_size_str]
@@ -484,7 +485,6 @@ def show_highscores(_=None):
         messagebox.showinfo('Highscores', 'No highscores were found, play a game and win it to get some')
 
 
-
 window = Tk()
 window.title('Game Loader')
 window.iconbitmap(LOGO)
@@ -511,11 +511,20 @@ game_size = StringVar(window, f'You game size will be {difficulty.get()[0]} rows
 
 Label(window, textvariable=game_size).pack(padx=20)
 
-cols = IntVar()
-rows = IntVar()
+cols = IntVar(window)
+rows = IntVar(window)
 
 Spinbox(window, from_=MIN_ROWS_AND_COLS, to=MAX_ROWS_AND_COLS, textvariable=rows, width=4, command=partial(change_difficulty, True)).pack()
 Spinbox(window, from_=MIN_ROWS_AND_COLS, to=MAX_ROWS_AND_COLS, textvariable=cols, width=4, command=partial(change_difficulty, True)).pack()
+
+mines = IntVar(window, -1)
+
+mines_counter = StringVar(window, f'Your game will have {mines.get()} mines')
+
+Label(window, textvariable=mines_counter).pack()
+Label(window, text='-1 means it will generate a random number').pack()
+
+Spinbox(window, textvariable=mines, width=4, from_= -1, to = 2000, command=lambda:mines_counter.set(f'Your game will have {mines.get()} mines')).pack()
 
 chord_state = BooleanVar(window)
 dark_mode_state = BooleanVar(window)
@@ -545,8 +554,8 @@ settings.add_command(label='Check for Updates', command=partial(check_for_update
 settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Minesweeper Version: {__version__}'), accelerator='Ctrl+I')
 
 # Keyboard Shortcuts
-window.bind_all('<Control-i>', lambda _: partial(messagebox.showinfo, title='Version Info', message=f'Minesweeper Version: {__version__}').__call__())
-window.bind_all('<Control-u>', lambda _: partial(check_for_updates, __version__, zip_or_installer(), window).__call__())
+window.bind_all('<Control-i>', lambda _: messagebox.showinfo(title='Version Info', message=f'Minesweeper Version: {__version__}'))
+window.bind_all('<Control-u>', lambda _: check_for_updates(__version__, zip_or_installer(), window))
 window.bind_all('<Control-q>', lambda _: window.destroy())
 window.bind_all('<Control-o>', load_game)
 window.bind_all('<space>', game)
