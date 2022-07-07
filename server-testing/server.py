@@ -26,6 +26,7 @@ print('Waiting for connection...')
 
 def new_client(conn:socket.socket):
     reply = 'random reply'
+    conn.send('Connected'.encode())
     while True:
         try:
             data = conn.recv(2048)
@@ -33,6 +34,7 @@ def new_client(conn:socket.socket):
             
             if not data:
                 print('Client Disconnected')
+                break
             else:
                 print('Received: ', reply)
                 print('Sending: ', reply)
@@ -52,4 +54,4 @@ while True:
     conn, addr = s.accept()
     print('Connected to: ', addr)
 
-    start_new_thread(new_client, (conn))
+    start_new_thread(new_client, (), {'conn':conn})
