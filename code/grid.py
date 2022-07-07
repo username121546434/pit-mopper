@@ -8,15 +8,11 @@ class ButtonGrid:
     def __init__(self, grid_size: tuple[int, int], window: Tk | Toplevel, grid: list[list[PickleSquare]] | None = None, dark_mode:bool = False):
         self.grid_size = grid_size
         self.root = window
+        self.dark_mode = dark_mode
         if grid == None:
             self.grid = self.button_grid()
         else:
             self.grid = self.setup_grid(grid)
-        
-        if dark_mode:
-            for row in self.grid:
-                for square in row:
-                    square.switch_theme()
 
     def button_grid(self) -> list[list[Square]]:
         Grid.rowconfigure(self.root, 2, weight=1)
@@ -35,6 +31,8 @@ class ButtonGrid:
                 # create a button inside frame
                 btn = Square(master=frame, text=blank)
                 btn.grid(row=row_index, column=col_index, sticky=N+S+E+W)
+                if self.dark_mode:
+                    btn.switch_theme()
                 # Store row and column indices as a Button attribute
                 btn.position = (row_index, col_index)
                 btn.config(command=partial(button_pressed.set, btn.position))
@@ -56,7 +54,7 @@ class ButtonGrid:
             row_num = grid.index(row)
             for square in row:
                 col_num = row.index(square)
-                dice = random.randint(1, 4)
+                dice = random.randint(1, 10)
                 coor = (row_num, col_num)
                 if dice == 2 and square not in self.around_square(*coordinates) and coor not in corners and coor != coordinates:
                     square.category = 'mine'

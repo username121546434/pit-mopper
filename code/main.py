@@ -108,8 +108,12 @@ def load_game(_=None):
     game_window = Toplevel(window)
     game_window.iconbitmap(LOGO)
     game_window.title('Minesweeper')
+    if dark_mode_state.get():
+        dark_title_bar(game_window)
+
     grid = data['grid'].grid
     button_grid = ButtonGrid(data['grid'].grid_size, game_window, grid)
+
     start: datetime = data['start']
     time = data['time played']
     num_mines: int = data['num mines']
@@ -147,6 +151,8 @@ def game(_=None):
     game_window.title('Minesweeper')
     start = datetime.now()
     game_window.grid_columnconfigure(1, weight=1)
+    if dark_mode_state.get():
+        dark_title_bar(game_window)
 
     if difficulty.get() < (7, 7):
         messagebox.showwarning(title='Size too small', message='Warning: It is rare but 6x6 and 6x7 and 7x6 games might crash or not work properly.\nIt is recommended to use 7x7 or higher')
@@ -182,8 +188,6 @@ def create_game(
     mines_found: int,
     additional_time: float = 0.0
 ):
-    if dark_mode_state.get():
-        dark_title_bar(game_window)
     session_start: datetime = datetime.now()
     squares_clicked_on = [
         square
@@ -229,11 +233,15 @@ def create_game(
         tearoff=0
     )
     game_window.bind('<Control-s>', lambda _: save_game(start, seconds, grid, zeros_checked, num_mines, chording))
+    game_window.bind('<Alt-q>', lambda _: game_window.destroy())
+    game_window.bind('<Alt-i>', lambda _: more_info(num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start))
+
     file_menu.add_command(label='Save As', accelerator='Ctrl+S', command=partial(save_game, start, seconds, grid, [
                           PickleSquare.from_square(square) for square in zeros_checked], num_mines, chording))
     file_menu.add_command(label='Additional Information', command=partial(
-        more_info, num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start))
-    file_menu.add_command(label='Exit', command=game_window.destroy)
+        more_info, num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start),
+        accelerator='Alt+I')
+    file_menu.add_command(label='Exit', command=game_window.destroy, accelerator='Alt+Q')
 
     menubar.add_menu(menu=file_menu, title='File')
     previous_sec = datetime.now()
@@ -444,7 +452,7 @@ def show_highscores(_=None):
         new_window = Toplevel(window)
         new_window.title('Highscores')
         new_window.iconbitmap(LOGO)
-        new_window.config(padx=20, pady=20)
+        new_window.config(padx=50, pady=20)
         frame = Frame(new_window, bg='black')
         new_window.grid_columnconfigure(0, weight=1)
         new_window.grid_rowconfigure(0, weight=1)
