@@ -54,7 +54,7 @@ class ButtonGrid:
             row_num = grid.index(row)
             for square in row:
                 col_num = row.index(square)
-                dice = random.randint(1, 10)
+                dice = random.randint(1, 9)
                 coor = (row_num, col_num)
                 if dice == 2 and square not in self.around_square(*coordinates) and coor not in corners and coor != coordinates:
                     square.category = 'mine'

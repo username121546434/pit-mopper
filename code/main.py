@@ -112,7 +112,7 @@ def load_game(_=None):
         dark_title_bar(game_window)
 
     grid = data['grid'].grid
-    button_grid = ButtonGrid(data['grid'].grid_size, game_window, grid)
+    button_grid = ButtonGrid(data['grid'].grid_size, game_window, grid, dark_mode_state.get())
 
     start: datetime = data['start']
     time = data['time played']
@@ -386,7 +386,14 @@ def load_highscore(txt_file: str) -> dict[str, float | int] | float:
         return float('inf')
     else:
         with open(txt_file, 'rb') as f:
-            return pickle.load(f)
+            value = pickle.load(f)
+        if isinstance(value, dict):
+            return value
+        else:
+            messagebox.showerror('Highscore value invalide', 'The highscore file contains an invalid value, press OK to delete the content of it')
+            with open(txt_file, 'wb') as f:
+                f.write()
+            return float('inf')
 
 
 def change_theme(*_):
@@ -457,9 +464,9 @@ def show_highscores(_=None):
         new_window.grid_columnconfigure(0, weight=1)
         new_window.grid_rowconfigure(0, weight=1)
         frame.grid(row=0, column=0)
-    
+
         if dark_mode_state.get():
-            frame.config(bg=DARK_MODE_FG)
+            new_window.config(bg=DARK_MODE_BG)
             dark_title_bar(new_window)
             bg_of_labels = DARK_MODE_BG
             fg_of_labels = DARK_MODE_FG
@@ -473,7 +480,6 @@ def show_highscores(_=None):
                 Grid.columnconfigure(frame, x, weight=1)
                 Label(frame, text=str(item), bg=bg_of_labels, fg=fg_of_labels).grid(row=y, column=x, padx=1, pady=1, sticky='nsew')
         new_window.update()
-        window.wait_window(new_window)
     else:
         messagebox.showinfo('Highscores', 'No highscores were found, play a game and win it to get some')
 
