@@ -513,7 +513,7 @@ Radiobutton(
 
 game_size = StringVar(window, f'You game size will be {difficulty.get()[0]} rows and {difficulty.get()[1]} columns')
 
-Label(window, textvariable=game_size).pack(padx=20)
+Label(window, textvariable=game_size).pack()
 
 cols = IntVar(window)
 rows = IntVar(window)
@@ -526,7 +526,7 @@ mines = IntVar(window, -1)
 mines_counter = StringVar(window, f'Your game will have {mines.get()} mines')
 
 Label(window, textvariable=mines_counter).pack()
-Label(window, text='-1 means it will generate a random number').pack()
+Label(window, text='-1 means it will generate a random number/use default').pack(padx=20)
 
 Spinbox(window, textvariable=mines, width=4, from_= -1, to = 2000, command=lambda:mines_counter.set(f'Your game will have {mines.get()} mines')).pack()
 

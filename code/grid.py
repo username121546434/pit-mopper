@@ -56,6 +56,13 @@ class ButtonGrid:
             (self.grid_size[0] - 1, 0),
             (0, self.grid_size[1] - 1)
         )
+        if self.num_mines == -1 and self.grid_size == (10, 10):
+            self.num_mines = 10
+        elif self.num_mines == -1 and self.grid_size == (20, 20):
+            self.num_mines = 40
+        elif self.num_mines == -1 and self.grid_size == (30, 30):
+            self.num_mines = 100
+
         if self.num_mines != -1:
             mines_so_far = 0
             while mines_so_far < self.num_mines:
