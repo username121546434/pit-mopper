@@ -19,7 +19,7 @@ CURRENT_DIR = os.getcwd()
 HIGHSCORE_TXT = os.path.join(CURRENT_DIR, 'highscore.txt')
 LOGO = "data\\images\\logo.ico"
 MAX_ROWS_AND_COLS = 75
-MIN_ROWS_AND_COLS = 6
+MIN_ROWS_AND_COLS = 4
 DARK_MODE_BG = '#282828'
 DARK_MODE_FG = '#FFFFFF'
 DEFAULT_BG = '#f0f0f0f0f0f0'
@@ -158,8 +158,6 @@ def game(_=None):
         messagebox.showerror(title='Game Size not chosen', message='You have not chosen a game size!')
         game_window.destroy()
         return None
-    elif difficulty.get() < (7, 7):
-        messagebox.showwarning(title='Size too small', message='Warning: It is rare but 6x6 and 6x7 and 7x6 games might crash or not work properly.\nIt is recommended to use 7x7 or higher')
     elif difficulty.get() >= (40, 40):
         messagebox.showwarning(title='Size too big', message='Warning: When the game is a size of 40x40 or above, the expierence might be so laggy it is unplayable.')
     grid = ButtonGrid(difficulty.get(), game_window, dark_mode=dark_mode_state.get(), num_mines=mines.get())
