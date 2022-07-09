@@ -58,7 +58,7 @@ class Square(Button):
         elif self.cget('text') == '🚩':
             if self.dark_mode:
                 self.config(fg='black')
-            self.config(text="  " * 3)
+            self.config(text="   " * 3)
             self.clicked_on = False
             self.flaged = False
 

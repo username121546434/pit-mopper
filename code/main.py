@@ -11,7 +11,7 @@ from windows_tools.installed_software import get_installed_software
 import ctypes as ct
 from custom_menubar import CustomMenuBar
 
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
 
 STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
@@ -158,7 +158,7 @@ def game(_=None):
         messagebox.showerror(title='Game Size not chosen', message='You have not chosen a game size!')
         game_window.destroy()
         return None
-    elif difficulty.get() >= (40, 40):
+    elif difficulty.get() >= (60, 60):
         messagebox.showwarning(title='Size too big', message='Warning: When the game is a size of 40x40 or above, the expierence might be so laggy it is unplayable.')
     grid = ButtonGrid(difficulty.get(), game_window, dark_mode=dark_mode_state.get(), num_mines=mines.get())
     zeros_checked = []
@@ -204,7 +204,6 @@ def create_game(
         for square in row
         if square.clicked_on == False
     ]
-    showed_game_over = False
     total_time = StringVar(game_window)
 
     Label(game_window, textvariable=total_time, bg=CURRENT_BG, fg=CURRENT_FG).grid(
@@ -251,7 +250,7 @@ def create_game(
     previous_sec = previous_sec.replace(microsecond=0)
     squares_flaged = []
 
-    while showed_game_over == False:
+    while True:
         game_window.after(100)
 
         now = datetime.now()
@@ -269,27 +268,27 @@ def create_game(
             for square in row
         ]
 
-        for row in grid.grid:
+        for row in grid.iter_rows():
             # Clicks Zeros
-            for square in [square for square in row if (square.cget('text') == '0') and (square not in zeros_checked)]:
+            for square in (square for square in row if (square.cget('text') == '0') and (square not in zeros_checked)):
                 zeros_checked.append(square)
-                for square2 in [square2 for square2 in grid.around_square(*square.position) if (square2.category != 'mine')]:
+                for square2 in (square2 for square2 in grid.around_square(*square.position) if (square2.category != 'mine')):
                     square2.clicked()
 
-            for square in [square for square in row if square.category == 'mine']:
+            for square in (square for square in row if square.category == 'mine'):
                 if square.category == 'mine' and square.cget('text') == '🚩':
                     mines_found += 1
 
             if chording:
                 # Checks all square if they are completed
-                for square in [square for square in row if square.completed == False]:
+                for square in (square for square in row if square.completed == False):
                     mines_around_square = [square for square in grid.around_square(
                         *square.position) if (square.category == 'mine') and (square.clicked_on == True)]
                     if (len(mines_around_square) == square.num and all(mine.category == 'mine' for mine in mines_around_square)) or square.num == None:
                         square.completed = True
 
                 # Shows all squares around a square if it was middle clicked
-                for square in [square for square in row if (square.chord)]:
+                for square in (square for square in row if (square.chord)):
                     if square.completed == False:
                         precolors = []
                         squares = [
@@ -306,7 +305,7 @@ def create_game(
                             precolor = precolors[squares.index(square2)]
                             square2.config(bg=precolor)
                     else:
-                        for square2 in [square for square in grid.around_square(*square.position) if not square.clicked_on and square.category != 'mine']:
+                        for square2 in (square for square in grid.around_square(*square.position) if not square.clicked_on and square.category != 'mine'):
                             square2.clicked()
                         square.chord = False
         mines_found = 0
@@ -351,7 +350,8 @@ def create_game(
                         square.config(text='✅')
                     elif square.num != None and square.cget('text') == '🚩':
                         square.config(text='❌')
-            showed_game_over = True
+            game_window.update()
+            break
         game_window.update()
 
     if win:

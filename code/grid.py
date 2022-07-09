@@ -6,7 +6,13 @@ from tkinter import messagebox
 
 
 class ButtonGrid:
-    def __init__(self, grid_size: tuple[int, int], window: Tk | Toplevel, grid: list[list[PickleSquare]] | None = None, dark_mode:bool = False, num_mines:int = -1):
+    def __init__(
+        self, grid_size: tuple[int, int],
+        window: Tk | Toplevel,
+        grid: list[list[PickleSquare]] | None = None,
+        dark_mode:bool = False,
+        num_mines:int = -1
+    ):
         self.grid_size = grid_size
         self.root = window
         self.dark_mode = dark_mode
@@ -24,7 +30,7 @@ class ButtonGrid:
         Grid.rowconfigure(self.root, 2, weight=1)
         Grid.columnconfigure(self.root, 1, weight=1)
         grid = []
-        blank = "  " * 3
+        blank = "   " * 3
         button_pressed = Variable(self.root, None)
         # Create & Configure frame
         frame = Frame(self.root)
@@ -50,12 +56,13 @@ class ButtonGrid:
         self.root.wait_variable(button_pressed)
         coordinates = button_pressed.get()
 
-        corners = (
+        not_allowed_coors = [
             (0, 0),
             (self.grid_size[0] - 1, self.grid_size[1] - 1),
             (self.grid_size[0] - 1, 0),
-            (0, self.grid_size[1] - 1)
-        )
+            (0, self.grid_size[1] - 1),
+            coordinates
+        ]
         if self.num_mines == -1 and self.grid_size == (10, 10):
             self.num_mines = 10
         elif self.num_mines == -1 and self.grid_size == (20, 20):
@@ -63,46 +70,29 @@ class ButtonGrid:
         elif self.num_mines == -1 and self.grid_size == (30, 30):
             self.num_mines = 100
         elif self.num_mines == -1:
-            self.num_mines = int((self.grid_size[0] * self.grid_size[1])/10)
+            self.num_mines = int((self.grid_size[0] * self.grid_size[1])/9)
 
-        if self.num_mines != -1:
-            mines_so_far = 0
-            while mines_so_far < self.num_mines:
-                for row in grid:
-                    row_num = grid.index(row)
-                    for square in row:
-                        col_num = row.index(square)
-                        dice = random.randint(1, 9)
-                        coor = (row_num, col_num)
-                        if dice == 2 and square not in self.around_square(*coordinates) and coor not in corners and coor != coordinates and mines_so_far < self.num_mines:
-                            mines_so_far += 1
-                            square.category = 'mine'
-        else:
-            for row in grid:
-                row_num = grid.index(row)
-                for square in row:
-                    col_num = row.index(square)
-                    dice = random.randint(1, 9)
-                    coor = (row_num, col_num)
-                    if dice == 2 and square not in self.around_square(*coordinates) and coor not in corners and coor != coordinates:
-                        square.category = 'mine'
+        mines_so_far = 0
+        while mines_so_far < self.num_mines:
+            for square, coor in self.iter_squares():
+                dice = random.randint(1, 20)
+                if dice == 2 and square not in self.around_square(*coordinates) and coor not in not_allowed_coors and mines_so_far < self.num_mines:
+                    mines_so_far += 1
+                    not_allowed_coors.append(coor)
+                    square.category = 'mine'
 
         self.grid = grid
 
-        for row in grid:
-            row_num = grid.index(row)
-            for square in row:
-                if square.category != 'mine':
-                    num_mines = 0
-                    col_num = row.index(square)
-                    around_squares = self.around_square(row_num, col_num)
-                    for around_square in around_squares:
-                        if around_square.category == 'mine':
-                            num_mines += 1
-                    if num_mines == 0:
-                        square.category == 'blank'
-                    else:
-                        square.num = num_mines
+        for square, coor in self.iter_squares():
+            if square.category != 'mine':
+                num_mines = 0
+                for around_square in self.around_square(*coor):
+                    if around_square.category == 'mine':
+                        num_mines += 1
+                if num_mines == 0:
+                    square.category == 'blank'
+                else:
+                    square.num = num_mines
 
         return grid
     
@@ -130,8 +120,8 @@ class ButtonGrid:
             new_grid.append(new_row)
         return new_grid
 
-    def around_square(self, row_num: int, col_num: int, print_=False) -> list[Square]:
-        around = []
+    def around_square(self, row_num: int, col_num: int, print_=False):
+        around:list[Square] = []
         coors = []
 
         coors.append((row_num + 1, col_num))  # Adds the square above
@@ -164,7 +154,17 @@ class ButtonGrid:
             except IndexError:
                 pass
 
-        return around
+        for square in around:
+            yield square
+    
+    def iter_rows(self):
+        for row in self.grid:
+            yield row
+    
+    def iter_squares(self):
+        for row in self.grid:
+            for square in row:
+                yield square, (self.grid.index(row), row.index(square))
 
 
 class PickleButtonGrid:

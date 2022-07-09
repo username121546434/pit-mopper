@@ -23,6 +23,8 @@ else:
 s.listen()
 print('Waiting for connection...')
 
+games = {}
+id_count = 0
 
 def new_client(conn:socket.socket):
     reply = 'random reply'
@@ -53,5 +55,14 @@ def new_client(conn:socket.socket):
 while True:
     conn, addr = s.accept()
     print('Connected to: ', addr)
+
+    id_count += 1
+    game_id = (id_count - 1)//2
+    if id_count % 2 == 1:
+        print('Creating new game...')
+        game = None
+        games[game_id] = game
+    else:
+        game = games[game_id]
 
     start_new_thread(new_client, (), {'conn':conn})
