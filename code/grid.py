@@ -57,10 +57,6 @@ class ButtonGrid:
         coordinates = button_pressed.get()
 
         not_allowed_coors = [
-            (0, 0),
-            (self.grid_size[0] - 1, self.grid_size[1] - 1),
-            (self.grid_size[0] - 1, 0),
-            (0, self.grid_size[1] - 1),
             coordinates
         ]
         if self.num_mines == -1 and self.grid_size == (10, 10):
@@ -102,7 +98,7 @@ class ButtonGrid:
         new_grid = []
         # Create & Configure frame
         frame = Frame(self.root)
-        frame.grid(row=1, column=1, sticky=N+S+E+W)
+        frame.grid(row=2, column=1, sticky=N+S+E+W)
         for row_index in range(self.grid_size[0]):
             Grid.rowconfigure(frame, row_index, weight=1)
             row = grid[row_index]
@@ -170,7 +166,7 @@ class ButtonGrid:
 class PickleButtonGrid:
     """Same as `ButtonGrid` but is used to pickle and save data"""
 
-    def __init__(self, grid_size: int, grid: list[list[PickleSquare]]) -> None:
+    def __init__(self, grid_size: tuple[int, int], grid: list[list[PickleSquare]]) -> None:
         self.grid_size = grid_size
         self.grid = grid
 

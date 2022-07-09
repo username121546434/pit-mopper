@@ -65,13 +65,15 @@ def more_info(
     squares_clicked_on,
     squares_not_clicked_on,
     start,
-    session_start
+    session_start,
+    total_squares
 ):
     messagebox.showinfo('Additional Information', f'''
 Total Mines: {num_mines}
 Mines found: {mines_found}
 Squares clicked on: {len(squares_clicked_on)}
 Squares not clicked on: {len(squares_not_clicked_on)}
+Total squares: {total_squares}
 Started Game: {start.strftime(STRFTIME)}
 Session Started: {session_start.strftime(STRFTIME)}
 ''')
@@ -86,7 +88,7 @@ def save_game(
     chording,
 ):
     global difficulty
-    print(start, total_time, grid, zeros_checked, num_mines, chording, sep='\n\n')
+    print(start, total_time, grid, zeros_checked, num_mines, chording, grid.grid_size, sep='\n\n')
     data = {
         'start': start,
         'time played': total_time,
@@ -97,7 +99,9 @@ def save_game(
         'difficulty': difficulty.get()
     }
     with filedialog.asksaveasfile('wb', filetypes=(('Minesweeper Game Files', '*.min'), ('Any File', '*.*'))) as f:  # Pickling
+        messagebox.showinfo('Save Game', 'You game is being saved right now, this may a few moments. Please wait until another popup comes before closing the game.')
         pickle.dump(data, f)
+        messagebox.showinfo('Save Game', 'Your game has been saved, you can now close the game.')
 
 
 def load_game(_=None):
@@ -236,12 +240,13 @@ def create_game(
     )
     game_window.bind('<Control-s>', lambda _: save_game(start, seconds, grid, zeros_checked, num_mines, chording))
     game_window.bind('<Alt-q>', lambda _: game_window.destroy())
-    game_window.bind('<Alt-i>', lambda _: more_info(num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start))
+    game_window.bind('<Alt-i>', lambda _: more_info(
+        num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start,  grid.grid_size[0] * grid.grid_size[1]))
 
     file_menu.add_command(label='Save As', accelerator='Ctrl+S', command=partial(save_game, start, seconds, grid, [
                           PickleSquare.from_square(square) for square in zeros_checked], num_mines, chording))
-    file_menu.add_command(label='Additional Information', command=partial(
-        more_info, num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start),
+    file_menu.add_command(label='More Info', command=lambda: more_info(
+        num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start, grid.grid_size[0] * grid.grid_size[1]),
         accelerator='Alt+I')
     file_menu.add_command(label='Exit', command=game_window.destroy, accelerator='Alt+Q')
 
@@ -275,9 +280,9 @@ def create_game(
                 for square2 in (square2 for square2 in grid.around_square(*square.position) if (square2.category != 'mine')):
                     square2.clicked()
 
-            for square in (square for square in row if square.category == 'mine'):
-                if square.category == 'mine' and square.cget('text') == '🚩':
-                    mines_found += 1
+            # Counts mines found
+            for square in (square for square in squares_flaged if square.category == 'mine'):
+                mines_found += 1
 
             if chording:
                 # Checks all square if they are completed
