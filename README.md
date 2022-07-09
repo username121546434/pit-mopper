@@ -2,6 +2,11 @@
 
 I have recreated the game "Mineseweeper" in python.
 
+Project Structure:
+./code - Actual source code for Minesweeper
+./images - Images used for documentation
+./server-testing - testing for multiplayer
+
 ## Keyboard Shorcuts
 
 1. Ctrl + I - Shows the Version of Minesweeper
