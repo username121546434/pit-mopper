@@ -29,7 +29,7 @@ __md.stripTopLevelTags = False
 def md_to_text(text):
     return __md.convert(text)
 
-def check_for_updates(current_version: str, download_zip: bool, master: Tk | Toplevel):
+def check_for_updates(current_version: str, master: Tk | Toplevel):
     try:
         response = requests.get('https://api.github.com/repos/username121546434/minesweeper-python/releases')
     except requests.exceptions.ConnectionError as error:

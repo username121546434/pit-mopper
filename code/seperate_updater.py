@@ -46,7 +46,7 @@ if download_zip:
         dir = filename[:-3]
         dir = os.path.expanduser(f'~\\Downloads\\{dir}')
         zip_file.extractall(dir)
-    messagebox.showinfo(title='Update', message=f'''The update has completed, you can find it in {dir}. You can delete the previous update or keep it in case you get issues with the new one.''')
+    messagebox.showinfo(title='Update', message=f'''The update has completed, you can find it in {dir}. You can delete the previous update or keep it in case you get issues with the new one. Make sure you move highscore.txt over to the new installation!''')
 else:
     os.startfile(os.path.expanduser(f'~\\Downloads\\{filename}'))
     sys.exit()

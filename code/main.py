@@ -7,7 +7,6 @@ from datetime import datetime
 from tkinter import filedialog, messagebox
 import os
 from updater import check_for_updates
-from windows_tools.installed_software import get_installed_software
 import ctypes as ct
 from custom_menubar import CustomMenuBar
 
@@ -445,17 +444,6 @@ def change_theme(*_):
                             square.config(bg=CURRENT_BG, fg=CURRENT_FG)
 
 
-def zip_or_installer():
-    # Checks whether the current minesweeper is from the zip download or from the installer
-    # returns False if it was downloaded through the installer and True if from zip file
-    return_value = True
-    # print(get_installed_software())
-    for app in get_installed_software():
-        if 'Minesweeper' in app['name']:
-            return_value = False
-    return return_value
-
-
 def show_highscores(_=None):
     highscore_data = load_highscore(HIGHSCORE_TXT)
 
@@ -557,12 +545,12 @@ settings = Menu(menubar, tearoff=0)
 settings.add_checkbutton(variable=chord_state, label='Enable Chording', accelerator='Ctrl+A')
 settings.add_checkbutton(variable=dark_mode_state, label='Dark Mode', accelerator='Ctrl+D')
 settings.add_separator()
-settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, zip_or_installer(), window), accelerator='Ctrl+U')
+settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, window), accelerator='Ctrl+U')
 settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Minesweeper Version: {__version__}'), accelerator='Ctrl+I')
 
 # Keyboard Shortcuts
 window.bind_all('<Control-i>', lambda _: messagebox.showinfo(title='Version Info', message=f'Minesweeper Version: {__version__}'))
-window.bind_all('<Control-u>', lambda _: check_for_updates(__version__, zip_or_installer(), window))
+window.bind_all('<Control-u>', lambda _: check_for_updates(__version__, window))
 window.bind_all('<Control-q>', lambda _: window.destroy())
 window.bind_all('<Control-o>', load_game)
 window.bind_all('<space>', game)
