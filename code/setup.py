@@ -10,14 +10,6 @@ executables = [Executable(
 )]
 
 packages = [
-    "functools",
-    'pickle',
-    'tkinter',
-    'os',
-    'sys',
-    'windows_tools.installed_software',
-    'datetime',
-    'ctypes',
     'grid',
     'updater',
     'squares',
