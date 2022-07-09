@@ -12,13 +12,16 @@ I have recreated the game "Mineseweeper" in python.
 6. Ctrl + D - Enables/Disables Dark Mode
 7. Ctrl + S - Saves the current game, only applicable when a game is being played
 8. Space - Does the same thing that the "Play!" button in the game loader does
+7. Alt + Q - Closes the game, same as clicking the X
+9. Alt + I - Gives extra information about the current game, same as going to File > More Info
+10. Ctrl + H - Shows your highscores
 
-## Latest Features in v1.2.0
+## Latest Features in v1.3.0
 
-1. Added a custom grid size so that you can play on any grid you want! As long as it is between 6x6 and 75x75
-2. 2 new commands have been added to the Settings menu: Dark Mode and Version Info. Both of them are self-explanatory as to what they do
-3. As mentioned above a new Dark Mode has been added
-4. Now it tells you the size of your game before you play it
-5. It now tells you how many mines there are and how many flags you have put down without having to go to the Additional Info page, also shows percent complete
-6. A License has been added to the installer
-7. Keyboard shortcuts have been added to the game, you can find a list of them below, you can also find most of them next to the options in the Settings and File menus
+1. You can now choose how many mines are in the game!
+2. Dark mode has been updated so that everything is actually dark
+3. The new updater is now a separate program that first uninstalls the game then installs the latest version
+4. You can no longer die on the first click! I wonder how that was an issue for so long...
+5. Performance has been improved
+6. You can now see your high scores
+7. 3 new keyboard shortcuts have been added including Alt + Q to quit game, Alt + I to show more info about game, and Ctrl + H to show high scores
