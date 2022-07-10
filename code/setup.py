@@ -4,7 +4,7 @@ base = None
 
 executables = [Executable(
     "./minesweeper-python/code/main.py",
-    base='Win32GUI',
+    base=None,
     icon='./minesweeper-python/code/data/images/logo.ico',
     copyright='GNU GPL v3, see LICENSE.txt for more info'
 )]
@@ -13,7 +13,8 @@ packages = [
     'grid',
     'updater',
     'squares',
-    'load_font'
+    'load_font',
+    'html.parser'
 ]
 include_files = [
     './minesweeper-python/code/data'
