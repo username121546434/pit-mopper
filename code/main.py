@@ -162,7 +162,7 @@ def game(_=None):
         game_window.destroy()
         return None
     elif difficulty.get() >= (60, 60):
-        messagebox.showwarning(title='Size too big', message='Warning: When the game is a size of 40x40 or above, the expierence might be so laggy it is unplayable.')
+        messagebox.showwarning(title='Size too big', message='Warning: When the game is a size of 60x60 or above, the expierence might be so laggy it is unplayable.')
     grid = ButtonGrid(difficulty.get(), game_window, dark_mode=dark_mode_state.get(), num_mines=mines.get())
     zeros_checked = []
     num_mines = 0
