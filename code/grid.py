@@ -16,10 +16,6 @@ class ButtonGrid:
         self.grid_size = grid_size
         self.root = window
         self.dark_mode = dark_mode
-        if num_mines == 0 or num_mines == 1:
-            messagebox.showerror('Mines are too low', "You can't have 0 or 1 mine on a game")
-            window.destroy()
-            return None
         self.num_mines = num_mines
         if grid == None:
             self.grid = self.button_grid()
@@ -55,6 +51,10 @@ class ButtonGrid:
         self.grid = grid
         self.root.wait_variable(button_pressed)
         coordinates = button_pressed.get()
+
+        for square, _ in self.iter_squares():
+            square.config(command=None)
+        self.grid = grid
 
         not_allowed_coors = [
             coordinates

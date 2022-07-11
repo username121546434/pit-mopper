@@ -163,6 +163,12 @@ def game(_=None):
         return None
     elif difficulty.get() >= (60, 60):
         messagebox.showwarning(title='Size too big', message='Warning: When the game is a size of 60x60 or above, the expierence might be so laggy it is unplayable.')
+    elif mines.get() > (difficulty.get()[0] * difficulty.get()[1]) - 10:
+        messagebox.showerror(title='Mines too high', message='You have chosen too many mines.')
+        game_window.destroy()
+        return None
+    elif mines.get() > ((difficulty.get()[0] * difficulty.get()[1])/2):
+        messagebox.showwarning(title='Number of mines high', message='You have chosen a high amount of mines, so it might take a long time to place them all')
     grid = ButtonGrid(difficulty.get(), game_window, dark_mode=dark_mode_state.get(), num_mines=mines.get())
     zeros_checked = []
     num_mines = 0
@@ -253,6 +259,7 @@ def create_game(
     previous_sec = datetime.now()
     previous_sec = previous_sec.replace(microsecond=0)
     squares_flaged = []
+    squares_checked = []
 
     while True:
         game_window.after(100)
@@ -266,17 +273,11 @@ def create_game(
         percent = round(((len(squares_flaged))/num_mines) * 100, 2)
         total_time.set(f'Time: {format_second(seconds)}  🚩 {len(squares_flaged)}/{num_mines} 💣 ({percent}%)')
 
-        game_overs = [
-            square.game_over
-            for row in grid.grid
-            for square in row
-        ]
-
         for row in grid.iter_rows():
             # Clicks Zeros
-            for square in (square for square in row if (square.cget('text') == '0') and (square not in zeros_checked)):
+            for square in (square for square in row if (square.num == None) and (square.clicked_on) and (square not in zeros_checked) and (square.category != 'mine')):
                 zeros_checked.append(square)
-                for square2 in (square2 for square2 in grid.around_square(*square.position) if (square2.category != 'mine')):
+                for square2 in (square2 for square2 in grid.around_square(*square.position) if (square2.category != 'mine') and square2 not in squares_checked):
                     square2.clicked()
 
             # Counts mines found
@@ -327,6 +328,7 @@ def create_game(
             for square in row
             if square.clicked_on == False
         ]
+
         squares_flaged = [
             square
             for row in grid.grid
@@ -334,11 +336,17 @@ def create_game(
             if square.flaged
         ]
 
+        game_overs = [
+            square.game_over
+            for row in grid.grid
+            for square in row
+        ]
+
         if (len(squares_clicked_on) == (grid.grid_size[0] * grid.grid_size[1]) and all(square.category == 'mine' for square in squares_flaged)) or \
                 (all(square.category == 'mine' for square in squares_not_clicked_on) and len(squares_not_clicked_on) == num_mines):
             game_over = True
             win = True
-        elif True in game_overs:
+        elif any(game_overs):
             game_over = True
             win = False
         else:
