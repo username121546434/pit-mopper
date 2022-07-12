@@ -2,13 +2,12 @@ from tkinter import *
 from squares import Square, PickleSquare
 import random
 from functools import partial
-from tkinter import messagebox
 
 
 class ButtonGrid:
     def __init__(
         self, grid_size: tuple[int, int],
-        window: Tk | Toplevel,
+        window: Toplevel,
         grid: list[list[PickleSquare]] | None = None,
         dark_mode:bool = False,
         num_mines:int = -1
@@ -27,7 +26,7 @@ class ButtonGrid:
         Grid.columnconfigure(self.root, 1, weight=1)
         grid = []
         blank = "   " * 3
-        button_pressed = Variable(self.root, None)
+        button_pressed = Variable(self.root.winfo_toplevel(), None, 'button pressed')
         # Create & Configure frame
         frame = Frame(self.root)
         frame.grid(row=2, column=1, sticky=N+S+E+W)
@@ -49,7 +48,7 @@ class ButtonGrid:
 
 
         self.grid = grid
-        self.root.wait_variable(button_pressed)
+        self.root.winfo_toplevel().wait_variable('button pressed')
         coordinates = button_pressed.get()
 
         for square, _ in self.iter_squares():

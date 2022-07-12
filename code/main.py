@@ -1,5 +1,6 @@
 from functools import partial
 import pickle
+import sys
 from tkinter import *
 from grid import ButtonGrid, PickleButtonGrid
 from squares import PickleSquare, Square
@@ -262,7 +263,8 @@ def create_game(
     squares_checked = []
 
     while True:
-        game_window.after(100)
+        global after_cancel
+        after_cancel.append(window.after(100, do_nothing))
 
         now = datetime.now()
         now = now.replace(microsecond=0)
@@ -488,10 +490,27 @@ def show_highscores(_=None):
         messagebox.showinfo('Highscores', 'No highscores were found, play a game and win it to get some')
 
 
+def do_nothing():
+    pass
+
+
+def quit():
+    global window
+    window.destroy()
+    for code in after_cancel:
+        window.after_cancel(code)
+    window.setvar('button pressed', 39393)
+    print('closing app...')
+    del window
+    sys.exit()
+
+
 window = Tk()
 window.title('Game Loader')
 window.iconbitmap(LOGO)
 window.resizable(False, False)
+
+after_cancel = []
 
 Label(text='Select Difficulty').pack(pady=(25, 0))
 
@@ -568,5 +587,6 @@ window.bind_all('<Control-h>', show_highscores)
 
 menubar.add_menu(menu=file_menu, title='File')
 menubar.add_menu(menu=settings, title='Settings')
+window.protocol('WM_DELETE_WINDOW', quit)
 
 window.mainloop()
