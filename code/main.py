@@ -8,7 +8,7 @@ from datetime import datetime
 from tkinter import filedialog, messagebox
 import os
 from updater import check_for_updates
-import ctypes as ct
+import ctypes
 from custom_menubar import CustomMenuBar
 
 __version__ = '1.3.0'
@@ -49,14 +49,14 @@ def dark_title_bar(window):
     # https://stackoverflow.com/a/70724666
     window.update()
     DWMWA_USE_IMMERSIVE_DARK_MODE = 20
-    set_window_attribute = ct.windll.dwmapi.DwmSetWindowAttribute
-    get_parent = ct.windll.user32.GetParent
+    set_window_attribute = ctypes.windll.dwmapi.DwmSetWindowAttribute
+    get_parent = ctypes.windll.user32.GetParent
     hwnd = get_parent(window.winfo_id())
     rendering_policy = DWMWA_USE_IMMERSIVE_DARK_MODE
     value = 2
-    value = ct.c_int(value)
-    set_window_attribute(hwnd, rendering_policy, ct.byref(value),
-                         ct.sizeof(value))
+    value = ctypes.c_int(value)
+    set_window_attribute(hwnd, rendering_policy, ctypes.byref(value),
+                         ctypes.sizeof(value))
 
 
 def more_info(
