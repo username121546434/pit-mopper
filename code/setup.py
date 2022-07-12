@@ -3,7 +3,7 @@ from cx_Freeze import setup, Executable
 base = None    
 
 executables = [Executable(
-    "./minesweeper-python/code/main.py",
+    "./minesweeper-python/code/Minesweeper.py",
     base=None,
     icon='./minesweeper-python/code/data/images/logo.ico',
     copyright='GNU GPL v3, see LICENSE.txt for more info'

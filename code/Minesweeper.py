@@ -14,9 +14,12 @@ from custom_menubar import CustomMenuBar
 __version__ = '1.3.0'
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
 
+# Creates AppData folder if doesn't exist
+if not os.path.exists(os.path.expanduser(r'~\AppData\Local\Minesweeper')):
+    os.mkdir(os.path.expanduser(r'~\AppData\Local\Minesweeper'))
+
 STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
-CURRENT_DIR = os.getcwd()
-HIGHSCORE_TXT = os.path.join(CURRENT_DIR, 'highscore.txt')
+HIGHSCORE_TXT = os.path.expanduser(r'~\AppData\Local\Minesweeper\highscore.txt')
 LOGO = "data\\images\\logo.ico"
 MAX_ROWS_AND_COLS = 75
 MIN_ROWS_AND_COLS = 4
@@ -74,6 +77,7 @@ Mines found: {mines_found}
 Squares clicked on: {len(squares_clicked_on)}
 Squares not clicked on: {len(squares_not_clicked_on)}
 Total squares: {total_squares}
+Ratio of mines: {round((num_mines/total_squares) * 100, 2)}%
 Started Game: {start.strftime(STRFTIME)}
 Session Started: {session_start.strftime(STRFTIME)}
 ''')
@@ -223,7 +227,7 @@ def create_game(
     if additional_time != 0.0:
         total_time.set(f'Time: {format_second(int(additional_time))} 🚩0/{num_mines}💣')
 
-    highscore_data = load_highscore(HIGHSCORE_TXT)
+    highscore_data = load_highscore()
     game_size_str = f'{difficulty.get()[0]}x{difficulty.get()[1]}'
     game_window.title(f'{game_size_str} Minesweeper Game')
     if not isinstance(highscore_data, float):
@@ -395,21 +399,26 @@ def change_difficulty(from_spinbox:bool = False):
     game_size.set(f'You game size will be {difficulty.get()[0]} rows and {difficulty.get()[1]} columns')
 
 
-def load_highscore(txt_file: str) -> dict[str, float | int] | float:
-    try:
-        f = open(txt_file)
-        f.close()
-    except FileNotFoundError:
-        return float('inf')
+def load_highscore() -> dict[str, float | int] | float:
+    if not os.path.exists(HIGHSCORE_TXT):
+        if not os.path.exists(os.path.join(os.getcwd(), 'highscore.txt')):
+            return float('inf')
+        else:
+            with open(os.path.join(os.getcwd(), 'highscore.txt'), 'rb') as f:
+                value = pickle.load(f)
+            messagebox.showerror('Highscore file in wrong place', 'The highscore file was found, but in the wrong spot, as soon as you click OK, Minesweeper will attempt to move the file to a new location, you might have to delete the file yourself.')
+            with open(HIGHSCORE_TXT, 'wb') as f:
+                pickle.dump(value, f)
+            os.remove(os.path.join(os.getcwd(), 'highscore.txt'))
+            return value
     else:
-        with open(txt_file, 'rb') as f:
+        with open(HIGHSCORE_TXT, 'rb') as f:
             value = pickle.load(f)
         if isinstance(value, dict):
             return value
         else:
             messagebox.showerror('Highscore value invalide', 'The highscore file contains an invalid value, press OK to delete the content of it')
-            with open(txt_file, 'wb') as f:
-                f.write()
+            os.remove(HIGHSCORE_TXT)
             return float('inf')
 
 
@@ -455,7 +464,7 @@ def change_theme(*_):
 
 
 def show_highscores(_=None):
-    highscore_data = load_highscore(HIGHSCORE_TXT)
+    highscore_data = load_highscore()
 
     if isinstance(highscore_data, dict):
         data = [['Game Size', 'Seconds']]
@@ -494,7 +503,7 @@ def do_nothing():
     pass
 
 
-def quit():
+def quit_game():
     global window
     window.destroy()
     for code in after_cancel:
@@ -566,7 +575,7 @@ file_menu = Menu(
 file_menu.add_command(label='Open File', command=load_game, accelerator='Ctrl+O')
 file_menu.add_command(label='Highscores', command=show_highscores, accelerator='Ctrl+H')
 file_menu.add_separator()
-file_menu.add_command(label='Exit', command=window.destroy, accelerator='Ctrl+Q')
+file_menu.add_command(label='Exit', command=quit_game, accelerator='Ctrl+Q')
 
 settings = Menu(menubar, tearoff=0)
 settings.add_checkbutton(variable=chord_state, label='Enable Chording', accelerator='Ctrl+A')
@@ -578,7 +587,7 @@ settings.add_command(label='Version Info', command=partial(messagebox.showinfo, 
 # Keyboard Shortcuts
 window.bind_all('<Control-i>', lambda _: messagebox.showinfo(title='Version Info', message=f'Minesweeper Version: {__version__}'))
 window.bind_all('<Control-u>', lambda _: check_for_updates(__version__, window))
-window.bind_all('<Control-q>', lambda _: window.destroy())
+window.bind_all('<Control-q>', lambda _: quit_game)
 window.bind_all('<Control-o>', load_game)
 window.bind_all('<space>', game)
 window.bind_all('<Control-a>', lambda _: chord_state.set(not chord_state.get()))
@@ -587,6 +596,6 @@ window.bind_all('<Control-h>', show_highscores)
 
 menubar.add_menu(menu=file_menu, title='File')
 menubar.add_menu(menu=settings, title='Settings')
-window.protocol('WM_DELETE_WINDOW', quit)
+window.protocol('WM_DELETE_WINDOW', quit_game)
 
 window.mainloop()
