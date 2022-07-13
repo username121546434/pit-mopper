@@ -10,16 +10,19 @@ import os
 from updater import check_for_updates
 import ctypes
 from custom_menubar import CustomMenuBar
+import logging
 
 __version__ = '1.3.0'
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
 
+APPDATA = os.path.expanduser(r'~\AppData\Local\Minesweeper')
+DEBUG = APPDATA + r'\debug'
 # Creates AppData folder if doesn't exist
-if not os.path.exists(os.path.expanduser(r'~\AppData\Local\Minesweeper')):
-    os.mkdir(os.path.expanduser(r'~\AppData\Local\Minesweeper'))
+if not os.path.exists(DEBUG):
+    os.makedirs(DEBUG)
 
 STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
-HIGHSCORE_TXT = os.path.expanduser(r'~\AppData\Local\Minesweeper\highscore.txt')
+HIGHSCORE_TXT = os.path.join(APPDATA, 'highscore.txt')
 LOGO = "data\\images\\logo.ico"
 MAX_ROWS_AND_COLS = 75
 MIN_ROWS_AND_COLS = 4
@@ -30,6 +33,31 @@ DEFAULT_FG = '#000000'
 CURRENT_BG = DEFAULT_BG
 CURRENT_FG = DEFAULT_FG
 
+
+debug_log = os.path.join(DEBUG, f"{datetime.now().strftime('%A %B %m, %I-%M %p %Y %Z')}.log")
+
+with open(debug_log, 'w') as _:
+    pass
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s]: %(message)s",
+    handlers=[
+        logging.FileHandler(debug_log),
+        logging.StreamHandler()
+    ]
+)
+
+logging.info('Loading app...')
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+
+    logging.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+
+sys.excepthook = handle_exception
 
 def format_second(seconds: int | float):
     if seconds != float('inf'):
@@ -92,7 +120,16 @@ def save_game(
     chording,
 ):
     global difficulty
-    print(start, total_time, grid, zeros_checked, num_mines, chording, grid.grid_size, sep='\n\n')
+    logging.info(f'''Saving game with the following attributes:
+
+start:               {start}
+total_time:          {total_time}
+grid:                {grid}
+zeros_checked:       {zeros_checked}
+num_mines:           {num_mines}
+chording:            {chording}
+grid.grid_size       {grid.grid_size}
+''')
     data = {
         'start': start,
         'time played': total_time,
@@ -102,16 +139,23 @@ def save_game(
         'chording': chording,
         'difficulty': difficulty.get()
     }
+    logging.info(f'Data to save: {data}')
     with filedialog.asksaveasfile('wb', filetypes=(('Minesweeper Game Files', '*.min'), ('Any File', '*.*'))) as f:  # Pickling
         messagebox.showinfo('Save Game', 'You game is being saved right now, this may a few moments. Please wait until another popup comes before closing the game.')
+        logging.info('Saving data...')
         pickle.dump(data, f)
+        logging.info('Data successfully saved')
         messagebox.showinfo('Save Game', 'Your game has been saved, you can now close the game.')
 
 
 def load_game(_=None):
-    with filedialog.askopenfile('rb', filetypes=(('Minesweeper Game Files', '*.min'), ('Any File', '*.*'))) as f:  # Un Pickling
+    logging.info('Opening game...')
+    file = filedialog.askopenfile('rb', filetypes=(('Minesweeper Game Files', '*.min'), ('Any File', '*.*')))
+    logging.info(f'Reading {file}...')
+    with file as f:  # Un Pickling
         data = pickle.load(f)
         data: dict[str]
+    logging.info(f'{file} successfully read, setting up game...')
 
     game_window = Toplevel(window)
     game_window.iconbitmap(LOGO)
@@ -151,6 +195,7 @@ def game(_=None):
     global difficulty
     global window
     global chord_state
+    logging.info('Creating a game...')
 
     chording = chord_state.get()
 
@@ -159,21 +204,27 @@ def game(_=None):
     game_window.title('Minesweeper')
     start = datetime.now()
     game_window.grid_columnconfigure(1, weight=1)
+
     if dark_mode_state.get():
         dark_title_bar(game_window)
-
     if difficulty.get() == (None, None) or difficulty.get() == ('None', 'None'):
+        logging.error('Game size not chosen')
         messagebox.showerror(title='Game Size not chosen', message='You have not chosen a game size!')
         game_window.destroy()
         return None
     elif difficulty.get() >= (60, 60):
+        logging.warning(f'Size too big {difficulty.get()}')
         messagebox.showwarning(title='Size too big', message='Warning: When the game is a size of 60x60 or above, the expierence might be so laggy it is unplayable.')
     elif mines.get() > (difficulty.get()[0] * difficulty.get()[1]) - 10:
+        logging.error(f'Mines too high, game size {difficulty.get()}, mines: {mines.get()}')
         messagebox.showerror(title='Mines too high', message='You have chosen too many mines.')
         game_window.destroy()
         return None
     elif mines.get() > ((difficulty.get()[0] * difficulty.get()[1])/2):
+        logging.warning(f'Number of mines high, game size {difficulty.get()}, mines: {mines.get()}')
         messagebox.showwarning(title='Number of mines high', message='You have chosen a high amount of mines, so it might take a long time to place them all')
+
+    logging.info('Creating grid of buttons...')
     grid = ButtonGrid(difficulty.get(), game_window, dark_mode=dark_mode_state.get(), num_mines=mines.get())
     zeros_checked = []
     num_mines = 0
@@ -204,6 +255,17 @@ def create_game(
     mines_found: int,
     additional_time: float = 0.0
 ):
+    logging.info(f'''Creating game with following attributes:
+
+game_window:           {game_window}
+start:                 {start}
+grid:                  {grid}
+zeros_checked:         {zeros_checked}
+num_mines:             {num_mines}
+chording:              {chording}
+mines_found:           {mines_found}
+additional_time:       {additional_time}
+''')
     session_start: datetime = datetime.now()
     squares_clicked_on = [
         square
@@ -230,6 +292,7 @@ def create_game(
     highscore_data = load_highscore()
     game_size_str = f'{difficulty.get()[0]}x{difficulty.get()[1]}'
     game_window.title(f'{game_size_str} Minesweeper Game')
+    logging.info(f'{game_size_str} Minesweeper Game starting...')
     if not isinstance(highscore_data, float):
         try:
             highscore = highscore_data[game_size_str]
@@ -266,6 +329,7 @@ def create_game(
     squares_flaged = []
     squares_checked = []
 
+    logging.info('Entering while loop...')
     while True:
         global after_cancel
         after_cancel.append(window.after(100, do_nothing))
@@ -352,7 +416,12 @@ def create_game(
                 (all(square.category == 'mine' for square in squares_not_clicked_on) and len(squares_not_clicked_on) == num_mines):
             game_over = True
             win = True
+            if (len(squares_clicked_on) == (grid.grid_size[0] * grid.grid_size[1]) and all(square.category == 'mine' for square in squares_flaged)):
+                logging.info('Game has been won because all squares are clicked and all mines flagged')
+            else:
+                logging.info('Game has been won because the squares left are mines')
         elif any(game_overs):
+            logging.info('The game is over, and it is lost.')
             game_over = True
             win = False
         else:
@@ -379,6 +448,7 @@ def create_game(
         messagebox.showinfo(
             'Game Over', f'Game Over.\nYou lost.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}')
     if win and seconds < highscore:
+        logging.info('Highscore has been beaten, writing new highscore data')
         with open(HIGHSCORE_TXT, 'wb') as f:
             if isinstance(highscore_data, dict):
                 new_highscore_data = highscore_data.copy()
@@ -386,6 +456,7 @@ def create_game(
                 new_highscore_data = {}
             new_highscore_data[game_size_str] = seconds
             pickle.dump(new_highscore_data, f)
+    logging.info('Destroying window')
     game_window.destroy()
 
 
@@ -393,15 +464,20 @@ def change_difficulty(from_spinbox:bool = False):
     global game_size
     global difficulty
     if not from_spinbox:
+        logging.info(f'Setting game size to: {tuple(int(i) for i in difficulty.get().split(" "))}')
         difficulty.set(tuple(int(i) for i in difficulty.get().split(' ')))
     else:
+        logging.info(f'Setting custom game size: {(rows.get(), cols.get())}')
         difficulty.set((rows.get(), cols.get()))
-    game_size.set(f'You game size will be {difficulty.get()[0]} rows and {difficulty.get()[1]} columns')
+    game_size.set(f'Your game size will be {difficulty.get()[0]} rows and {difficulty.get()[1]} columns')
 
 
 def load_highscore() -> dict[str, float | int] | float:
+    logging.info('Loading highscore...')
     if not os.path.exists(HIGHSCORE_TXT):
+        logging.info(f'{HIGHSCORE_TXT} does not exist, looking in root directory')
         if not os.path.exists(os.path.join(os.getcwd(), 'highscore.txt')):
+            logging.info('No highscore was found')
             return float('inf')
         else:
             with open(os.path.join(os.getcwd(), 'highscore.txt'), 'rb') as f:
@@ -412,12 +488,16 @@ def load_highscore() -> dict[str, float | int] | float:
             os.remove(os.path.join(os.getcwd(), 'highscore.txt'))
             return value
     else:
+        logging.info(f'{HIGHSCORE_TXT} does exist, reading data from it')
         with open(HIGHSCORE_TXT, 'rb') as f:
             value = pickle.load(f)
         if isinstance(value, dict):
+            logging.info(f'{HIGHSCORE_TXT} successfully read')
             return value
         else:
+            logging.info(f'{HIGHSCORE_TXT} contains invalid data {value}')
             messagebox.showerror('Highscore value invalide', 'The highscore file contains an invalid value, press OK to delete the content of it')
+            logging.info('Removing file...')
             os.remove(HIGHSCORE_TXT)
             return float('inf')
 
@@ -425,10 +505,12 @@ def load_highscore() -> dict[str, float | int] | float:
 def change_theme(*_):
     global CURRENT_BG, CURRENT_FG
     if dark_mode_state.get():
+        logging.info('User switched theme to dark mode')
         CURRENT_BG = DARK_MODE_BG
         CURRENT_FG = DARK_MODE_FG
         dark_title_bar(window)
     else:
+        logging.info('User switched theme to light mode')
         CURRENT_BG = DEFAULT_BG
         CURRENT_FG = DEFAULT_FG
         window.resizable(False, False)
@@ -464,9 +546,11 @@ def change_theme(*_):
 
 
 def show_highscores(_=None):
+    logging.info('User requested highscores')
     highscore_data = load_highscore()
 
     if isinstance(highscore_data, dict):
+        logging.info(f'Highscore data detected: {highscore_data}')
         data = [['Game Size', 'Seconds']]
         for key, value in highscore_data.items():
             data.append([key, str(round(value, 1))])
@@ -496,6 +580,7 @@ def show_highscores(_=None):
                 Label(frame, text=str(item), bg=bg_of_labels, fg=fg_of_labels).grid(row=y, column=x, padx=1, pady=1, sticky='nsew')
         new_window.update()
     else:
+        logging.info('No highscores found')
         messagebox.showinfo('Highscores', 'No highscores were found, play a game and win it to get some')
 
 
@@ -509,10 +594,17 @@ def quit_game():
     for code in after_cancel:
         window.after_cancel(code)
     window.setvar('button pressed', 39393)
-    print('closing app...')
+    logging.info('Closing app...')
     del window
     sys.exit()
 
+
+def change_mines():
+    mines_counter.set(f'Your game will have {mines.get()} mines')
+    logging.info(f'Setting custom mine count: {mines.get()}')
+
+
+logging.info('Functions successfully defined, creating GUI')
 
 window = Tk()
 window.title('Game Loader')
@@ -555,7 +647,7 @@ mines_counter = StringVar(window, f'Your game will have {mines.get()} mines')
 Label(window, textvariable=mines_counter).pack()
 Label(window, text='-1 means it will generate a random number/use default').pack(padx=20)
 
-Spinbox(window, textvariable=mines, width=4, from_= -1, to = 2000, command=lambda:mines_counter.set(f'Your game will have {mines.get()} mines')).pack()
+Spinbox(window, textvariable=mines, width=4, from_= -1, to = 2000, command=change_mines).pack()
 
 chord_state = BooleanVar(window)
 dark_mode_state = BooleanVar(window)
@@ -598,4 +690,5 @@ menubar.add_menu(menu=file_menu, title='File')
 menubar.add_menu(menu=settings, title='Settings')
 window.protocol('WM_DELETE_WINDOW', quit_game)
 
+logging.info('GUI successfully created')
 window.mainloop()
