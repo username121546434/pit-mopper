@@ -11,9 +11,22 @@ from updater import check_for_updates
 import ctypes
 from custom_menubar import CustomMenuBar
 import logging
+from ctypes import wintypes
 
 __version__ = '1.3.0'
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
+
+user32 = ctypes.WinDLL('user32', use_last_error=True)
+kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+
+kernel32.GetConsoleWindow.restype = wintypes.HWND
+user32.SendMessageW.argtypes = (wintypes.HWND, wintypes.UINT,
+    wintypes.WPARAM, wintypes.LPARAM)
+user32.ShowWindow.argtypes = (wintypes.HWND, ctypes.c_int)
+
+SW_HIDE = 0
+SW_SHOW = 5
+
 
 APPDATA = os.path.expanduser(r'~\AppData\Local\Minesweeper')
 DEBUG = APPDATA + r'\debug'
@@ -21,7 +34,7 @@ DEBUG = APPDATA + r'\debug'
 if not os.path.exists(DEBUG):
     os.makedirs(DEBUG)
 
-STRFTIME = '%A %B %m, %I:%M %p %Y %Z'
+STRFTIME = r'%A %B %d, %I:%M %p %Y %Z'
 HIGHSCORE_TXT = os.path.join(APPDATA, 'highscore.txt')
 LOGO = "data\\images\\logo.ico"
 MAX_ROWS_AND_COLS = 75
@@ -34,17 +47,27 @@ CURRENT_BG = DEFAULT_BG
 CURRENT_FG = DEFAULT_FG
 
 
-debug_log = os.path.join(DEBUG, f"{datetime.now().strftime('%A %B %m, %I-%M %p %Y %Z')}.log")
+debug_log_file = os.path.join(DEBUG, f"{datetime.now().strftime(STRFTIME.replace(':', '-'))}.log")
 
-with open(debug_log, 'w') as _:
+with open(debug_log_file, 'w') as _:
     pass
+
+console_open = False
+allocated_console = None
+if allocated_console is None:
+    # one-time set up for all instances
+    allocated = bool(kernel32.AllocConsole())
+    allocated_console = allocated
+    if allocated:
+        hwnd = kernel32.GetConsoleWindow()
+        user32.ShowWindow(hwnd, SW_HIDE)
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s]: %(message)s",
     handlers=[
-        logging.FileHandler(debug_log),
-        logging.StreamHandler()
+        logging.FileHandler(debug_log_file),
+        logging.StreamHandler(open('CONOUT$', 'w', buffering=1)),
     ]
 )
 
@@ -58,6 +81,28 @@ def handle_exception(exc_type, exc_value, exc_traceback):
     logging.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
 
 sys.excepthook = handle_exception
+
+
+def show_console():
+    global console_open
+    hwnd = kernel32.GetConsoleWindow()
+    user32.ShowWindow(hwnd, SW_SHOW)
+    console_open = True
+
+
+def hide_console():
+    global console_open
+    hwnd = kernel32.GetConsoleWindow()
+    user32.ShowWindow(hwnd, SW_HIDE)
+    console_open = False
+
+
+def console():
+    if console_open:
+        hide_console()
+    else:
+        show_console()
+
 
 def format_second(seconds: int | float):
     if seconds != float('inf'):
@@ -675,6 +720,10 @@ settings.add_checkbutton(variable=dark_mode_state, label='Dark Mode', accelerato
 settings.add_separator()
 settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, window), accelerator='Ctrl+U')
 settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Minesweeper Version: {__version__}'), accelerator='Ctrl+I')
+
+advanced = Menu(settings, tearoff=0)
+advanced.add_command(label='Console', command=console)
+settings.add_cascade(label='Advanced', menu=advanced)
 
 # Keyboard Shortcuts
 window.bind_all('<Control-i>', lambda _: messagebox.showinfo(title='Version Info', message=f'Minesweeper Version: {__version__}'))
