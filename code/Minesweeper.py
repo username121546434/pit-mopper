@@ -205,8 +205,6 @@ def load_game(_=None):
     game_window = Toplevel(window)
     game_window.iconbitmap(LOGO)
     game_window.title('Minesweeper')
-    if dark_mode_state.get():
-        dark_title_bar(game_window)
 
     grid = data['grid'].grid
     button_grid = ButtonGrid(data['grid'].grid_size, game_window, grid, dark_mode_state.get())
@@ -236,70 +234,46 @@ def load_game(_=None):
     )
 
 
-def game(_=None):
-    global difficulty
-    global window
-    global chord_state
-    logging.info('Creating a game...')
+def create_game(
+    _ = None,
+    game_window: Toplevel = None,
+    start: datetime = None,
+    grid: ButtonGrid = None,
+    zeros_checked: list[Square] = [],
+    num_mines: int = 0,
+    chording: bool = None,
+    mines_found: int = 0,
+    additional_time: float = 0.0
+):
+    if game_window == None:
+        game_window = Toplevel(window)
+        game_window.iconbitmap(LOGO)
+        game_window.title('Minesweeper')
+        game_window.grid_columnconfigure(1, weight=1)
+        chording = chord_state.get()
 
-    chording = chord_state.get()
+        start = datetime.now()
 
-    game_window = Toplevel(window)
-    game_window.iconbitmap(LOGO)
-    game_window.title('Minesweeper')
-    start = datetime.now()
-    game_window.grid_columnconfigure(1, weight=1)
+        if difficulty.get() == (None, None) or difficulty.get() == ('None', 'None'):
+            logging.error('Game size not chosen')
+            messagebox.showerror(title='Game Size not chosen', message='You have not chosen a game size!')
+            game_window.destroy()
+            return
+        elif difficulty.get() >= (60, 60):
+            logging.warning(f'Size too big {difficulty.get()}')
+            messagebox.showwarning(title='Size too big', message='Warning: When the game is a size of 60x60 or above, the expierence might be so laggy it is unplayable.')
+        elif mines.get() > (difficulty.get()[0] * difficulty.get()[1]) - 10:
+            logging.error(f'Mines too high, game size {difficulty.get()}, mines: {mines.get()}')
+            messagebox.showerror(title='Mines too high', message='You have chosen too many mines.')
+            game_window.destroy()
+            return
+        elif mines.get() > ((difficulty.get()[0] * difficulty.get()[1])/2):
+            logging.warning(f'Number of mines high, game size {difficulty.get()}, mines: {mines.get()}')
+            messagebox.showwarning(title='Number of mines high', message='You have chosen a high amount of mines, so it might take a long time to place them all')
 
     if dark_mode_state.get():
         dark_title_bar(game_window)
-    if difficulty.get() == (None, None) or difficulty.get() == ('None', 'None'):
-        logging.error('Game size not chosen')
-        messagebox.showerror(title='Game Size not chosen', message='You have not chosen a game size!')
-        game_window.destroy()
-        return None
-    elif difficulty.get() >= (60, 60):
-        logging.warning(f'Size too big {difficulty.get()}')
-        messagebox.showwarning(title='Size too big', message='Warning: When the game is a size of 60x60 or above, the expierence might be so laggy it is unplayable.')
-    elif mines.get() > (difficulty.get()[0] * difficulty.get()[1]) - 10:
-        logging.error(f'Mines too high, game size {difficulty.get()}, mines: {mines.get()}')
-        messagebox.showerror(title='Mines too high', message='You have chosen too many mines.')
-        game_window.destroy()
-        return None
-    elif mines.get() > ((difficulty.get()[0] * difficulty.get()[1])/2):
-        logging.warning(f'Number of mines high, game size {difficulty.get()}, mines: {mines.get()}')
-        messagebox.showwarning(title='Number of mines high', message='You have chosen a high amount of mines, so it might take a long time to place them all')
 
-    logging.info('Creating grid of buttons...')
-    grid = ButtonGrid(difficulty.get(), game_window, dark_mode=dark_mode_state.get(), num_mines=mines.get())
-    zeros_checked = []
-    num_mines = 0
-
-    for row in grid.grid:
-        for square in row:
-            if square.category == 'mine':
-                num_mines += 1
-    mines_found = 0
-    create_game(
-        game_window,
-        start,
-        grid,
-        zeros_checked,
-        num_mines,
-        chording,
-        mines_found,
-    )
-
-
-def create_game(
-    game_window: Toplevel,
-    start: datetime,
-    grid: ButtonGrid,
-    zeros_checked: list[Square],
-    num_mines: int,
-    chording: bool,
-    mines_found: int,
-    additional_time: float = 0.0
-):
     logging.info(f'''Creating game with following attributes:
 
 game_window:           {game_window}
@@ -312,6 +286,20 @@ mines_found:           {mines_found}
 additional_time:       {additional_time}
 ''')
     session_start: datetime = datetime.now()
+    total_time = StringVar(game_window)
+
+    Label(game_window, textvariable=total_time, bg=CURRENT_BG, fg=CURRENT_FG).grid(
+        row=1, column=1, sticky=N+S+E+W, pady=(5, 0))
+    game_window.config(bg=CURRENT_BG)
+
+    if grid == None:
+        logging.info('Creating grid of buttons...')
+        grid = ButtonGrid(difficulty.get(), game_window, dark_mode=dark_mode_state.get(), num_mines=mines.get())
+        for row in grid.grid:
+            for square in row:
+                if square.category == 'mine':
+                    num_mines += 1
+
     squares_clicked_on = [
         square
         for row in grid.grid
@@ -325,11 +313,6 @@ additional_time:       {additional_time}
         for square in row
         if square.clicked_on == False
     ]
-    total_time = StringVar(game_window)
-
-    Label(game_window, textvariable=total_time, bg=CURRENT_BG, fg=CURRENT_FG).grid(
-        row=1, column=1, sticky=N+S+E+W, pady=(5, 0))
-    game_window.config(bg=CURRENT_BG)
 
     if additional_time != 0.0:
         total_time.set(f'Time: {format_second(int(additional_time))} 🚩0/{num_mines}💣')
@@ -698,7 +681,7 @@ chord_state = BooleanVar(window)
 dark_mode_state = BooleanVar(window)
 dark_mode_state.trace('w', change_theme)  
 
-Button(window, text='Play!', command=game).pack(pady=(0, 20))
+Button(window, text='Play!', command=create_game).pack(pady=(0, 20))
 
 # create a menubar
 menubar = CustomMenuBar(window)
@@ -730,7 +713,7 @@ window.bind_all('<Control-i>', lambda _: messagebox.showinfo(title='Version Info
 window.bind_all('<Control-u>', lambda _: check_for_updates(__version__, window))
 window.bind_all('<Control-q>', lambda _: quit_game)
 window.bind_all('<Control-o>', load_game)
-window.bind_all('<space>', game)
+window.bind_all('<space>', create_game)
 window.bind_all('<Control-a>', lambda _: chord_state.set(not chord_state.get()))
 window.bind_all('<Control-d>', lambda _: dark_mode_state.set(not dark_mode_state.get()))
 window.bind_all('<Control-h>', show_highscores)
