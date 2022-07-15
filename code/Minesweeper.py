@@ -12,6 +12,7 @@ import ctypes
 from custom_menubar import CustomMenuBar
 import logging
 from ctypes import wintypes
+import shutil
 
 __version__ = '1.3.0'
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
@@ -55,7 +56,7 @@ if allocated_console is None:
     # one-time set up for all instances
     allocated = bool(kernel32.AllocConsole())
     allocated_console = allocated
-    if not allocated:
+    if allocated:
         hwnd = kernel32.GetConsoleWindow()
         user32.ShowWindow(hwnd, SW_HIDE)
 
@@ -618,11 +619,27 @@ def do_nothing():
 
 def quit_game():
     global window
+    logging.info('Closing Minesweeper...')
     window.destroy()
     for code in after_cancel:
         window.after_cancel(code)
+    logging.shutdown()
+    if del_data == 'all':
+        try:
+            shutil.rmtree(APPDATA)
+        except FileNotFoundError:
+            pass
+    elif del_data == 'debug':
+        try:
+            shutil.rmtree(DEBUG)
+        except FileNotFoundError:
+            pass
+    elif del_data == 'highscore':
+        try:
+            os.remove(HIGHSCORE_TXT)
+        except FileNotFoundError:
+            pass
     window.setvar('button pressed', 39393)
-    logging.info('Closing app...')
     del window
     sys.exit()
 
@@ -630,6 +647,30 @@ def quit_game():
 def change_mines():
     mines_counter.set(f'Your game will have {mines.get()} mines')
     logging.info(f'Setting custom mine count: {mines.get()}')
+
+
+def clear_all_data():
+    global del_data
+    if messagebox.askyesno('Delete Data', 'Are you sure you want to delete all data? This includes highscores and debug logs and may break some features.'):
+        logging.info('Requested to delete all data')
+        del_data = 'all'
+        messagebox.showinfo('Delete Data', 'As soon as you close Minesweeper, all data will be deleted')
+
+
+def clear_debug():
+    global del_data
+    if messagebox.askyesno('Delete Data', 'Are you sure you want to delete the debug logs?'):
+        logging.info('Requested to delete debug logs')
+        del_data = 'debug'
+        messagebox.showinfo('Delete Data', 'As soon as you close Minesweeper, the debug logs will be deleted')
+
+
+def clear_highscore():
+    global del_data
+    if messagebox.askyesno('Delete Data', 'Are you sure you want to delete your higscores?'):
+        logging.info('Requested to delete highscore data')
+        del_data = 'highscore'
+        messagebox.showinfo('Delete Data', 'As soon as you close Minesweeper, the your highscores will be deleted')
 
 
 logging.info('Functions successfully defined, creating GUI')
@@ -640,6 +681,7 @@ window.iconbitmap(default=LOGO, bitmap=LOGO)
 window.resizable(False, False)
 
 after_cancel = []
+del_data = 'none'
 
 Label(text='Select Difficulty').pack(pady=(25, 0))
 
@@ -707,6 +749,9 @@ settings.add_command(label='Version Info', command=partial(messagebox.showinfo, 
 console_open = BooleanVar(window, False)
 advanced = Menu(settings, tearoff=0)
 advanced.add_checkbutton(label='Console', command=console, variable=console_open)
+advanced.add_command(label='Delete all data', command=clear_all_data)
+advanced.add_command(label='Delete Debug Logs', command=clear_debug)
+advanced.add_command(label='Delete Highscore', command=clear_highscore)
 settings.add_cascade(label='Advanced', menu=advanced)
 
 # Keyboard Shortcuts
