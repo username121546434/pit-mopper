@@ -16,24 +16,14 @@ from ctypes import wintypes
 __version__ = '1.3.0'
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
 
-user32 = ctypes.WinDLL('user32', use_last_error=True)
-kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
-
-kernel32.GetConsoleWindow.restype = wintypes.HWND
-user32.SendMessageW.argtypes = (wintypes.HWND, wintypes.UINT,
-    wintypes.WPARAM, wintypes.LPARAM)
-user32.ShowWindow.argtypes = (wintypes.HWND, ctypes.c_int)
-
-SW_HIDE = 0
-SW_SHOW = 5
-
-
 APPDATA = os.path.expanduser(r'~\AppData\Local\Minesweeper')
 DEBUG = APPDATA + r'\debug'
 # Creates AppData folder if doesn't exist
 if not os.path.exists(DEBUG):
     os.makedirs(DEBUG)
 
+SW_HIDE = 0
+SW_SHOW = 5
 STRFTIME = r'%A %B %d, %I:%M %p %Y %Z'
 HIGHSCORE_TXT = os.path.join(APPDATA, 'highscore.txt')
 LOGO = "data\\images\\logo.ico"
@@ -52,22 +42,33 @@ debug_log_file = os.path.join(DEBUG, f"{datetime.now().strftime(STRFTIME.replace
 with open(debug_log_file, 'w') as _:
     pass
 
-console_open = False
+user32 = ctypes.WinDLL('user32', use_last_error=True)
+kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+
+kernel32.GetConsoleWindow.restype = wintypes.HWND
+user32.SendMessageW.argtypes = (wintypes.HWND, wintypes.UINT,
+    wintypes.WPARAM, wintypes.LPARAM)
+user32.ShowWindow.argtypes = (wintypes.HWND, ctypes.c_int)
+
 allocated_console = None
 if allocated_console is None:
     # one-time set up for all instances
     allocated = bool(kernel32.AllocConsole())
     allocated_console = allocated
-    if allocated:
+    if not allocated:
         hwnd = kernel32.GetConsoleWindow()
         user32.ShowWindow(hwnd, SW_HIDE)
+
+sys.stdin = open('CONIN$', 'r')
+sys.stdout = open('CONOUT$', 'w')
+sys.stderr = open('CONOUT$', 'w', buffering=1)
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s]: %(message)s",
     handlers=[
         logging.FileHandler(debug_log_file),
-        logging.StreamHandler(open('CONOUT$', 'w', buffering=1)),
+        logging.StreamHandler(sys.stderr),
     ]
 )
 
@@ -84,21 +85,20 @@ sys.excepthook = handle_exception
 
 
 def show_console():
-    global console_open
+    logging.info('Showing Console')
+    logging.warning('If you close this window, the app will terminate')
     hwnd = kernel32.GetConsoleWindow()
     user32.ShowWindow(hwnd, SW_SHOW)
-    console_open = True
 
 
 def hide_console():
-    global console_open
+    logging.info('Hiding Console')
     hwnd = kernel32.GetConsoleWindow()
     user32.ShowWindow(hwnd, SW_HIDE)
-    console_open = False
 
 
 def console():
-    if console_open:
+    if not console_open.get():
         hide_console()
     else:
         show_console()
@@ -636,7 +636,7 @@ logging.info('Functions successfully defined, creating GUI')
 
 window = Tk()
 window.title('Game Loader')
-window.iconbitmap(LOGO)
+window.iconbitmap(default=LOGO, bitmap=LOGO)
 window.resizable(False, False)
 
 after_cancel = []
@@ -704,8 +704,9 @@ settings.add_separator()
 settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, window), accelerator='Ctrl+U')
 settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Minesweeper Version: {__version__}'), accelerator='Ctrl+I')
 
+console_open = BooleanVar(window, False)
 advanced = Menu(settings, tearoff=0)
-advanced.add_command(label='Console', command=console)
+advanced.add_checkbutton(label='Console', command=console, variable=console_open)
 settings.add_cascade(label='Advanced', menu=advanced)
 
 # Keyboard Shortcuts

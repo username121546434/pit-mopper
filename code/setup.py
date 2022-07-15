@@ -4,7 +4,7 @@ base = None
 
 executables = [Executable(
     "./minesweeper-python/code/Minesweeper.py",
-    base=None,
+    base='Win32GUI',
     icon='./minesweeper-python/code/data/images/logo.ico',
     copyright='GNU GPL v3, see LICENSE.txt for more info'
 )]
