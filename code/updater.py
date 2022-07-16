@@ -6,6 +6,7 @@ from tkinter import *
 from tkinter import messagebox
 from markdown import Markdown
 from io import StringIO
+from multiplayer.network import check_internet
 
 
 def unmark_element(element, stream=None):
@@ -30,14 +31,10 @@ def md_to_text(text):
     return __md.convert(text)
 
 def check_for_updates(current_version: str, master: Tk | Toplevel):
-    try:
-        response = requests.get('https://api.github.com/repos/username121546434/minesweeper-python/releases')
-    except requests.exceptions.ConnectionError as error:
-        messagebox.showerror(title='Failed to Check for Updates', message=f'''This is most likely because you do not have an internet connection.
-If you do have an internet connection, then here are details so you can report a bug:
-
-{error}''')
-        return None
+    if not check_internet():
+        messagebox.showerror('No internet', 'You can only check for updates with an internet connection')
+        return
+    response = requests.get('https://api.github.com/repos/username121546434/minesweeper-python/releases')
     response.raise_for_status()
     latest_version = response.json()[0]["tag_name"]
     body = md_to_text(response.json()[0]['body'])
