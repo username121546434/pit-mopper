@@ -4,6 +4,8 @@ I have recreated the game "Mineseweeper" in python.
 
 Project Structure:
 - ./code - Actual source code for Minesweeper
+- ./code/data - Data files for Minesweeper(ie: Images and Fonts)
+- ./code/multiplayer - Soon going to files for Minesweeper multiplayer
 - ./images - Images used for documentation
 
 ## Keyboard Shorcuts
