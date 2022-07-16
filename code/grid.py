@@ -50,6 +50,11 @@ class ButtonGrid:
         self.grid = grid
         self.root.winfo_toplevel().wait_variable('button pressed')
         coordinates = button_pressed.get()
+        if coordinates == 39393: # Stop message
+            try:
+                self.root.destroy()
+            except TclError:
+                return
 
         for square, _ in self.iter_squares():
             square.config(command=None)

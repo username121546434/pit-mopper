@@ -1,7 +1,9 @@
 from functools import partial
+import json
 import pickle
 import sys
 from tkinter import *
+import requests
 from grid import ButtonGrid, PickleButtonGrid
 from squares import PickleSquare, Square
 from datetime import datetime
@@ -14,6 +16,7 @@ import logging
 from ctypes import wintypes
 import shutil
 import win32api
+from multiplayer import network
 
 __version__ = '1.3.0'
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
@@ -80,17 +83,19 @@ def handle_exception(exc_type, exc_value, exc_traceback):
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
-
+    messagebox.showerror('Unknown Error', f'There has been an error, details are below\n\n{exc_value}')
+    if check_internet():
+        if messagebox.askyesno('Unknown Error', 'Would you like to submit a bug report?'):
+            bug_report()
     logging.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
 
 sys.excepthook = handle_exception
-
 
 def show_console():
     logging.info('Showing Console')
     logging.warning('If you close this window, the app will terminate')
     hwnd = kernel32.GetConsoleWindow()
-    win32api.SetConsoleCtrlHandler(quit_game, True)
+    win32api.SetConsoleCtrlHandler(quit_app, True)
     user32.ShowWindow(hwnd, SW_SHOW)
 
 
@@ -199,10 +204,13 @@ grid.grid_size       {grid.grid_size}
 def load_game(_=None):
     logging.info('Opening game...')
     file = filedialog.askopenfile('rb', filetypes=(('Minesweeper Game Files', '*.min'), ('Any File', '*.*')))
-    logging.info(f'Reading {file}...')
-    with file as f:  # Un Pickling
-        data = pickle.load(f)
-        data: dict[str]
+    if file == None:
+        return
+    else:
+        logging.info(f'Reading {file}...')
+        with file as f:  # Un Pickling
+            data = pickle.load(f)
+            data: dict[str]
     logging.info(f'{file} successfully read, setting up game...')
 
     game_window = Toplevel(window)
@@ -248,6 +256,7 @@ def create_game(
     mines_found: int = 0,
     additional_time: float = 0.0
 ):
+    global after_cancel
     if game_window == None:
         game_window = Toplevel(window)
         game_window.iconbitmap(LOGO)
@@ -298,6 +307,11 @@ additional_time:       {additional_time}
     if grid == None:
         logging.info('Creating grid of buttons...')
         grid = ButtonGrid(difficulty.get(), game_window, dark_mode=dark_mode_state.get(), num_mines=mines.get())
+        if app_closed:
+            try:
+                game_window.destroy()
+            except TclError:
+                return
         for row in grid.grid:
             for square in row:
                 if square.category == 'mine':
@@ -362,7 +376,12 @@ additional_time:       {additional_time}
 
     logging.info('Entering while loop...')
     while True:
-        global after_cancel
+        if app_closed:
+            try:
+                game_window.destroy()
+            except TclError:
+                pass
+            return
         after_cancel.append(window.after(100, do_nothing))
 
         now = datetime.now()
@@ -619,12 +638,14 @@ def do_nothing():
     pass
 
 
-def quit_game(_=None):
-    global window
+def quit_app(_=None):
+    global window, app_closed
+    app_closed = True
     logging.info('Closing Minesweeper...')
-    window.destroy()
     for code in after_cancel:
         window.after_cancel(code)
+    window.setvar('button pressed', 39393)
+    window.destroy()
     logging.shutdown()
     if del_data == 'all':
         try:
@@ -641,7 +662,6 @@ def quit_game(_=None):
             os.remove(HIGHSCORE_TXT)
         except FileNotFoundError:
             pass
-    window.setvar('button pressed', 39393)
     del window
     sys.exit()
 
@@ -675,15 +695,54 @@ def clear_highscore():
         messagebox.showinfo('Delete Data', 'As soon as you close Minesweeper, the your highscores will be deleted')
 
 
+def bug_report():
+    new_window = Toplevel(window)
+
+    Label(new_window, text='Enter a discription of what happenned below, also include information about which platform you are on etc')
+    describtion = Text(new_window)
+    describtion.pack()
+
+    Button(new_window, text='Continue', command=partial(make_github_issue, title=describtion.get('1.0', 'end')))
+
+
+def make_github_issue(title, body=None, assignee=None, milestone=None, labels=None):
+    # https://gist.github.com/JeffPaine/3145490
+    '''Create an issue on github.com using the given parameters.'''
+    # Our url to create issues via POST
+    url = 'https://api.github.com/repos/username121546434/minesweeper-python/issues'
+    # Create an authenticated session to create the issue
+    session = requests.Session(auth=('bug-reports1', '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'))
+    # Create our issue
+    issue = {'title': title,
+             'body': body,
+             'assignee': assignee,
+             'milestone': milestone,
+             'labels': labels}
+    # Add the issue to our repository
+    r = session.post(url, json.dumps(issue))
+
+
+def check_internet():
+    logging.info('Checking internet...')
+    if network.check_internet():
+        logging.info('Internet available')
+        return True
+    else:
+        logging.info('Internet not available')
+        return False
+
+
 logging.info('Functions successfully defined, creating GUI')
 
 window = Tk()
 window.title('Game Loader')
 window.iconbitmap(default=LOGO, bitmap=LOGO)
 window.resizable(False, False)
+window.report_callback_exception = handle_exception
 
 after_cancel = []
 del_data = 'none'
+app_closed = False
 
 Label(text='Select Difficulty').pack(pady=(25, 0))
 
@@ -739,7 +798,7 @@ file_menu = Menu(
 file_menu.add_command(label='Open File', command=load_game, accelerator='Ctrl+O')
 file_menu.add_command(label='Highscores', command=show_highscores, accelerator='Ctrl+H')
 file_menu.add_separator()
-file_menu.add_command(label='Exit', command=quit_game, accelerator='Ctrl+Q')
+file_menu.add_command(label='Exit', command=quit_app, accelerator='Ctrl+Q')
 
 settings = Menu(menubar, tearoff=0)
 settings.add_checkbutton(variable=chord_state, label='Enable Chording', accelerator='Ctrl+A')
@@ -747,19 +806,19 @@ settings.add_checkbutton(variable=dark_mode_state, label='Dark Mode', accelerato
 settings.add_separator()
 settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, window), accelerator='Ctrl+U')
 settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Minesweeper Version: {__version__}'), accelerator='Ctrl+I')
+settings.add_separator()
+settings.add_command(label='Delete all data', command=clear_all_data)
+settings.add_command(label='Delete Debug Logs', command=clear_debug)
+settings.add_command(label='Delete Highscore', command=clear_highscore)
 
 console_open = BooleanVar(window, False)
 advanced = Menu(settings, tearoff=0)
 advanced.add_checkbutton(label='Console', command=console, variable=console_open)
-advanced.add_command(label='Delete all data', command=clear_all_data)
-advanced.add_command(label='Delete Debug Logs', command=clear_debug)
-advanced.add_command(label='Delete Highscore', command=clear_highscore)
-settings.add_cascade(label='Advanced', menu=advanced)
 
 # Keyboard Shortcuts
 window.bind_all('<Control-i>', lambda _: messagebox.showinfo(title='Version Info', message=f'Minesweeper Version: {__version__}'))
 window.bind_all('<Control-u>', lambda _: check_for_updates(__version__, window))
-window.bind_all('<Control-q>', lambda _: quit_game)
+window.bind_all('<Control-q>', lambda _: quit_app)
 window.bind_all('<Control-o>', load_game)
 window.bind_all('<space>', create_game)
 window.bind_all('<Control-a>', lambda _: chord_state.set(not chord_state.get()))
@@ -768,7 +827,8 @@ window.bind_all('<Control-h>', show_highscores)
 
 menubar.add_menu(menu=file_menu, title='File')
 menubar.add_menu(menu=settings, title='Settings')
-window.protocol('WM_DELETE_WINDOW', quit_game)
+menubar.add_menu(menu=advanced, title='Advanced')
+window.protocol('WM_DELETE_WINDOW', quit_app)
 
 logging.info('GUI successfully created')
 window.mainloop()
