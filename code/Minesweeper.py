@@ -13,6 +13,7 @@ from custom_menubar import CustomMenuBar
 import logging
 from ctypes import wintypes
 import shutil
+import win32api
 
 __version__ = '1.3.0'
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
@@ -89,6 +90,7 @@ def show_console():
     logging.info('Showing Console')
     logging.warning('If you close this window, the app will terminate')
     hwnd = kernel32.GetConsoleWindow()
+    win32api.SetConsoleCtrlHandler(quit_game, True)
     user32.ShowWindow(hwnd, SW_SHOW)
 
 
@@ -617,7 +619,7 @@ def do_nothing():
     pass
 
 
-def quit_game():
+def quit_game(_=None):
     global window
     logging.info('Closing Minesweeper...')
     window.destroy()
