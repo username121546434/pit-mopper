@@ -9,21 +9,23 @@ class ButtonGrid:
         self, grid_size: tuple[int, int],
         window: Toplevel,
         grid: list[list[PickleSquare]] | None = None,
-        dark_mode:bool = False,
-        num_mines:int = -1
+        dark_mode: bool = False,
+        num_mines: int = -1,
+        row: int = 2,
+        column: int = 1
     ):
         self.grid_size = grid_size
         self.root = window
         self.dark_mode = dark_mode
         self.num_mines = num_mines
         if grid == None:
-            self.grid = self.button_grid()
+            self.grid = self.button_grid(row, column)
         else:
-            self.grid = self.setup_grid(grid)
+            self.grid = self.setup_grid(grid, row, column)
 
-    def button_grid(self) -> list[list[Square]]:
-        Grid.rowconfigure(self.root, 2, weight=1)
-        Grid.columnconfigure(self.root, 1, weight=1)
+    def button_grid(self, row_num, col_num) -> list[list[Square]]:
+        Grid.rowconfigure(self.root, row_num, weight=1)
+        Grid.columnconfigure(self.root, col_num, weight=1)
         grid = []
         blank = "   " * 3
         button_pressed = Variable(self.root.winfo_toplevel(), None, 'button pressed')
@@ -96,9 +98,9 @@ class ButtonGrid:
 
         return grid
     
-    def setup_grid(self, grid: list[list[PickleSquare]]) -> list[list[Square]]:
-        Grid.rowconfigure(self.root, 1, weight=1)
-        Grid.columnconfigure(self.root, 1, weight=1)
+    def setup_grid(self, grid: list[list[PickleSquare]], row_num, col_num) -> list[list[Square]]:
+        Grid.rowconfigure(self.root, row_num, weight=1)
+        Grid.columnconfigure(self.root, col_num, weight=1)
         new_grid = []
         # Create & Configure frame
         frame = Frame(self.root)

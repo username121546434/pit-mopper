@@ -237,6 +237,7 @@ def load_game(_=None):
                 mines_found += 1
 
     create_game(
+        None,
         game_window,
         start,
         button_grid,
