@@ -1,4 +1,5 @@
 from functools import partial
+import traceback
 import pickle
 import sys
 from tkinter import *
@@ -536,10 +537,22 @@ def load_highscore() -> dict[str, float | int] | float:
         else:
             with open(os.path.join(os.getcwd(), 'highscore.txt'), 'rb') as f:
                 value = pickle.load(f)
+            if isinstance(value, dict):
+                logging.info(f'highscore.txt successfully read')
+            else:
+                logging.info(f'highscore.txt contains invalid data: {value}')
+                messagebox.showerror('Highscore value invalide', 'The highscore file contains an invalid value, press OK to delete the content of it')
+                logging.info('Removing file...')
+                os.remove(HIGHSCORE_TXT)
+                value = float('inf')
             messagebox.showerror('Highscore file in wrong place', 'The highscore file was found, but in the wrong spot, as soon as you click OK, Minesweeper will attempt to move the file to a new location, you might have to delete the file yourself.')
-            with open(HIGHSCORE_TXT, 'wb') as f:
-                pickle.dump(value, f)
-            os.remove(os.path.join(os.getcwd(), 'highscore.txt'))
+            if not isinstance(value, float):
+                with open(HIGHSCORE_TXT, 'wb') as f:
+                    pickle.dump(value, f)
+            try:
+                os.remove(os.path.join(os.getcwd(), 'highscore.txt'))
+            except:
+                messagebox.showerror('File Delete', 'Unable to delete file, you will have to delete it yourself')
             return value
     else:
         logging.info(f'{HIGHSCORE_TXT} does exist, reading data from it')
@@ -549,7 +562,7 @@ def load_highscore() -> dict[str, float | int] | float:
             logging.info(f'{HIGHSCORE_TXT} successfully read')
             return value
         else:
-            logging.info(f'{HIGHSCORE_TXT} contains invalid data {value}')
+            logging.info(f'{HIGHSCORE_TXT} contains invalid data: {value}')
             messagebox.showerror('Highscore value invalide', 'The highscore file contains an invalid value, press OK to delete the content of it')
             logging.info('Removing file...')
             os.remove(HIGHSCORE_TXT)
@@ -708,32 +721,38 @@ def bug_report():
     description = Text(new_window, width=1, height=1)
     description.pack(side='top',fill='both',expand=True)
 
-    Button(new_window, text='Continue', command=partial(make_github_issue, body=description.get('1.0', 'end'), window=new_window)).pack()
+    Button(new_window, text='Continue', command=lambda: make_github_issue(body=description.get('1.0', 'end'))).pack()
     window.wait_window(new_window)
     if not app_closed:
         window.bind_all('<space>', create_game)
 
 
-def make_github_issue(body=None, window=None):
-    if not app_closed:
-        window.destory()
+def make_github_issue(body=None):
     with open(debug_log_file, 'r') as f:
         debug_log = f.read()
-    body = f'''This is a bug report from a user
+    last_traceback = traceback.format_exc()
+    body = f'''This is an auto generated bug report
 
-### User description
+## Description
 {body}
 
-### More information
-Traceback: {str(sys.last_traceback)}
-Type: {str(sys.last_type)}
-Value: {str(sys.last_value)}
+## More information
+Traceback: {sys.last_traceback}
+Type: {sys.last_type}
+Value: {sys.last_value}
+
+Full Traceback:
+```
+{last_traceback}
+```
 
 <details>
   <summary>
     Debug Log Output
   </summary>
-  {debug_log}
+{debug_log.splitlines()[0]}
+
+{"".join(debug_log.splitlines(True)[1:])}
 </details>
 '''
     messagebox.showinfo('Bug Report', 'As soon as you press OK, you will be directed to a link where you can report this bug and an auto generated issue will be copied to your clipboard')
