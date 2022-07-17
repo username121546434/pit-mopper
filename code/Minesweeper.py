@@ -714,7 +714,8 @@ def bug_report():
 
 
 def make_github_issue(body=None, window=None):
-    window.destory()
+    if not app_closed:
+        window.destory()
     with open(debug_log_file, 'r') as f:
         debug_log = f.read()
     body = f'''This is a bug report from a user
