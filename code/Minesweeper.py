@@ -19,7 +19,7 @@ import win32api
 from multiplayer import network
 import pyperclip
 
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
 
 APPDATA = os.path.expanduser(r'~\AppData\Local\Minesweeper')
@@ -109,7 +109,7 @@ def hide_console():
     user32.ShowWindow(hwnd, SW_HIDE)
 
 
-def console():
+def console(*_):
     if not console_open.get():
         hide_console()
     else:
@@ -743,8 +743,7 @@ Value: {sys.last_value}
 
 Full Traceback:
 ```
-{last_traceback}
-```
+{last_traceback}```
 
 <details>
   <summary>
@@ -819,6 +818,8 @@ Label(window, text='-1 means it will generate a random number/use default').pack
 Spinbox(window, textvariable=mines, width=4, from_= -1, to = 2000, command=change_mines).pack()
 
 chord_state = BooleanVar(window)
+console_open = BooleanVar(window, False)
+console_open.trace('w', console)
 dark_mode_state = BooleanVar(window)
 dark_mode_state.trace('w', change_theme)  
 
@@ -849,19 +850,19 @@ settings.add_command(label='Delete all data', command=clear_all_data)
 settings.add_command(label='Delete Debug Logs', command=clear_debug)
 settings.add_command(label='Delete Highscore', command=clear_highscore)
 
-console_open = BooleanVar(window, False)
 advanced = Menu(settings, tearoff=0)
-advanced.add_checkbutton(label='Console', command=console, variable=console_open)
+advanced.add_checkbutton(label='Console', variable=console_open, accelerator='Ctrl+F')
 
 # Keyboard Shortcuts
 window.bind_all('<Control-i>', lambda _: messagebox.showinfo(title='Version Info', message=f'Minesweeper Version: {__version__}'))
 window.bind_all('<Control-u>', lambda _: check_for_updates(__version__, window))
-window.bind_all('<Control-q>', lambda _: quit_app)
+window.bind_all('<Control-q>', quit_app)
 window.bind_all('<Control-o>', load_game)
 window.bind_all('<space>', create_game)
 window.bind_all('<Control-a>', lambda _: chord_state.set(not chord_state.get()))
 window.bind_all('<Control-d>', lambda _: dark_mode_state.set(not dark_mode_state.get()))
 window.bind_all('<Control-h>', show_highscores)
+window.bind_all('<Control-x>', lambda _: console_open.set(not console_open.get()))
 
 menubar.add_menu(menu=file_menu, title='File')
 menubar.add_menu(menu=settings, title='Settings')
