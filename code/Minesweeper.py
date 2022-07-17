@@ -1,9 +1,8 @@
 from functools import partial
-import json
 import pickle
 import sys
 from tkinter import *
-import requests
+import webbrowser
 from grid import ButtonGrid, PickleButtonGrid
 from squares import PickleSquare, Square
 from datetime import datetime
@@ -17,6 +16,7 @@ from ctypes import wintypes
 import shutil
 import win32api
 from multiplayer import network
+import pyperclip
 
 __version__ = '1.3.0'
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
@@ -83,6 +83,9 @@ def handle_exception(exc_type, exc_value, exc_traceback):
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
+    sys.last_type = exc_type
+    sys.last_value = exc_value
+    sys.last_traceback = exc_traceback
     messagebox.showerror('Unknown Error', f'There has been an error, details are below\n\n{exc_value}')
     if check_internet():
         if messagebox.askyesno('Unknown Error', 'Would you like to submit a bug report?'):
@@ -697,29 +700,43 @@ def clear_highscore():
 
 def bug_report():
     new_window = Toplevel(window)
+    new_window.config(padx=20, pady=20)
+    window.unbind_all('<space>')
 
-    Label(new_window, text='Enter a discription of what happenned below, also include information about which platform you are on etc')
-    describtion = Text(new_window)
-    describtion.pack()
+    Label(new_window, text='Enter a description of what happenned below, also include information about which platform you are on etc').pack()
+    description = Text(new_window, width=1, height=1)
+    description.pack(side='top',fill='both',expand=True)
 
-    Button(new_window, text='Continue', command=partial(make_github_issue, title=describtion.get('1.0', 'end')))
+    Button(new_window, text='Continue', command=partial(make_github_issue, body=description.get('1.0', 'end'), window=new_window)).pack()
+    window.wait_window(new_window)
+    if not app_closed:
+        window.bind_all('<space>', create_game)
 
 
-def make_github_issue(title, body=None, assignee=None, milestone=None, labels=None):
-    # https://gist.github.com/JeffPaine/3145490
-    '''Create an issue on github.com using the given parameters.'''
-    # Our url to create issues via POST
-    url = 'https://api.github.com/repos/username121546434/minesweeper-python/issues'
-    # Create an authenticated session to create the issue
-    session = requests.Session(auth=('bug-reports1', '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'))
-    # Create our issue
-    issue = {'title': title,
-             'body': body,
-             'assignee': assignee,
-             'milestone': milestone,
-             'labels': labels}
-    # Add the issue to our repository
-    r = session.post(url, json.dumps(issue))
+def make_github_issue(body=None, window=None):
+    window.destory()
+    with open(debug_log_file, 'r') as f:
+        debug_log = f.read()
+    body = f'''This is a bug report from a user
+
+### User description
+{body}
+
+### More information
+Traceback: {str(sys.last_traceback)}
+Type: {str(sys.last_type)}
+Value: {str(sys.last_value)}
+
+<details>
+  <summary>
+    Debug Log Output
+  </summary>
+  {debug_log}
+</details>
+'''
+    messagebox.showinfo('Bug Report', 'As soon as you press OK, you will be directed to a link where you can report this bug and an auto generated issue will be copied to your clipboard')
+    pyperclip.copy(body)
+    webbrowser.open('https://github.com/username121546434/minesweeper-python/issues')
 
 
 def check_internet():
