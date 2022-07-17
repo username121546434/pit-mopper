@@ -284,6 +284,11 @@ def create_game(
             messagebox.showerror(title='Mines too high', message='You have chosen too many mines.')
             game_window.destroy()
             return
+        elif mines.get() == 0 or mines.get() < -1:
+            logging.error(f'Mines too low ({mines.get()})')
+            messagebox.showerror('Mines too low', 'You cannot have a mine count below 0 with -1 being a special number')
+            game_window.destroy()
+            return
         elif mines.get() > ((difficulty.get()[0] * difficulty.get()[1])/2):
             logging.warning(f'Number of mines high, game size {difficulty.get()}, mines: {mines.get()}')
             messagebox.showwarning(title='Number of mines high', message='You have chosen a high amount of mines, so it might take a long time to place them all')
