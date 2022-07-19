@@ -789,7 +789,7 @@ settings.add_command(label='Delete Debug Logs', command=clear_debug)
 settings.add_command(label='Delete Highscore', command=clear_highscore)
 
 advanced = Menu(settings, tearoff=0)
-advanced.add_checkbutton(label='Console', variable=console_open, accelerator='Ctrl+F')
+advanced.add_checkbutton(label='Console', variable=console_open, accelerator='Ctrl+X')
 
 # Keyboard Shortcuts
 window.bind_all('<Control-i>', lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {__version__}'))
