@@ -22,7 +22,7 @@ import pyperclip
 __version__ = '1.4.0'
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
 
-APPDATA = os.path.expanduser(r'~\AppData\Local\Minesweeper')
+APPDATA = os.path.expanduser(r'~\AppData\Local\Pit Mopper')
 DEBUG = APPDATA + r'\debug'
 # Creates AppData folder if doesn't exist
 if not os.path.exists(DEBUG):
@@ -197,7 +197,7 @@ grid.grid_size       {grid.grid_size}
         'difficulty': difficulty.get()
     }
     logging.info(f'Data to save: {data}')
-    with filedialog.asksaveasfile('wb', filetypes=(('Minesweeper Game Files', '*.min'), ('Any File', '*.*'))) as f:  # Pickling
+    with filedialog.asksaveasfile('wb', filetypes=(('Pit Mopper Game Files', '*.min'), ('Any File', '*.*'))) as f:  # Pickling
         messagebox.showinfo('Save Game', 'You game is being saved right now, this may a few moments. Please wait until another popup comes before closing the game.')
         logging.info('Saving data...')
         pickle.dump(data, f)
@@ -207,7 +207,7 @@ grid.grid_size       {grid.grid_size}
 
 def load_game(_=None):
     logging.info('Opening game...')
-    file = filedialog.askopenfile('rb', filetypes=(('Minesweeper Game Files', '*.min'), ('Any File', '*.*')))
+    file = filedialog.askopenfile('rb', filetypes=(('Pit Mopper Game Files', '*.min'), ('Any File', '*.*')))
     if file == None:
         return
     else:
@@ -219,7 +219,7 @@ def load_game(_=None):
 
     game_window = Toplevel(window)
     game_window.iconbitmap(LOGO)
-    game_window.title('Minesweeper')
+    game_window.title('Pit Mopper')
 
     grid = data['grid'].grid
     button_grid = ButtonGrid(data['grid'].grid_size, game_window, grid, dark_mode_state.get())
@@ -265,7 +265,7 @@ def create_game(
     if game_window == None:
         game_window = Toplevel(window)
         game_window.iconbitmap(LOGO)
-        game_window.title('Minesweeper')
+        game_window.title('Pit Mopper')
         game_window.grid_columnconfigure(1, weight=1)
         chording = chord_state.get()
 
@@ -346,8 +346,8 @@ additional_time:       {additional_time}
 
     highscore_data = load_highscore()
     game_size_str = f'{difficulty.get()[0]}x{difficulty.get()[1]}'
-    game_window.title(f'{game_size_str} Minesweeper Game')
-    logging.info(f'{game_size_str} Minesweeper Game starting...')
+    game_window.title(f'{game_size_str} Pit Mopper Game')
+    logging.info(f'{game_size_str} Pit Mopper Game starting...')
     if not isinstance(highscore_data, float):
         try:
             highscore = highscore_data[game_size_str]
@@ -550,7 +550,7 @@ def load_highscore() -> dict[str, float | int] | float:
                 logging.info('Removing file...')
                 os.remove(HIGHSCORE_TXT)
                 value = float('inf')
-            messagebox.showerror('Highscore file in wrong place', 'The highscore file was found, but in the wrong spot, as soon as you click OK, Minesweeper will attempt to move the file to a new location, you might have to delete the file yourself.')
+            messagebox.showerror('Highscore file in wrong place', 'The highscore file was found, but in the wrong spot, as soon as you click OK, Pit Mopper will attempt to move the file to a new location, you might have to delete the file yourself.')
             if not isinstance(value, float):
                 with open(HIGHSCORE_TXT, 'wb') as f:
                     pickle.dump(value, f)
@@ -663,7 +663,7 @@ def do_nothing():
 def quit_app(_=None):
     global window, app_closed
     app_closed = True
-    logging.info('Closing Minesweeper...')
+    logging.info('Closing Pit Mopper...')
     for code in after_cancel:
         window.after_cancel(code)
     window.setvar('button pressed', 39393)
@@ -698,7 +698,7 @@ def clear_all_data():
     if messagebox.askyesno('Delete Data', 'Are you sure you want to delete all data? This includes highscores and debug logs and may break some features.'):
         logging.info('Requested to delete all data')
         del_data = 'all'
-        messagebox.showinfo('Delete Data', 'As soon as you close Minesweeper, all data will be deleted')
+        messagebox.showinfo('Delete Data', 'As soon as you close Pit Mopper, all data will be deleted')
 
 
 def clear_debug():
@@ -706,7 +706,7 @@ def clear_debug():
     if messagebox.askyesno('Delete Data', 'Are you sure you want to delete the debug logs?'):
         logging.info('Requested to delete debug logs')
         del_data = 'debug'
-        messagebox.showinfo('Delete Data', 'As soon as you close Minesweeper, the debug logs will be deleted')
+        messagebox.showinfo('Delete Data', 'As soon as you close Pit Mopper, the debug logs will be deleted')
 
 
 def clear_highscore():
@@ -714,7 +714,7 @@ def clear_highscore():
     if messagebox.askyesno('Delete Data', 'Are you sure you want to delete your higscores?'):
         logging.info('Requested to delete highscore data')
         del_data = 'highscore'
-        messagebox.showinfo('Delete Data', 'As soon as you close Minesweeper, the your highscores will be deleted')
+        messagebox.showinfo('Delete Data', 'As soon as you close Pit Mopper, the your highscores will be deleted')
 
 
 def bug_report():
@@ -761,7 +761,7 @@ Full Traceback:
 '''
     messagebox.showinfo('Bug Report', 'As soon as you press OK, you will be directed to a link where you can report this bug and an auto generated issue will be copied to your clipboard')
     pyperclip.copy(body)
-    webbrowser.open('https://github.com/username121546434/minesweeper-python/issues')
+    webbrowser.open('https://github.com/username121546434/pit-mopper/issues')
 
 
 def check_internet():
@@ -849,7 +849,7 @@ settings.add_checkbutton(variable=chord_state, label='Enable Chording', accelera
 settings.add_checkbutton(variable=dark_mode_state, label='Dark Mode', accelerator='Ctrl+D')
 settings.add_separator()
 settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, window), accelerator='Ctrl+U')
-settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Minesweeper Version: {__version__}'), accelerator='Ctrl+I')
+settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Pit Mopper Version: {__version__}'), accelerator='Ctrl+I')
 settings.add_separator()
 settings.add_command(label='Delete all data', command=clear_all_data)
 settings.add_command(label='Delete Debug Logs', command=clear_debug)
@@ -859,7 +859,7 @@ advanced = Menu(settings, tearoff=0)
 advanced.add_checkbutton(label='Console', variable=console_open, accelerator='Ctrl+F')
 
 # Keyboard Shortcuts
-window.bind_all('<Control-i>', lambda _: messagebox.showinfo(title='Version Info', message=f'Minesweeper Version: {__version__}'))
+window.bind_all('<Control-i>', lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {__version__}'))
 window.bind_all('<Control-u>', lambda _: check_for_updates(__version__, window))
 window.bind_all('<Control-q>', quit_app)
 window.bind_all('<Control-o>', load_game)

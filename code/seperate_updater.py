@@ -13,7 +13,7 @@ if os.path.exists('unins000.exe'):
 else:
     download_zip = True
 
-response = requests.get('https://api.github.com/repos/username121546434/minesweeper-python/releases')
+response = requests.get('https://api.github.com/repos/username121546434/pit-mopper/releases')
 if download_zip:
     asset = [
         asset

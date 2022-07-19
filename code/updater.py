@@ -34,7 +34,7 @@ def check_for_updates(current_version: str, master: Tk | Toplevel):
     if not check_internet():
         messagebox.showerror('No internet', 'You can only check for updates with an internet connection')
         return
-    response = requests.get('https://api.github.com/repos/username121546434/minesweeper-python/releases')
+    response = requests.get('https://api.github.com/repos/username121546434/pit-mopper/releases')
     response.raise_for_status()
     latest_version = response.json()[0]["tag_name"]
     body = md_to_text(response.json()[0]['body'])
@@ -56,7 +56,7 @@ def check_for_updates(current_version: str, master: Tk | Toplevel):
         master.wait_window(window)
 
     if Version(latest_version) > Version(current_version) and choice.get():
-        messagebox.showinfo(title='Update', message='Press "Ok" to update Minesweeper')
+        messagebox.showinfo(title='Update', message='Press "Ok" to update Pit Mopper')
         os.startfile('updater.exe')
         sys.exit()
     else:

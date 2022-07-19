@@ -3,9 +3,9 @@ from cx_Freeze import setup, Executable
 base = None    
 
 executables = [Executable(
-    "./minesweeper-python/code/Minesweeper.py",
+    "./pit-mopper/code/pit-mopper.py",
     base='Win32GUI',
-    icon='./minesweeper-python/code/data/images/logo.ico',
+    icon='./pit-mopper/code/data/images/logo.ico',
     copyright='GNU GPL v3, see LICENSE.txt for more info'
 )]
 
@@ -17,7 +17,7 @@ packages = [
     'html.parser'
 ]
 include_files = [
-    './minesweeper-python/code/data'
+    './pit-mopper/code/data'
 ]
 options = {
     'build_exe': {    
@@ -27,7 +27,7 @@ options = {
 }
 
 setup(
-    name = "Minesweeper",
+    name = "Pit Mopper",
     options = options,
     version = "1.2.0",
     description = '',

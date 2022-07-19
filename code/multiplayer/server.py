@@ -1,4 +1,4 @@
-"""Soon going to the server for online multiplayer minesweeper games.
+"""Soon going to the server for online multiplayer pit mopper games.
 Multiplayer games will most likely not coming anytime soon
 """
 import socket
