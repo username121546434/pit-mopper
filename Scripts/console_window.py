@@ -4,7 +4,6 @@ import sys
 from .constants import *
 from .base_logger import init_logger
 import logging
-init_logger()
 
 
 def get_console():
@@ -32,6 +31,7 @@ def get_console():
 
 
 def show_console():
+    init_logger()
     logging.info('Showing Console')
     logging.warning('If you close this window, the app will terminate')
     hwnd = kernel32.GetConsoleWindow()
@@ -39,6 +39,7 @@ def show_console():
 
 
 def hide_console():
+    init_logger()
     logging.info('Hiding Console')
     hwnd = kernel32.GetConsoleWindow()
     user32.ShowWindow(hwnd, SW_HIDE)

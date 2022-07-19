@@ -12,11 +12,13 @@ from tkinter import filedialog, messagebox
 
 from Scripts.constants import *
 from Scripts.console_window import *
+get_console()
+with open(debug_log_file, 'w') as _:
+    pass
 # Creates AppData folder if doesn't exist
 if not os.path.exists(DEBUG):
     os.makedirs(DEBUG)
 from Scripts.base_logger import init_logger
-get_console()
 init_logger()
 from Scripts.custom_menubar import CustomMenuBar
 from Scripts.squares import PickleSquare, Square
