@@ -1,5 +1,6 @@
 from tkinter import *
-from load_font import load_font
+from .load_font import load_font
+from .constants import DEFAULT_BG, DARK_MODE_BG
 
 font_family, font_name = load_font(r"data\fonts\DSEG7ClassicMini-Bold.ttf")
 
@@ -25,8 +26,6 @@ dark_mode_colors = {
     8: 'DarkGrey'
 }
 
-DARK_MODE_BG = '#282828'
-LIGHT_MODE_BG = '#f0f0f0f0f0f0'
 
 class Square(Button):
     def __init__(self, master: Misc | None = ..., text='') -> None:
@@ -78,7 +77,7 @@ class Square(Button):
             if self.dark_mode:
                 self.config(bg=DARK_MODE_BG)
             else:
-                self.config(bg=LIGHT_MODE_BG)
+                self.config(bg=DEFAULT_BG)
             self.config(text='0')
         self.clicked_on = True
     
@@ -88,9 +87,9 @@ class Square(Button):
             if self.clicked_on and self.num != None:
                 self.config(bg=num_colors[self.num])
             elif self.flaged:
-                self.config(fg='black', bg=LIGHT_MODE_BG)
+                self.config(fg='black', bg=DEFAULT_BG)
             else:
-                self.config(bg=LIGHT_MODE_BG)
+                self.config(bg=DEFAULT_BG)
         elif self.dark_mode:
             if self.clicked_on and self.num != None:
                 self.config(bg=dark_mode_colors[self.num])

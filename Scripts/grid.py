@@ -1,7 +1,11 @@
 from tkinter import *
-from squares import Square, PickleSquare
+from Scripts.constants import APP_CLOSED
+from .squares import Square, PickleSquare
 import random
 from functools import partial
+from .base_logger import init_logger
+import logging
+init_logger()
 
 
 class ButtonGrid:
@@ -50,9 +54,10 @@ class ButtonGrid:
 
 
         self.grid = grid
+        logging.info('Grid Created, waiting for button press...')
         self.root.winfo_toplevel().wait_variable('button pressed')
         coordinates = button_pressed.get()
-        if coordinates == 39393: # Stop message
+        if APP_CLOSED: # Stop message
             try:
                 self.root.destroy()
             except TclError:

@@ -6,7 +6,7 @@ from tkinter import *
 from tkinter import messagebox
 from markdown import Markdown
 from io import StringIO
-from multiplayer.network import check_internet
+from .network import check_internet
 
 
 def unmark_element(element, stream=None):

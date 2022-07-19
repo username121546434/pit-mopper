@@ -4,7 +4,7 @@ Multiplayer games will most likely not coming anytime soon
 import socket
 from _thread import *
 import sys
-from game import OnlineGame
+from Scripts.game import OnlineGame
 
 server = '192.168.2.13' # This may look like I mistakenly put my IP address here but its not
 # This is local address which means that it can only be used in my WIFI network

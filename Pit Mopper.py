@@ -1,82 +1,37 @@
-from functools import partial
-import traceback
 import pickle
 import sys
-from tkinter import *
+import traceback
 import webbrowser
-from grid import ButtonGrid, PickleButtonGrid
-from squares import PickleSquare, Square
+from functools import partial
+from tkinter import *
+import ctypes
+import os
+import shutil
 from datetime import datetime
 from tkinter import filedialog, messagebox
-import os
-from updater import check_for_updates
-import ctypes
-from custom_menubar import CustomMenuBar
-import logging
-from ctypes import wintypes
-import shutil
-import win32api
-from multiplayer import network
+
+from Scripts.constants import *
+from Scripts.console_window import *
+# Creates AppData folder if doesn't exist
+if not os.path.exists(DEBUG):
+    os.makedirs(DEBUG)
+from Scripts.base_logger import init_logger
+get_console()
+init_logger()
+from Scripts.custom_menubar import CustomMenuBar
+from Scripts.squares import PickleSquare, Square
+from Scripts.grid import ButtonGrid, PickleButtonGrid
+from Scripts.squares import PickleSquare, Square
+
+
+from Scripts.network import check_internet
+from Scripts.updater import check_for_updates
+
 import pyperclip
 
 __version__ = '1.4.0'
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
 
-APPDATA = os.path.expanduser(r'~\AppData\Local\Pit Mopper')
-DEBUG = APPDATA + r'\debug'
-# Creates AppData folder if doesn't exist
-if not os.path.exists(DEBUG):
-    os.makedirs(DEBUG)
-
-SW_HIDE = 0
-SW_SHOW = 5
-STRFTIME = r'%A %B %d, %I:%M %p %Y %Z'
-HIGHSCORE_TXT = os.path.join(APPDATA, 'highscore.txt')
-LOGO = "data\\images\\logo.ico"
-MAX_ROWS_AND_COLS = 75
-MIN_ROWS_AND_COLS = 4
-DARK_MODE_BG = '#282828'
-DARK_MODE_FG = '#FFFFFF'
-DEFAULT_BG = '#f0f0f0f0f0f0'
-DEFAULT_FG = '#000000'
-CURRENT_BG = DEFAULT_BG
-CURRENT_FG = DEFAULT_FG
-
-
-debug_log_file = os.path.join(DEBUG, f"{datetime.now().strftime(STRFTIME.replace(':', '-'))}.log")
-
-with open(debug_log_file, 'w') as _:
-    pass
-
-user32 = ctypes.WinDLL('user32', use_last_error=True)
-kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
-
-kernel32.GetConsoleWindow.restype = wintypes.HWND
-user32.SendMessageW.argtypes = (wintypes.HWND, wintypes.UINT,
-    wintypes.WPARAM, wintypes.LPARAM)
-user32.ShowWindow.argtypes = (wintypes.HWND, ctypes.c_int)
-
-allocated_console = None
-if allocated_console is None:
-    # one-time set up for all instances
-    allocated = bool(kernel32.AllocConsole())
-    allocated_console = allocated
-    if allocated:
-        hwnd = kernel32.GetConsoleWindow()
-        user32.ShowWindow(hwnd, SW_HIDE)
-
-sys.stdin = open('CONIN$', 'r')
-sys.stdout = open('CONOUT$', 'w')
-sys.stderr = open('CONOUT$', 'w', buffering=1)
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s]: %(message)s",
-    handlers=[
-        logging.FileHandler(debug_log_file),
-        logging.StreamHandler(sys.stderr),
-    ]
-)
 
 logging.info('Loading app...')
 
@@ -94,19 +49,6 @@ def handle_exception(exc_type, exc_value, exc_traceback):
     logging.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
 
 sys.excepthook = handle_exception
-
-def show_console():
-    logging.info('Showing Console')
-    logging.warning('If you close this window, the app will terminate')
-    hwnd = kernel32.GetConsoleWindow()
-    win32api.SetConsoleCtrlHandler(quit_app, True)
-    user32.ShowWindow(hwnd, SW_SHOW)
-
-
-def hide_console():
-    logging.info('Hiding Console')
-    hwnd = kernel32.GetConsoleWindow()
-    user32.ShowWindow(hwnd, SW_HIDE)
 
 
 def console(*_):
@@ -317,7 +259,7 @@ additional_time:       {additional_time}
     if grid == None:
         logging.info('Creating grid of buttons...')
         grid = ButtonGrid(difficulty.get(), game_window, dark_mode=dark_mode_state.get(), num_mines=mines.get())
-        if app_closed:
+        if APP_CLOSED:
             try:
                 game_window.destroy()
             except TclError:
@@ -386,7 +328,7 @@ additional_time:       {additional_time}
 
     logging.info('Entering while loop...')
     while True:
-        if app_closed:
+        if APP_CLOSED:
             try:
                 game_window.destroy()
             except TclError:
@@ -661,8 +603,8 @@ def do_nothing():
 
 
 def quit_app(_=None):
-    global window, app_closed
-    app_closed = True
+    global window, APP_CLOSED
+    APP_CLOSED = True
     logging.info('Closing Pit Mopper...')
     for code in after_cancel:
         window.after_cancel(code)
@@ -728,7 +670,7 @@ def bug_report():
 
     Button(new_window, text='Continue', command=lambda: make_github_issue(body=description.get('1.0', 'end'))).pack()
     window.wait_window(new_window)
-    if not app_closed:
+    if not APP_CLOSED:
         window.bind_all('<space>', create_game)
 
 
@@ -764,16 +706,6 @@ Full Traceback:
     webbrowser.open('https://github.com/username121546434/pit-mopper/issues')
 
 
-def check_internet():
-    logging.info('Checking internet...')
-    if network.check_internet():
-        logging.info('Internet available')
-        return True
-    else:
-        logging.info('Internet not available')
-        return False
-
-
 logging.info('Functions successfully defined, creating GUI')
 
 window = Tk()
@@ -784,7 +716,6 @@ window.report_callback_exception = handle_exception
 
 after_cancel = []
 del_data = 'none'
-app_closed = False
 
 Label(text='Select Difficulty').pack(pady=(25, 0))
 
