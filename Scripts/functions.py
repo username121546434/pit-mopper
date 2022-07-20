@@ -35,16 +35,19 @@ sys.excepthook = handle_exception
 
 
 def base_change_theme(window: Tk):
-    global CURRENT_BG, CURRENT_FG
     if constants.dark_mode:
         logging.info('User switched theme to dark mode')
         CURRENT_BG = DARK_MODE_BG
         CURRENT_FG = DARK_MODE_FG
+        constants.CURRENT_BG = DARK_MODE_BG
+        constants.CURRENT_FG = DARK_MODE_FG
         dark_title_bar(window)
     else:
         logging.info('User switched theme to light mode')
         CURRENT_BG = DEFAULT_BG
         CURRENT_FG = DEFAULT_FG
+        constants.CURRENT_BG = DEFAULT_BG
+        constants.CURRENT_FG = DEFAULT_FG
         window.resizable(False, False)
 
     window.config(bg=CURRENT_BG)
@@ -164,7 +167,7 @@ def clear_highscore():
         messagebox.showinfo('Delete Data', 'As soon as you close Pit Mopper, the your highscores will be deleted')
 
 
-def bindWidget(widget: Widget,event,func=None):
+def bindWidget(widget: Widget, event, all:bool=False, func=None):
     # https://stackoverflow.com/a/226141/19581763
     '''Set or retrieve the binding for an event on a widget'''
     try:
@@ -177,10 +180,13 @@ def bindWidget(widget: Widget,event,func=None):
         setattr(widget, 'bindings', dict())
 
     if func:
-        widget.bind(event,func)
+        if not all:
+            widget.bind(event, func)
+        else:
+            widget.bind_all(event, func)
         widget.bindings[event] = func
     else:
-        return(widget.bindings.setdefault(event,None))
+        return(widget.bindings.setdefault(event, None))
 
 
 def bug_report():

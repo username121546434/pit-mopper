@@ -196,9 +196,9 @@ additional_time:       {additional_time}
     session_start: datetime = datetime.now()
     total_time = StringVar(game_window)
 
-    Label(game_window, textvariable=total_time, bg=CURRENT_BG, fg=CURRENT_FG).grid(
+    Label(game_window, textvariable=total_time, bg=constants.CURRENT_BG, fg=constants.CURRENT_FG).grid(
         row=1, column=1, sticky=N+S+E+W, pady=(5, 0))
-    game_window.config(bg=CURRENT_BG)
+    game_window.config(bg=constants.CURRENT_BG)
 
     if grid == None:
         logging.info('Creating grid of buttons...')
@@ -244,7 +244,7 @@ additional_time:       {additional_time}
     seconds = additional_time
 
     # create a menubar
-    menubar = CustomMenuBar(game_window, bg=CURRENT_BG, fg=CURRENT_FG)
+    menubar = CustomMenuBar(game_window, bg=constants.CURRENT_BG, fg=constants.CURRENT_FG)
     menubar.place(x=0, y=0)
 
     # create the file_menu
@@ -594,15 +594,15 @@ advanced = Menu(settings, tearoff=0)
 advanced.add_checkbutton(label='Console', variable=console_open, accelerator='Ctrl+X')
 
 # Keyboard Shortcuts
-bindWidget(window, '<Control-i>', lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {VERSION}'))
-bindWidget(window, '<Control-u>', lambda _: check_for_updates())
-bindWidget(window, '<Control-q>', quit_app)
-bindWidget(window, '<Control-o>', load_game)
-bindWidget(window, '<space>', create_game)
-bindWidget(window, '<Control-a>', lambda _: chord_state.set(not chord_state.get()))
-bindWidget(window, '<Control-d>', lambda _: dark_mode_state.set(not dark_mode_state.get()))
-bindWidget(window, '<Control-h>', show_highscores)
-bindWidget(window, '<Control-x>', lambda _: console_open.set(not console_open.get()))
+bindWidget(window, '<Control-i>', True, lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {VERSION}'))
+bindWidget(window, '<Control-u>', True, lambda _: check_for_updates())
+bindWidget(window, '<Control-q>', True, quit_app)
+bindWidget(window, '<Control-o>', True, load_game)
+bindWidget(window, '<space>', True, create_game)
+bindWidget(window, '<Control-a>', True, lambda _: chord_state.set(not chord_state.get()))
+bindWidget(window, '<Control-d>', True, lambda _: dark_mode_state.set(not dark_mode_state.get()))
+bindWidget(window, '<Control-h>', True, show_highscores)
+bindWidget(window, '<Control-x>', True, lambda _: console_open.set(not console_open.get()))
 
 menubar.add_menu(menu=file_menu, title='File')
 menubar.add_menu(menu=settings, title='Settings')
