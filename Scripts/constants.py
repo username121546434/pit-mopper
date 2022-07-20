@@ -17,6 +17,9 @@ DEFAULT_FG = '#000000'
 CURRENT_BG = DEFAULT_BG
 CURRENT_FG = DEFAULT_FG
 APP_CLOSED = False
+VERSION = '1.4.0'
 
-
+dark_mode = False
+del_data = 'none'
+after_cancel = []
 debug_log_file = os.path.join(DEBUG, f"{datetime.now().strftime(STRFTIME.replace(':', '-'))}.log")

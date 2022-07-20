@@ -1,5 +1,8 @@
 from tkinter import *
+from Scripts.constants import VERSION
 
+__version__ = VERSION
+__license__ = 'GNU GPL v3, see LICENSE.txt for more info'
 
 def run_single_player():
     window.destroy()

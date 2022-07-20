@@ -1,15 +1,11 @@
 import pickle
-import sys
-import traceback
-import webbrowser
 from functools import partial
 from tkinter import *
-import ctypes
 import os
-import shutil
 from datetime import datetime
 from tkinter import filedialog, messagebox
 
+from . import constants
 from .constants import *
 from .console_window import *
 get_console()
@@ -24,33 +20,10 @@ from .custom_menubar import CustomMenuBar
 from .squares import PickleSquare, Square
 from .grid import ButtonGrid, PickleButtonGrid
 from .squares import PickleSquare, Square
-
-
-from .network import check_internet
+from .functions import *
 from .updater import check_for_updates
 
-import pyperclip
-
-__version__ = '1.4.0'
-__license__ = 'GNU GPL v3, see LICENSE.txt for more info'
-
-
-logging.info('Loading app...')
-
-def handle_exception(exc_type, exc_value, exc_traceback):
-    if issubclass(exc_type, KeyboardInterrupt):
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-    sys.last_type = exc_type
-    sys.last_value = exc_value
-    sys.last_traceback = exc_traceback
-    messagebox.showerror('Unknown Error', f'There has been an error, details are below\n\n{exc_value}')
-    if check_internet():
-        if messagebox.askyesno('Unknown Error', 'Would you like to submit a bug report?'):
-            bug_report()
-    logging.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
-
-sys.excepthook = handle_exception
+logging.info('Loading Single Player...')
 
 
 def console(*_):
@@ -58,37 +31,6 @@ def console(*_):
         hide_console()
     else:
         show_console()
-
-
-def format_second(seconds: int | float):
-    if seconds != float('inf'):
-        seconds = int(seconds)
-        minutes = int(seconds / 60)
-        sec = seconds % 60
-        if sec < 10:
-            sec = f'0{sec % 60}'
-
-        return f'{minutes}:{sec}'
-    else:
-        return 'None'
-
-
-def dark_title_bar(window):
-    """
-    MORE INFO:
-    https://docs.microsoft.com/en-us/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute
-    """
-    # https://stackoverflow.com/a/70724666
-    window.update()
-    DWMWA_USE_IMMERSIVE_DARK_MODE = 20
-    set_window_attribute = ctypes.windll.dwmapi.DwmSetWindowAttribute
-    get_parent = ctypes.windll.user32.GetParent
-    hwnd = get_parent(window.winfo_id())
-    rendering_policy = DWMWA_USE_IMMERSIVE_DARK_MODE
-    value = 2
-    value = ctypes.c_int(value)
-    set_window_attribute(hwnd, rendering_policy, ctypes.byref(value),
-                         ctypes.sizeof(value))
 
 
 def more_info(
@@ -518,49 +460,6 @@ def load_highscore() -> dict[str, float | int] | float:
             return float('inf')
 
 
-def change_theme(*_):
-    global CURRENT_BG, CURRENT_FG
-    if dark_mode_state.get():
-        logging.info('User switched theme to dark mode')
-        CURRENT_BG = DARK_MODE_BG
-        CURRENT_FG = DARK_MODE_FG
-        dark_title_bar(window)
-    else:
-        logging.info('User switched theme to light mode')
-        CURRENT_BG = DEFAULT_BG
-        CURRENT_FG = DEFAULT_FG
-        window.resizable(False, False)
-
-    window.config(bg=CURRENT_BG)
-    for child in window.winfo_children():
-        if not isinstance(child, Toplevel) and not isinstance(child, Spinbox) and not isinstance(child, CustomMenuBar):
-            child.config(bg=CURRENT_BG, fg=CURRENT_FG)
-        elif isinstance(child, CustomMenuBar):
-            child.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG)
-        elif isinstance(child, Spinbox):
-            if CURRENT_BG == DEFAULT_BG:
-                child.config(bg='white', fg=CURRENT_FG)
-            else:
-                child.config(bg=CURRENT_BG, fg=CURRENT_FG)
-        elif isinstance(child, Toplevel):
-            if CURRENT_BG == DARK_MODE_BG:
-                dark_title_bar(child)
-            else:
-                child.resizable(True, True)
-            child.config(bg=CURRENT_BG)
-            for child2 in child.winfo_children():
-                if not isinstance(child2, Frame) and not isinstance(child2, CustomMenuBar):
-                    child2.config(bg=CURRENT_BG, fg=CURRENT_FG)
-                elif isinstance(child2, CustomMenuBar):
-                    child2.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG)
-                elif isinstance(child2, Frame):
-                    for square in child2.winfo_children():
-                        if isinstance(square, Square):
-                            square.switch_theme()
-                        elif isinstance(square, Label):
-                            square.config(bg=CURRENT_BG, fg=CURRENT_FG)
-
-
 def show_highscores(_=None):
     logging.info('User requested highscores')
     highscore_data = load_highscore()
@@ -600,112 +499,18 @@ def show_highscores(_=None):
         messagebox.showinfo('Highscores', 'No highscores were found, play a game and win it to get some')
 
 
-def do_nothing():
-    pass
-
-
-def quit_app(_=None):
-    global window, APP_CLOSED
-    APP_CLOSED = True
-    logging.info('Closing Pit Mopper...')
-    for code in after_cancel:
-        window.after_cancel(code)
-    window.setvar('button pressed', 39393)
-    window.destroy()
-    logging.shutdown()
-    if del_data == 'all':
-        try:
-            shutil.rmtree(APPDATA)
-        except FileNotFoundError:
-            pass
-    elif del_data == 'debug':
-        try:
-            shutil.rmtree(DEBUG)
-        except FileNotFoundError:
-            pass
-    elif del_data == 'highscore':
-        try:
-            os.remove(HIGHSCORE_TXT)
-        except FileNotFoundError:
-            pass
-    del window
-    sys.exit()
-
-
 def change_mines():
     mines_counter.set(f'Your game will have {mines.get()} mines')
     logging.info(f'Setting custom mine count: {mines.get()}')
 
 
-def clear_all_data():
-    global del_data
-    if messagebox.askyesno('Delete Data', 'Are you sure you want to delete all data? This includes highscores and debug logs and may break some features.'):
-        logging.info('Requested to delete all data')
-        del_data = 'all'
-        messagebox.showinfo('Delete Data', 'As soon as you close Pit Mopper, all data will be deleted')
+def change_theme(*_):
+    constants.dark_mode = dark_mode_state.get()
+    base_change_theme(window)
 
 
-def clear_debug():
-    global del_data
-    if messagebox.askyesno('Delete Data', 'Are you sure you want to delete the debug logs?'):
-        logging.info('Requested to delete debug logs')
-        del_data = 'debug'
-        messagebox.showinfo('Delete Data', 'As soon as you close Pit Mopper, the debug logs will be deleted')
-
-
-def clear_highscore():
-    global del_data
-    if messagebox.askyesno('Delete Data', 'Are you sure you want to delete your higscores?'):
-        logging.info('Requested to delete highscore data')
-        del_data = 'highscore'
-        messagebox.showinfo('Delete Data', 'As soon as you close Pit Mopper, the your highscores will be deleted')
-
-
-def bug_report():
-    new_window = Toplevel(window)
-    new_window.config(padx=20, pady=20)
-    window.unbind_all('<space>')
-
-    Label(new_window, text='Enter a description of what happenned below, also include information about which platform you are on etc').pack()
-    description = Text(new_window, width=1, height=1)
-    description.pack(side='top',fill='both',expand=True)
-
-    Button(new_window, text='Continue', command=lambda: make_github_issue(body=description.get('1.0', 'end'))).pack()
-    window.wait_window(new_window)
-    if not APP_CLOSED:
-        window.bind_all('<space>', create_game)
-
-
-def make_github_issue(body=None):
-    with open(debug_log_file, 'r') as f:
-        debug_log = f.read()
-    last_traceback = traceback.format_exc()
-    body = f'''This is an auto generated bug report
-
-## Description
-{body}
-
-## More information
-Traceback: {sys.last_traceback}
-Type: {sys.last_type}
-Value: {sys.last_value}
-
-Full Traceback:
-```
-{last_traceback}```
-
-<details>
-  <summary>
-    Debug Log Output
-  </summary>
-{debug_log.splitlines()[0]}
-
-{"".join(debug_log.splitlines(True)[1:])}
-</details>
-'''
-    messagebox.showinfo('Bug Report', 'As soon as you press OK, you will be directed to a link where you can report this bug and an auto generated issue will be copied to your clipboard')
-    pyperclip.copy(body)
-    webbrowser.open('https://github.com/username121546434/pit-mopper/issues')
+def quit_app():
+    base_quit_app(window)
 
 
 logging.info('Functions successfully defined, creating GUI')
@@ -715,9 +520,6 @@ window.title('Game Loader')
 window.iconbitmap(default=LOGO, bitmap=LOGO)
 window.resizable(False, False)
 window.report_callback_exception = handle_exception
-
-after_cancel = []
-del_data = 'none'
 
 Label(text='Select Difficulty').pack(pady=(25, 0))
 
@@ -759,7 +561,7 @@ chord_state = BooleanVar(window)
 console_open = BooleanVar(window, False)
 console_open.trace('w', console)
 dark_mode_state = BooleanVar(window)
-dark_mode_state.trace('w', change_theme)  
+dark_mode_state.trace('w', change_theme)
 
 Button(window, text='Play!', command=create_game).pack(pady=(0, 20))
 
@@ -781,8 +583,8 @@ settings = Menu(menubar, tearoff=0)
 settings.add_checkbutton(variable=chord_state, label='Enable Chording', accelerator='Ctrl+A')
 settings.add_checkbutton(variable=dark_mode_state, label='Dark Mode', accelerator='Ctrl+D')
 settings.add_separator()
-settings.add_command(label='Check for Updates', command=partial(check_for_updates, __version__, window), accelerator='Ctrl+U')
-settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Pit Mopper Version: {__version__}'), accelerator='Ctrl+I')
+settings.add_command(label='Check for Updates', command=check_for_updates, accelerator='Ctrl+U')
+settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Pit Mopper Version: {VERSION}'), accelerator='Ctrl+I')
 settings.add_separator()
 settings.add_command(label='Delete all data', command=clear_all_data)
 settings.add_command(label='Delete Debug Logs', command=clear_debug)
@@ -792,15 +594,15 @@ advanced = Menu(settings, tearoff=0)
 advanced.add_checkbutton(label='Console', variable=console_open, accelerator='Ctrl+X')
 
 # Keyboard Shortcuts
-window.bind_all('<Control-i>', lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {__version__}'))
-window.bind_all('<Control-u>', lambda _: check_for_updates(__version__, window))
-window.bind_all('<Control-q>', quit_app)
-window.bind_all('<Control-o>', load_game)
-window.bind_all('<space>', create_game)
-window.bind_all('<Control-a>', lambda _: chord_state.set(not chord_state.get()))
-window.bind_all('<Control-d>', lambda _: dark_mode_state.set(not dark_mode_state.get()))
-window.bind_all('<Control-h>', show_highscores)
-window.bind_all('<Control-x>', lambda _: console_open.set(not console_open.get()))
+bindWidget(window, '<Control-i>', lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {VERSION}'))
+bindWidget(window, '<Control-u>', lambda _: check_for_updates())
+bindWidget(window, '<Control-q>', quit_app)
+bindWidget(window, '<Control-o>', load_game)
+bindWidget(window, '<space>', create_game)
+bindWidget(window, '<Control-a>', lambda _: chord_state.set(not chord_state.get()))
+bindWidget(window, '<Control-d>', lambda _: dark_mode_state.set(not dark_mode_state.get()))
+bindWidget(window, '<Control-h>', show_highscores)
+bindWidget(window, '<Control-x>', lambda _: console_open.set(not console_open.get()))
 
 menubar.add_menu(menu=file_menu, title='File')
 menubar.add_menu(menu=settings, title='Settings')
