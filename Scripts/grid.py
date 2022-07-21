@@ -5,7 +5,6 @@ import random
 from functools import partial
 from .base_logger import init_logger
 import logging
-init_logger()
 
 
 class ButtonGrid:
@@ -16,23 +15,26 @@ class ButtonGrid:
         dark_mode: bool = False,
         num_mines: int = -1,
         row: int = 2,
-        column: int = 1
+        column: int = 1,
+        click_random_square: bool = False
     ):
         self.grid_size = grid_size
         self.root = window
         self.dark_mode = dark_mode
         self.num_mines = num_mines
         if grid == None:
-            self.grid = self.button_grid(row, column)
+            self.grid = self.button_grid(row, column, click_random_square)
         else:
             self.grid = self.setup_grid(grid, row, column)
 
-    def button_grid(self, row_num, col_num) -> list[list[Square]]:
+    def button_grid(self, row_num, col_num, click_random_square: bool = False) -> list[list[Square]]:
+        init_logger()
         Grid.rowconfigure(self.root, row_num, weight=1)
         Grid.columnconfigure(self.root, col_num, weight=1)
         grid = []
         blank = "   " * 3
-        button_pressed = Variable(self.root.winfo_toplevel(), None, 'button pressed')
+        if not click_random_square:
+            button_pressed = Variable(self.root.winfo_toplevel(), None, 'button pressed')
         # Create & Configure frame
         frame = Frame(self.root)
         frame.grid(row=2, column=1, sticky=N+S+E+W)
@@ -48,15 +50,20 @@ class ButtonGrid:
                     btn.switch_theme()
                 # Store row and column indices as a Button attribute
                 btn.position = (row_index, col_index)
-                btn.config(command=partial(button_pressed.set, btn.position))
+                if not click_random_square:
+                    btn.config(command=partial(button_pressed.set, btn.position))
                 row.append(btn)
             grid.append(row)
 
 
         self.grid = grid
-        logging.info('Grid Created, waiting for button press...')
-        self.root.winfo_toplevel().wait_variable('button pressed')
-        coordinates = button_pressed.get()
+        if not click_random_square:
+            logging.info('Grid Created, waiting for button press...')
+            self.root.winfo_toplevel().wait_variable('button pressed')
+            coordinates = button_pressed.get()
+        else:
+            coordinates = (random.randint(0, self.grid_size[0]), random.randint(0, self.grid_size[1]))
+            self.grid[coordinates[0]][coordinates[1]].clicked()
         if APP_CLOSED: # Stop message
             try:
                 self.root.destroy()

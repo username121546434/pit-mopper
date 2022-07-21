@@ -2,9 +2,10 @@
 Multiplayer games will most likely not coming anytime soon
 """
 import socket
-from _thread import *
+import threading
 import sys
 from Scripts.game import OnlineGame
+import pickle
 
 server = '192.168.2.13' # This may look like I mistakenly put my IP address here but its not
 # This is local address which means that it can only be used in my WIFI network
@@ -25,31 +26,37 @@ else:
 s.listen()
 print('Waiting for connection...')
 
-games:dict[int, OnlineGame] = {}
+games: dict[int, OnlineGame] = {}
 id_count = 0
 
-def new_client(conn:socket.socket):
-    reply = 'random reply'
-    conn.send('Connected'.encode())
-    while True:
-        try:
-            data = conn.recv(2048)
-            recieved = data.decode('utf-8')
-            
-            if not data:
-                print('Client Disconnected')
-                break
-            else:
-                print('Received: ', recieved)
-                print('Sending: ', reply)
-            
-            conn.sendall(reply.encode('utf-8'))
+def new_client(conn: socket.socket, player: int, game_id: int):
+    reply = games[game_id]
+    conn.send(pickle.dumps(player))
 
-        except Exception as e:
-            sys.stderr.write(e + '\nUnknown error with client, disconnecting immeidietly')
+    while True:
+        data = conn.recv(2048)
+        recieved = pickle.loads(data)
+
+        if data == 'disconnect':
+            print('Client Disconnected')
             break
+        else:
+            print('Received: ', recieved)
+            print('Sending: ', reply)
+
+        if player == 1:
+            games[game_id].available = True
+
+        conn.sendall(pickle.dumps(games[game_id]))
 
     print('Disconnecting...')
+    if games[game_id].available:
+        games[game_id].available = False
+    else:
+        try:
+            games.pop(game_id)
+        except KeyError:
+            pass
     conn.close()
 
 
@@ -59,11 +66,13 @@ while True:
 
     id_count += 1
     game_id = (id_count - 1)//2
+    player = 0
     if id_count % 2 == 1:
         print('Creating new game...')
-        game = None
+        game = OnlineGame(game_id)
         games[game_id] = game
     else:
         game = games[game_id]
+        player = 1
 
-    start_new_thread(new_client, (), {'conn':conn})
+    threading.Thread(target=new_client, args=(conn, player, game_id)).start()

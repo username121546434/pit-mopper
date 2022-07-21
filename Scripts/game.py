@@ -10,6 +10,7 @@ class OnlineGame:
         self.p2_finished = False
         self.p1_info = {}
         self.p2_info = {}
+        self.available = False
     
     def update_info(self, player:int, info:dict):
         if player == 1:

@@ -4,6 +4,7 @@ import sys
 from tkinter import messagebox
 from tkinter import *
 
+from .grid import ButtonGrid
 from . import constants
 from .squares import Square
 from .custom_menubar import CustomMenuBar
@@ -119,22 +120,22 @@ def base_quit_app(window: Tk):
     global APP_CLOSED
     APP_CLOSED = True
     logging.info('Closing Pit Mopper...')
-    for code in after_cancel:
+    for code in constants.after_cancel:
         window.after_cancel(code)
     window.setvar('button pressed', 39393)
     window.destroy()
     logging.shutdown()
-    if del_data == 'all':
+    if constants.del_data == 'all':
         try:
             shutil.rmtree(APPDATA)
         except FileNotFoundError:
             pass
-    elif del_data == 'debug':
+    elif constants.del_data == 'debug':
         try:
             shutil.rmtree(DEBUG)
         except FileNotFoundError:
             pass
-    elif del_data == 'highscore':
+    elif constants.del_data == 'highscore':
         try:
             os.remove(HIGHSCORE_TXT)
         except FileNotFoundError:
@@ -144,26 +145,23 @@ def base_quit_app(window: Tk):
 
 
 def clear_all_data():
-    global del_data
     if messagebox.askyesno('Delete Data', 'Are you sure you want to delete all data? This includes highscores and debug logs and may break some features.'):
         logging.info('Requested to delete all data')
-        del_data = 'all'
+        constants.del_data = 'all'
         messagebox.showinfo('Delete Data', 'As soon as you close Pit Mopper, all data will be deleted')
 
 
 def clear_debug():
-    global del_data
     if messagebox.askyesno('Delete Data', 'Are you sure you want to delete the debug logs?'):
         logging.info('Requested to delete debug logs')
-        del_data = 'debug'
+        constants.del_data = 'debug'
         messagebox.showinfo('Delete Data', 'As soon as you close Pit Mopper, the debug logs will be deleted')
 
 
 def clear_highscore():
-    global del_data
     if messagebox.askyesno('Delete Data', 'Are you sure you want to delete your higscores?'):
         logging.info('Requested to delete highscore data')
-        del_data = 'highscore'
+        constants.del_data = 'highscore'
         messagebox.showinfo('Delete Data', 'As soon as you close Pit Mopper, the your highscores will be deleted')
 
 
@@ -235,3 +233,152 @@ Full Traceback:
     messagebox.showinfo('Bug Report', 'As soon as you press OK, you will be directed to a link where you can report this bug and an auto generated issue will be copied to your clipboard')
     pyperclip.copy(body)
     webbrowser.open('https://github.com/username121546434/pit-mopper/issues')
+
+
+def update_game(
+    game_window: Toplevel,
+    grid: ButtonGrid,
+    session_start: datetime,
+    total_time: StringVar,
+    zeros_checked: list[Square] = [],
+    num_mines: int = 0,
+    chording: bool = None,
+    mines_found: int = 0,
+    additional_time: float = 0.0,
+):
+    previous_sec = datetime.now()
+    previous_sec = previous_sec.replace(microsecond=0)
+    seconds = 0
+    squares_checked = []
+    squares_flaged = []
+    squares_clicked_on = [
+        square
+        for row in grid.grid
+        for square in row
+        if square.clicked_on
+    ]
+
+    squares_not_clicked_on = [
+        square
+        for row in grid.grid
+        for square in row
+        if square.clicked_on == False
+    ]
+    while True:
+        if APP_CLOSED:
+            try:
+                game_window.destroy()
+            except TclError:
+                pass
+            return
+        constants.after_cancel.append(game_window.master.after(100, do_nothing))
+
+        now = datetime.now()
+        now = now.replace(microsecond=0)
+        if now > previous_sec:
+            previous_sec = now
+            seconds = (now - session_start).total_seconds() + additional_time
+
+        percent = round(((len(squares_flaged))/num_mines) * 100, 2)
+        total_time.set(f'Time: {format_second(seconds)}  🚩 {len(squares_flaged)}/{num_mines} 💣 ({percent}%)')
+
+        for row in grid.iter_rows():
+            # Clicks Zeros
+            for square in (square for square in row if (square.num == None) and (square.clicked_on) and (square not in zeros_checked) and (square.category != 'mine')):
+                zeros_checked.append(square)
+                for square2 in (square2 for square2 in grid.around_square(*square.position) if (square2.category != 'mine') and square2 not in squares_checked):
+                    square2.clicked()
+                    squares_checked.append(square2)
+
+            # Counts mines found
+            for square in (square for square in squares_flaged if square.category == 'mine'):
+                mines_found += 1
+
+            if chording:
+                # Checks all square if they are completed
+                for square in (square for square in row if square.completed == False):
+                    mines_around_square = [square for square in grid.around_square(
+                        *square.position) if (square.category == 'mine') and (square.clicked_on == True)]
+                    if (len(mines_around_square) == square.num and all(mine.category == 'mine' for mine in mines_around_square)) or square.num == None:
+                        square.completed = True
+
+                # Shows all squares around a square if it was middle clicked
+                for square in (square for square in row if (square.chord)):
+                    if square.completed == False:
+                        precolors = []
+                        squares = [
+                            square
+                            for square in grid.around_square(*square.position)
+                            if square.clicked_on == False
+                        ]
+                        for square2 in squares:
+                            precolors.append(square2.cget('bg'))
+                            square2.config(bg='brown')
+                        game_window.update()
+                        game_window.after(1000)
+                        for square2 in squares:
+                            precolor = precolors[squares.index(square2)]
+                            square2.config(bg=precolor)
+                    else:
+                        for square2 in (square for square in grid.around_square(*square.position) if not square.clicked_on and square.category != 'mine'):
+                            square2.clicked()
+                        square.chord = False
+        mines_found = 0
+
+        squares_clicked_on = [
+            square
+            for row in grid.grid
+            for square in row
+            if square.clicked_on
+        ]
+
+        squares_not_clicked_on = [
+            square
+            for row in grid.grid
+            for square in row
+            if square.clicked_on == False
+        ]
+
+        squares_flaged = [
+            square
+            for row in grid.grid
+            for square in row
+            if square.flaged
+        ]
+
+        game_overs = [
+            square.game_over
+            for row in grid.grid
+            for square in row
+        ]
+
+        if (len(squares_clicked_on) == (grid.grid_size[0] * grid.grid_size[1]) and all(square.category == 'mine' for square in squares_flaged)) or \
+                (all(square.category == 'mine' for square in squares_not_clicked_on) and len(squares_not_clicked_on) == num_mines):
+            game_over = True
+            win = True
+            if (len(squares_clicked_on) == (grid.grid_size[0] * grid.grid_size[1]) and all(square.category == 'mine' for square in squares_flaged)):
+                logging.info('Game has been won because all squares are clicked and all mines flagged')
+            else:
+                logging.info('Game has been won because the squares left are mines')
+        elif any(game_overs):
+            logging.info('The game is over, and it is lost.')
+            game_over = True
+            win = False
+        else:
+            game_over = False
+
+        if game_over:
+            for row in grid.grid:
+                for square in row:
+                    if square.category == 'mine' and square.cget('text') != '🚩':
+                        square.clicked()
+                    elif square.category == 'mine' and square.cget('text') == '🚩':
+                        mines_found += 1
+                        square.config(text='✅')
+                    elif square.num != None and square.cget('text') == '🚩':
+                        square.config(text='❌')
+            game_window.update()
+            return {'win': win, 'seconds': seconds}
+        game_window.update()
+
+
