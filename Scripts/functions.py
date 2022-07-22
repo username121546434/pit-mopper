@@ -279,8 +279,8 @@ def update_game(
             previous_sec = now
             seconds = (now - session_start).total_seconds() + additional_time
 
-        percent = round(((len(squares_flaged))/num_mines) * 100, 2)
-        total_time.set(f'Time: {format_second(seconds)}  🚩 {len(squares_flaged)}/{num_mines} 💣 ({percent}%)')
+            percent = round(((len(squares_flaged))/num_mines) * 100, 2)
+            total_time.set(f'Time: {format_second(seconds)}  🚩 {len(squares_flaged)}/{num_mines} 💣 ({percent}%)')
 
         for row in grid.iter_rows():
             # Clicks Zeros
