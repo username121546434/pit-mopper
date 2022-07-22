@@ -4,6 +4,7 @@ Multiplayer games will most likely not coming anytime soon
 import socket
 import threading
 import sys
+import traceback
 from Scripts.game import OnlineGame
 import pickle
 
@@ -30,24 +31,29 @@ games: dict[int, OnlineGame] = {}
 id_count = 0
 
 def new_client(conn: socket.socket, player: int, game_id: int):
-    reply = games[game_id]
     conn.send(pickle.dumps(player))
 
     while True:
-        data = conn.recv(2048)
-        recieved = pickle.loads(data)
+        try:
+            recieved = pickle.loads(conn.recv(2048))
 
-        if data == 'disconnect':
-            print('Client Disconnected')
-            break
-        else:
+            if recieved == 'disconnect':
+                print('Client Disconnected')
+                break
+            elif isinstance(recieved, dict):
+                games[game_id].update_info(player, recieved)
+
             print('Received: ', recieved)
-            print('Sending: ', reply)
+            print('Sending: ', games[game_id])
 
-        if player == 1:
-            games[game_id].available = True
+            if player == 2 and not games[game_id].available:
+                games[game_id].available = True
 
-        conn.sendall(pickle.dumps(games[game_id]))
+            conn.sendall(pickle.dumps(games[game_id]))
+        except Exception:
+            print(traceback.format_exc())
+            print('Unknown error, disconnecting imeidietly')
+            break
 
     print('Disconnecting...')
     if games[game_id].available:
@@ -66,13 +72,13 @@ while True:
 
     id_count += 1
     game_id = (id_count - 1)//2
-    player = 0
+    player = 1
     if id_count % 2 == 1:
         print('Creating new game...')
         game = OnlineGame(game_id)
         games[game_id] = game
     else:
         game = games[game_id]
-        player = 1
+        player = 2
 
     threading.Thread(target=new_client, args=(conn, player, game_id)).start()

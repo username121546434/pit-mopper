@@ -37,7 +37,7 @@ class ButtonGrid:
             button_pressed = Variable(self.root.winfo_toplevel(), None, 'button pressed')
         # Create & Configure frame
         frame = Frame(self.root)
-        frame.grid(row=2, column=1, sticky=N+S+E+W)
+        frame.grid(row=row_num, column=col_num, sticky=N+S+E+W)
         for row_index in range(self.grid_size[0]):
             Grid.rowconfigure(frame, row_index, weight=1)
             row = []
@@ -62,7 +62,7 @@ class ButtonGrid:
             self.root.winfo_toplevel().wait_variable('button pressed')
             coordinates = button_pressed.get()
         else:
-            coordinates = (random.randint(0, self.grid_size[0]), random.randint(0, self.grid_size[1]))
+            coordinates = (random.randint(0, self.grid_size[0] - 1), random.randint(0, self.grid_size[1] - 1))
             self.grid[coordinates[0]][coordinates[1]].clicked()
         if APP_CLOSED: # Stop message
             try:

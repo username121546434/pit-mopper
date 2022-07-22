@@ -8,6 +8,7 @@ from tkinter import filedialog, messagebox
 from . import constants
 from .constants import *
 from .console_window import *
+from .functions import _update_game
 get_console()
 with open(debug_log_file, 'w') as _:
     pass
@@ -89,6 +90,34 @@ grid.grid_size       {grid.grid_size}
         pickle.dump(data, f)
         logging.info('Data successfully saved')
         messagebox.showinfo('Save Game', 'Your game has been saved, you can now close the game.')
+
+
+def update_game(
+    game_window: Toplevel,
+    grid: ButtonGrid,
+    session_start: datetime,
+    total_time: StringVar,
+    zeros_checked: list[Square] = [],
+    num_mines: int = 0,
+    chording: bool = None,
+    mines_found: int = 0,
+    additional_time: float = 0.0,
+):
+    result = _update_game(
+        game_window,
+        grid,
+        session_start,
+        total_time,
+        zeros_checked,
+        num_mines,
+        chording,
+        mines_found,
+        additional_time
+    )
+    while True:
+        result = _update_game(**result)
+        if result['result']['game over']:
+            return result['result']
 
 
 def load_game(_=None):
