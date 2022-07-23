@@ -22,9 +22,8 @@ from .grid import ButtonGrid, PickleButtonGrid
 from .squares import PickleSquare, Square
 from .functions import *
 from .updater import check_for_updates
-
+import gc
 logging.info('Loading Single Player...')
-
 
 def console(*_):
     if not console_open.get():
@@ -116,15 +115,17 @@ def update_game(
     result2 = result.pop('result')
     while True:
         if not isinstance(result, dict):
-            return
-        constants.after_cancel.append(window.after(100, do_nothing))
+            return None
+        constants.after_cancel.append(game_window.after(100, do_nothing))
         constants.after_cancel.pop()
         result = _update_game(**result)
         result2 = result.pop('result')
         if result2['game over']:
             return result2
-        elif not game_window.winfo_exists():
-            return
+        try:
+            game_window.winfo_exists()
+        except TclError:
+            return None
 
 
 def load_game(_=None):
@@ -240,7 +241,7 @@ additional_time:       {additional_time}
     if grid == None:
         logging.info('Creating grid of buttons...')
         grid = ButtonGrid(difficulty.get(), game_window, dark_mode=dark_mode_state.get(), num_mines=mines.get())
-        if APP_CLOSED:
+        if constants.APP_CLOSED:
             try:
                 game_window.destroy()
             except TclError:
@@ -315,6 +316,7 @@ additional_time:       {additional_time}
         mines_found,
         additional_time
     )
+    gc.collect()
     if not isinstance(result, dict):
         return
     win = result['win']
@@ -337,11 +339,7 @@ additional_time:       {additional_time}
             pickle.dump(new_highscore_data, f)
     logging.info('Destroying window')
     game_window.destroy()
-    snapshot = tracemalloc.take_snapshot()
-    top_stats = snapshot.statistics('lineno')
-    print("[ Top 10 ]")
-    for stat in top_stats[:10]:
-        print(stat)
+    gc.collect()
 
 
 def change_difficulty(from_spinbox:bool = False):

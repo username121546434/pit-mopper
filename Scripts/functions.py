@@ -1,5 +1,6 @@
 import ctypes
 from datetime import datetime
+import gc
 import os
 import shutil
 import sys
@@ -381,6 +382,7 @@ def _update_game(
                     square.config(text='❌')
         game_window.update()
     game_window.update()
+    gc.collect()
     return {
         'game_window': game_window,
         'grid': grid,

@@ -64,7 +64,7 @@ class ButtonGrid:
         else:
             coordinates = (random.randint(0, self.grid_size[0] - 1), random.randint(0, self.grid_size[1] - 1))
             self.grid[coordinates[0]][coordinates[1]].clicked()
-        if constants.APP_CLOSED: # Stop message
+        if coordinates == 39393: # Stop message
             try:
                 self.root.destroy()
             except TclError:
