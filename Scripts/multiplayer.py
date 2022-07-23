@@ -9,7 +9,6 @@ from .game import OnlineGame
 from tkinter import *
 from . import constants
 from .functions import *
-from .constants import *
 from .console_window import get_console, show_console, hide_console
 get_console()
 from .base_logger import init_logger
@@ -38,7 +37,7 @@ logging.info('Loading multiplayer...')
 
 window = Tk()
 window.title('Pit Mopper Multiplayer')
-window.iconbitmap(LOGO, LOGO)
+window.iconbitmap(constants.LOGO, constants.LOGO)
 
 console_open = BooleanVar(window, False)
 console_open.trace('w', console)
@@ -60,7 +59,7 @@ settings = Menu(menubar, tearoff=0)
 settings.add_checkbutton(variable=dark_mode_state, label='Dark Mode', accelerator='Ctrl+D')
 settings.add_separator()
 settings.add_command(label='Check for Updates', command=check_for_updates, accelerator='Ctrl+U')
-settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Pit Mopper Version: {VERSION}'), accelerator='Ctrl+I')
+settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Pit Mopper Version: {constants.VERSION}'), accelerator='Ctrl+I')
 settings.add_separator()
 settings.add_command(label='Delete all data', command=clear_all_data)
 settings.add_command(label='Delete Debug Logs', command=clear_debug)
@@ -70,7 +69,7 @@ advanced = Menu(settings, tearoff=0)
 advanced.add_checkbutton(label='Console', variable=console_open, accelerator='Ctrl+X')
 
 # Keyboard Shortcuts
-bindWidget(window, '<Control-i>', True, lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {VERSION}'))
+bindWidget(window, '<Control-i>', True, lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {constants.VERSION}'))
 bindWidget(window, '<Control-u>', True, lambda _: check_for_updates())
 bindWidget(window, '<Control-q>', True, quit_app)
 bindWidget(window, '<Control-d>', True, lambda _: dark_mode_state.set(not dark_mode_state.get()))
@@ -123,6 +122,7 @@ while True:
                 True
             )
             while True:
+                constants.after_cancel.append(game_window.after(50, do_nothing))
                 result = _update_game(**result)
                 game = n.send_data('get')
                 if player == 1:

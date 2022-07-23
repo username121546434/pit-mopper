@@ -6,7 +6,6 @@ from datetime import datetime
 from tkinter import filedialog, messagebox
 
 from . import constants
-from .constants import *
 from .console_window import *
 from .functions import _update_game
 get_console()
@@ -114,10 +113,18 @@ def update_game(
         mines_found,
         additional_time
     )
+    result2 = result.pop('result')
     while True:
+        if not isinstance(result, dict):
+            return
+        constants.after_cancel.append(window.after(100, do_nothing))
+        constants.after_cancel.pop()
         result = _update_game(**result)
-        if result['result']['game over']:
-            return result['result']
+        result2 = result.pop('result')
+        if result2['game over']:
+            return result2
+        elif not game_window.winfo_exists():
+            return
 
 
 def load_game(_=None):
@@ -176,6 +183,8 @@ def create_game(
     mines_found: int = 0,
     additional_time: float = 0.0
 ):
+    import tracemalloc
+    tracemalloc.start()
     if game_window == None:
         game_window = Toplevel(window)
         game_window.iconbitmap(LOGO)
@@ -306,6 +315,8 @@ additional_time:       {additional_time}
         mines_found,
         additional_time
     )
+    if not isinstance(result, dict):
+        return
     win = result['win']
     seconds = result['seconds']
 
@@ -326,6 +337,11 @@ additional_time:       {additional_time}
             pickle.dump(new_highscore_data, f)
     logging.info('Destroying window')
     game_window.destroy()
+    snapshot = tracemalloc.take_snapshot()
+    top_stats = snapshot.statistics('lineno')
+    print("[ Top 10 ]")
+    for stat in top_stats[:10]:
+        print(stat)
 
 
 def change_difficulty(from_spinbox:bool = False):

@@ -1,4 +1,6 @@
 import ctypes
+from datetime import datetime
+import os
 import shutil
 import sys
 from tkinter import messagebox
@@ -9,7 +11,6 @@ from . import constants
 from .squares import Square
 from .custom_menubar import CustomMenuBar
 from .network import check_internet
-from .constants import *
 import traceback
 import pyperclip
 import logging
@@ -38,17 +39,17 @@ sys.excepthook = handle_exception
 def base_change_theme(window: Tk):
     if constants.dark_mode:
         logging.info('User switched theme to dark mode')
-        CURRENT_BG = DARK_MODE_BG
-        CURRENT_FG = DARK_MODE_FG
-        constants.CURRENT_BG = DARK_MODE_BG
-        constants.CURRENT_FG = DARK_MODE_FG
+        constants.CURRENT_BG = constants.DARK_MODE_BG
+        constants.CURRENT_FG = constants.DARK_MODE_FG
+        CURRENT_BG = constants.DARK_MODE_BG
+        CURRENT_FG = constants.DARK_MODE_FG
         dark_title_bar(window)
     else:
         logging.info('User switched theme to light mode')
-        CURRENT_BG = DEFAULT_BG
-        CURRENT_FG = DEFAULT_FG
-        constants.CURRENT_BG = DEFAULT_BG
-        constants.CURRENT_FG = DEFAULT_FG
+        constants.CURRENT_BG = constants.DEFAULT_BG
+        constants.CURRENT_FG = constants.DEFAULT_FG
+        CURRENT_BG = constants.DEFAULT_BG
+        CURRENT_FG = constants.DEFAULT_FG
         window.resizable(False, False)
 
     window.config(bg=CURRENT_BG)
@@ -58,12 +59,12 @@ def base_change_theme(window: Tk):
         elif isinstance(child, CustomMenuBar):
             child.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG)
         elif isinstance(child, Spinbox):
-            if CURRENT_BG == DEFAULT_BG:
+            if CURRENT_BG == constants.DEFAULT_BG:
                 child.config(bg='white', fg=CURRENT_FG)
             else:
                 child.config(bg=CURRENT_BG, fg=CURRENT_FG)
         elif isinstance(child, Toplevel):
-            if CURRENT_BG == DARK_MODE_BG:
+            if CURRENT_BG == constants.DARK_MODE_BG:
                 dark_title_bar(child)
             else:
                 child.resizable(True, True)
@@ -126,17 +127,17 @@ def base_quit_app(window: Tk):
     logging.shutdown()
     if constants.del_data == 'all':
         try:
-            shutil.rmtree(APPDATA)
+            shutil.rmtree(constants.APPDATA)
         except FileNotFoundError:
             pass
     elif constants.del_data == 'debug':
         try:
-            shutil.rmtree(DEBUG)
+            shutil.rmtree(constants.DEBUG)
         except FileNotFoundError:
             pass
     elif constants.del_data == 'highscore':
         try:
-            os.remove(HIGHSCORE_TXT)
+            os.remove(constants.HIGHSCORE_TXT)
         except FileNotFoundError:
             pass
     del window
@@ -198,12 +199,12 @@ def bug_report():
 
     Button(new_window, text='Continue', command=lambda: make_github_issue(body=description.get('1.0', 'end'))).pack()
     new_window.master.wait_window(new_window)
-    if not APP_CLOSED:
+    if not constants.APP_CLOSED:
         new_window.master.bind_all('<space>', func)
 
 
 def make_github_issue(body=None):
-    with open(debug_log_file, 'r') as f:
+    with open(constants.debug_log_file, 'r') as f:
         debug_log = f.read()
     last_traceback = traceback.format_exc()
     body = f'''This is an auto generated bug report
@@ -239,20 +240,31 @@ def _update_game(
     grid: ButtonGrid,
     session_start: datetime,
     total_time: StringVar,
-    zeros_checked: list[Square] = [],
+    zeros_checked: list[Square] = None,
     num_mines: int = 0,
     chording: bool = None,
     mines_found: int = 0,
     additional_time: float = 0.0,
-    squares_checked: list = [],
+    squares_checked: list = None,
     previous_sec: datetime = None,
-    result: dict = {}
 ):
     if previous_sec == None:
         previous_sec = datetime.now()
+    if squares_checked == None:
+        squares_checked = []
+    if zeros_checked == None:
+        zeros_checked = []
+    if constants.APP_CLOSED:
+        return
+
     seconds = 0
     squares_checked = []
-    squares_flaged = []
+    squares_flaged = [
+        square
+        for row in grid.grid
+        for square in row
+        if square.flaged
+    ]
     squares_clicked_on = [
         square
         for row in grid.grid
@@ -266,7 +278,7 @@ def _update_game(
         for square in row
         if square.clicked_on == False
     ]
-    if APP_CLOSED:
+    if constants.APP_CLOSED:
         try:
             game_window.destroy()
         except TclError:

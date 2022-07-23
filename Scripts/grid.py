@@ -1,5 +1,5 @@
 from tkinter import *
-from Scripts.constants import APP_CLOSED
+from . import constants
 from .squares import Square, PickleSquare
 import random
 from functools import partial
@@ -64,7 +64,7 @@ class ButtonGrid:
         else:
             coordinates = (random.randint(0, self.grid_size[0] - 1), random.randint(0, self.grid_size[1] - 1))
             self.grid[coordinates[0]][coordinates[1]].clicked()
-        if APP_CLOSED: # Stop message
+        if constants.APP_CLOSED: # Stop message
             try:
                 self.root.destroy()
             except TclError:
@@ -74,9 +74,6 @@ class ButtonGrid:
             square.config(command=None)
         self.grid = grid
 
-        not_allowed_coors = [
-            coordinates
-        ]
         if self.num_mines == -1 and self.grid_size == (10, 10):
             self.num_mines = 10
         elif self.num_mines == -1 and self.grid_size == (20, 20):
@@ -86,14 +83,13 @@ class ButtonGrid:
         elif self.num_mines == -1:
             self.num_mines = int((self.grid_size[0] * self.grid_size[1])/9)
 
-        mines_so_far = 0
-        while mines_so_far < self.num_mines:
-            for square, coor in self.iter_squares():
-                dice = random.randint(1, 20)
-                if dice == 2 and square not in self.around_square(*coordinates) and coor not in not_allowed_coors and mines_so_far < self.num_mines:
-                    mines_so_far += 1
-                    not_allowed_coors.append(coor)
-                    square.category = 'mine'
+        squares = [
+            square
+            for square, _ in self.iter_squares()
+            if square != self.grid[coordinates[0]][coordinates[1]] and square not in [square2 for square2 in self.around_square(*coordinates)]
+        ]
+        for square in random.sample(squares, self.num_mines):
+            square.category = 'mine'
 
         self.grid = grid
 
