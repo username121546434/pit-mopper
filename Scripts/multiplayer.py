@@ -123,9 +123,10 @@ while True:
             )
             while True:
                 constants.after_cancel.append(game_window.after(50, do_nothing))
+                result2 = result.pop('result')
                 result = _update_game(**result)
                 game = n.send_data('get')
-                if player == 1:
+                if player == 2:
                     other_timer.config(text=game.p1_info['timer text'])
                 else:
                     other_timer.config(text=game.p2_info['timer text'])
