@@ -8,6 +8,7 @@ import logging
 
 
 class ButtonGrid:
+    __slots__ = ('root', 'dark_mode', 'grid_size', 'num_mines', 'grid')
     def __init__(
         self, grid_size: tuple[int, int],
         window: Toplevel,

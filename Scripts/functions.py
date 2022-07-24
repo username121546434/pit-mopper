@@ -286,6 +286,7 @@ def _update_game(
             pass
         return
     constants.after_cancel.append(game_window.master.after(100, do_nothing))
+    constants.after_cancel.pop(constants.after_cancel.index(constants.after_cancel[-1]))
     now = datetime.now()
     now = now.replace(microsecond=0)
     if now > previous_sec:

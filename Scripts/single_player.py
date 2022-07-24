@@ -95,12 +95,14 @@ def update_game(
     grid: ButtonGrid,
     session_start: datetime,
     total_time: StringVar,
-    zeros_checked: list[Square] = [],
+    zeros_checked: list[Square] = None,
     num_mines: int = 0,
     chording: bool = None,
     mines_found: int = 0,
     additional_time: float = 0.0,
 ):
+    if zeros_checked == None:
+        zeros_checked = []
     result = _update_game(
         game_window,
         grid,
@@ -117,7 +119,7 @@ def update_game(
         if not isinstance(result, dict):
             return None
         constants.after_cancel.append(game_window.after(100, do_nothing))
-        constants.after_cancel.pop()
+        constants.after_cancel.pop(constants.after_cancel.index(constants.after_cancel[-1]))
         result = _update_game(**result)
         result2 = result.pop('result')
         if result2['game over']:
@@ -178,14 +180,14 @@ def create_game(
     game_window: Toplevel = None,
     start: datetime = None,
     grid: ButtonGrid = None,
-    zeros_checked: list[Square] = [],
+    zeros_checked: list[Square] = None,
     num_mines: int = 0,
     chording: bool = None,
     mines_found: int = 0,
     additional_time: float = 0.0
 ):
-    import tracemalloc
-    tracemalloc.start()
+    if zeros_checked == None:
+        zeros_checked = []
     if game_window == None:
         game_window = Toplevel(window)
         game_window.iconbitmap(LOGO)
@@ -316,12 +318,12 @@ additional_time:       {additional_time}
         mines_found,
         additional_time
     )
-    gc.collect()
     if not isinstance(result, dict):
         return
     win = result['win']
     seconds = result['seconds']
-
+    del result
+    gc.collect()
     if win:
         messagebox.showinfo(
             'Game Over', f'Game Over.\nYou won!\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}')
