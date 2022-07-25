@@ -28,6 +28,7 @@ dark_mode_colors = {
 
 
 class Square(Button):
+    __slots__ = ('category', 'num', 'game_over', 'flaged', 'position', 'chord', 'completed', 'clicked_on', 'dark_mode')
     def __init__(self, master: Misc | None = ..., text='') -> None:
         self.category: str | None = None
         self.num: int | None = None
