@@ -3,21 +3,17 @@ from cx_Freeze import setup, Executable
 base = None    
 
 executables = [Executable(
-    "./pit-mopper/Pit Mopper.py",
+    "./Pit Mopper.py",
     base='Win32GUI',
-    icon='./pit-mopper/Scripts/data/images/logo.ico',
+    icon='./Scripts/data/images/logo.ico',
     copyright='GNU GPL v3, see LICENSE.txt for more info'
 )]
 
 packages = [
-    'grid',
-    'updater',
-    'squares',
-    'load_font',
     'html.parser'
 ]
 include_files = [
-    './pit-mopper/Scripts/data'
+    './Scripts/data'
 ]
 options = {
     'build_exe': {    

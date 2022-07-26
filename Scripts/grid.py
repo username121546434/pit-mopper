@@ -1,5 +1,4 @@
 from tkinter import *
-from . import constants
 from .squares import Square, PickleSquare
 import random
 from functools import partial

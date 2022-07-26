@@ -101,21 +101,21 @@ def check_for_updates(app_quit):
                 dir = os.path.expanduser(f'~\\Downloads\\{dir}')
                 zip_file.extractall(dir)
             os.remove(file)
-            with open(bat_file) as bat:
+            with open(bat_file, 'w') as bat:
                 bat.write(f'''@echo off
-sleep 3
-rmdir {os.getcwd()} /S /Q
-move /y {dir} {os.getcwd()}
+timeout 3
+rmdir "{os.getcwd()}" /S /Q
+move /y {dir} "{os.getcwd()}"
 rmdir {dir} /S /Q
-start /b "" cmd /c del "%~f0"&exit /b''')
+(goto) 2>nul & del "%~f0"''')
         else:
-            with open(bat_file) as bat:
+            with open(bat_file, 'w') as bat:
                 bat.write(f'''@echo off
-sleep 3
-{os.path.abspath('./unins000.exe')} /SILENT /SUPPRESSMSGBOXES
+timeout 3
+"{os.path.abspath('./unins000.exe')}" /SILENT /SUPPRESSMSGBOXES
 {file} /DIR="{os.getcwd()}" /SILENT /SUPPRESSMSGBOXES /NOCANCEL /FORCECLOSEAPPLICATIONS
 del /q {file}
-start /b "" cmd /c del "%~f0"&exit /b''')
+(goto) 2>nul & del "%~f0"''')
         os.startfile(bat_file)
         app_quit()
     else:
