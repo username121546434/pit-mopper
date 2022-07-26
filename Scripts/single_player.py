@@ -521,7 +521,7 @@ settings = Menu(menubar, tearoff=0)
 settings.add_checkbutton(variable=chord_state, label='Enable Chording', accelerator='Ctrl+A')
 settings.add_checkbutton(variable=dark_mode_state, label='Dark Mode', accelerator='Ctrl+D')
 settings.add_separator()
-settings.add_command(label='Check for Updates', command=check_for_updates, accelerator='Ctrl+U')
+settings.add_command(label='Check for Updates', command=partial(check_for_updates, quit_app), accelerator='Ctrl+U')
 settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Pit Mopper Version: {VERSION}'), accelerator='Ctrl+I')
 settings.add_separator()
 settings.add_command(label='Delete all data', command=clear_all_data)
@@ -533,7 +533,7 @@ advanced.add_checkbutton(label='Console', variable=console_open, accelerator='Ct
 
 # Keyboard Shortcuts
 bindWidget(window, '<Control-i>', True, lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {VERSION}'))
-bindWidget(window, '<Control-u>', True, lambda _: check_for_updates())
+bindWidget(window, '<Control-u>', True, lambda _: check_for_updates(quit_app))
 bindWidget(window, '<Control-q>', True, quit_app)
 bindWidget(window, '<Control-o>', True, load_game)
 bindWidget(window, '<space>', True, create_game)

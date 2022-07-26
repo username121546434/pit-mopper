@@ -3,9 +3,9 @@ from cx_Freeze import setup, Executable
 base = None    
 
 executables = [Executable(
-    "./pit-mopper/code/pit-mopper.py",
+    "./pit-mopper/Pit Mopper.py",
     base='Win32GUI',
-    icon='./pit-mopper/code/data/images/logo.ico',
+    icon='./pit-mopper/Scripts/data/images/logo.ico',
     copyright='GNU GPL v3, see LICENSE.txt for more info'
 )]
 
@@ -17,7 +17,7 @@ packages = [
     'html.parser'
 ]
 include_files = [
-    './pit-mopper/code/data'
+    './pit-mopper/Scripts/data'
 ]
 options = {
     'build_exe': {    
@@ -29,7 +29,7 @@ options = {
 setup(
     name = "Pit Mopper",
     options = options,
-    version = "1.2.0",
+    version = "1.4.0",
     description = '',
     executables = executables
 ) 

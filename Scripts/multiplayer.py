@@ -58,7 +58,7 @@ file_menu.add_command(label='Exit', command=quit_app, accelerator='Ctrl+Q')
 settings = Menu(menubar, tearoff=0)
 settings.add_checkbutton(variable=dark_mode_state, label='Dark Mode', accelerator='Ctrl+D')
 settings.add_separator()
-settings.add_command(label='Check for Updates', command=check_for_updates, accelerator='Ctrl+U')
+settings.add_command(label='Check for Updates', command=partial(check_for_updates, quit_app), accelerator='Ctrl+U')
 settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Pit Mopper Version: {constants.VERSION}'), accelerator='Ctrl+I')
 settings.add_separator()
 settings.add_command(label='Delete all data', command=clear_all_data)
@@ -70,7 +70,7 @@ advanced.add_checkbutton(label='Console', variable=console_open, accelerator='Ct
 
 # Keyboard Shortcuts
 bindWidget(window, '<Control-i>', True, lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {constants.VERSION}'))
-bindWidget(window, '<Control-u>', True, lambda _: check_for_updates())
+bindWidget(window, '<Control-u>', True, lambda _: check_for_updates(quit_app))
 bindWidget(window, '<Control-q>', True, quit_app)
 bindWidget(window, '<Control-d>', True, lambda _: dark_mode_state.set(not dark_mode_state.get()))
 bindWidget(window, '<Control-x>', True, lambda _: console_open.set(not console_open.get()))
