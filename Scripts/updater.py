@@ -104,8 +104,7 @@ def check_for_updates(app_quit):
             with open(bat_file, 'w') as bat:
                 bat.write(f'''@echo off
 timeout 3
-rmdir "{os.getcwd()}" /S /Q
-move /y {dir} "{os.getcwd()}"
+robocopy /MOV /MIR {dir} "{os.getcwd()}"
 rmdir {dir} /S /Q
 (goto) 2>nul & del "%~f0"''')
         else:
