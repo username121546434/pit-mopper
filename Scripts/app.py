@@ -1,20 +1,10 @@
 from tkinter import *
-from typing import Callable
 from . import constants
 from .custom_menubar import CustomMenuBar
 from .functions import *
 from .console_window import show_console, hide_console
 from functools import partial
 from .updater import check_for_updates
-from dataclasses import dataclass
-
-
-@dataclass(slots=True, frozen=True)
-class MenuBarCommand:
-    index: int
-    menu: Menu
-    label: str
-    command: Callable
 
 
 class App(Tk):

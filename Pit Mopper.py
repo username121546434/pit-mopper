@@ -3,20 +3,23 @@ import os
 from tkinter import *
 from tkinter import messagebox
 from Scripts.app import App
-from Scripts.constants import VERSION, DEBUG
+from Scripts.constants import VERSION, DEBUG, debug_log_file
 from Scripts.network import check_internet
 from Scripts.console_window import get_console
 import sys
 get_console()
+
+if not os.path.exists(DEBUG):
+    os.makedirs(DEBUG)
+
+with open(debug_log_file, 'w') as _:
+    pass
 from Scripts.base_logger import init_logger
 init_logger()
 
 logging.info('Loading...')
 __version__ = VERSION
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
-
-if not os.path.exists(DEBUG):
-    os.makedirs(DEBUG)
 
 def run_single_player():
     window.destroy()

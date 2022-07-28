@@ -66,8 +66,8 @@ while True:
                 True
             )
             while True:
-                constants.after_cancel.append(game_window.after(50, do_nothing))
-                result2 = result.pop('result')
+                game_window.after(100, do_nothing)
+                result2 = result.get('result')
                 result = _update_game(**result)
                 game = n.send_data('get')
                 if player == 2:

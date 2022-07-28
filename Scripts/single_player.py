@@ -9,8 +9,6 @@ from . import constants
 from .console_window import *
 from .functions import _update_game
 get_console()
-with open(debug_log_file, 'w') as _:
-    pass
 # Creates AppData folder if doesn't exist
 if not os.path.exists(DEBUG):
     os.makedirs(DEBUG)
