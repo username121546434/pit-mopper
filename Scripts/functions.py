@@ -248,6 +248,7 @@ def _update_game(
     additional_time: float = 0.0,
     squares_checked: list = None,
     previous_sec: datetime = None,
+    result: dict = None
 ):
     if previous_sec == None:
         previous_sec = datetime.now()
@@ -257,8 +258,15 @@ def _update_game(
         zeros_checked = []
     if constants.APP_CLOSED:
         return
+    if result == None:
+        result = {
+            'win': False,
+            'seconds': 0,
+            'game over': False
+        }
+    mines_found = 0
 
-    seconds = 0
+    seconds = result['seconds']
     squares_checked = []
     squares_flaged = [
         square
@@ -285,8 +293,6 @@ def _update_game(
         except TclError:
             pass
         return
-    constants.after_cancel.append(game_window.master.after(100, do_nothing))
-    constants.after_cancel.pop(constants.after_cancel.index(constants.after_cancel[-1]))
     now = datetime.now()
     now = now.replace(microsecond=0)
     if now > previous_sec:
@@ -301,9 +307,6 @@ def _update_game(
             for square2 in (square2 for square2 in grid.around_square(*square.position) if (square2.category != 'mine') and square2 not in squares_checked):
                 square2.clicked()
                 squares_checked.append(square2)
-        # Counts mines found
-        for square in (square for square in squares_flaged if square.category == 'mine'):
-            mines_found += 1
         if chording:
             # Checks all square if they are completed
             for square in (square for square in row if square.completed == False):
@@ -332,7 +335,6 @@ def _update_game(
                     for square2 in (square for square in grid.around_square(*square.position) if not square.clicked_on and square.category != 'mine'):
                         square2.clicked()
                     square.chord = False
-    mines_found = 0
     squares_clicked_on = [
         square
         for row in grid.grid
@@ -356,6 +358,9 @@ def _update_game(
         for row in grid.grid
         for square in row
     ]
+    # Counts mines found
+    for square in (square for square in squares_flaged if square.category == 'mine'):
+        mines_found += 1
     if (len(squares_clicked_on) == (grid.grid_size[0] * grid.grid_size[1]) and all(square.category == 'mine' for square in squares_flaged)) or \
             (all(square.category == 'mine' for square in squares_not_clicked_on) and len(squares_not_clicked_on) == num_mines):
         game_over = True
@@ -372,16 +377,15 @@ def _update_game(
         game_over = False
         win = False
     if game_over:
-        for row in grid.grid:
-            for square in row:
-                if square.category == 'mine' and square.cget('text') != '🚩':
-                    square.clicked()
-                elif square.category == 'mine' and square.cget('text') == '🚩':
-                    mines_found += 1
-                    square.config(text='✅')
-                elif square.num != None and square.cget('text') == '🚩':
-                    square.config(text='❌')
-        game_window.update()
+        mines_found = 0
+        for square, _ in grid.iter_squares():
+            if square.category == 'mine' and square.cget('text') != '🚩':
+                square.clicked()
+            elif square.category == 'mine' and square.cget('text') == '🚩':
+                mines_found += 1
+                square.config(text='✅')
+            elif square.num != None and square.cget('text') == '🚩':
+                square.config(text='❌')
     game_window.update()
     gc.collect()
     return {

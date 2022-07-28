@@ -1,31 +1,18 @@
-from functools import partial
 from tkinter.ttk import Progressbar
-from .functions import _update_game
 
+from .app import App
+from .functions import _update_game
 from .grid import ButtonGrid
-from .updater import check_for_updates
 from .network import Network
 from .game import OnlineGame
 from tkinter import *
 from . import constants
 from .functions import *
-from .console_window import get_console, show_console, hide_console
+from .console_window import get_console
 get_console()
 from .base_logger import init_logger
 import logging
 init_logger()
-
-
-def console(*_):
-    if not console_open.get():
-        hide_console()
-    else:
-        show_console()
-
-
-def change_theme(*_):
-    constants.dark_mode = dark_mode_state.get()
-    base_change_theme(window)
 
 
 def quit_app():
@@ -35,51 +22,8 @@ def quit_app():
 
 logging.info('Loading multiplayer...')
 
-window = Tk()
-window.title('Pit Mopper Multiplayer')
-window.iconbitmap(constants.LOGO, constants.LOGO)
-
-console_open = BooleanVar(window, False)
-console_open.trace('w', console)
-dark_mode_state = BooleanVar(window)
-dark_mode_state.trace('w', change_theme)
-
-# create a menubar
-menubar = CustomMenuBar(window)
-menubar.place(x=0, y=0)
-
-# create the file_menu
-file_menu = Menu(
-    menubar,
-    tearoff=0
-)
-file_menu.add_command(label='Exit', command=quit_app, accelerator='Ctrl+Q')
-
-settings = Menu(menubar, tearoff=0)
-settings.add_checkbutton(variable=dark_mode_state, label='Dark Mode', accelerator='Ctrl+D')
-settings.add_separator()
-settings.add_command(label='Check for Updates', command=partial(check_for_updates, quit_app), accelerator='Ctrl+U')
-settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Pit Mopper Version: {constants.VERSION}'), accelerator='Ctrl+I')
-settings.add_separator()
-settings.add_command(label='Delete all data', command=clear_all_data)
-settings.add_command(label='Delete Debug Logs', command=clear_debug)
-settings.add_command(label='Delete Highscore', command=clear_highscore)
-
-advanced = Menu(settings, tearoff=0)
-advanced.add_checkbutton(label='Console', variable=console_open, accelerator='Ctrl+X')
-
-# Keyboard Shortcuts
-bindWidget(window, '<Control-i>', True, lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {constants.VERSION}'))
-bindWidget(window, '<Control-u>', True, lambda _: check_for_updates(quit_app))
-bindWidget(window, '<Control-q>', True, quit_app)
-bindWidget(window, '<Control-d>', True, lambda _: dark_mode_state.set(not dark_mode_state.get()))
-bindWidget(window, '<Control-x>', True, lambda _: console_open.set(not console_open.get()))
-
-menubar.add_menu(menu=file_menu, title='File')
-menubar.add_menu(menu=settings, title='Settings')
-menubar.add_menu(menu=advanced, title='Advanced')
-window.protocol('WM_DELETE_WINDOW', quit_app)
-
+window = App('Pit Mopper Multiplayer')
+window.quit_app = quit_app
 label = Label(window, text='Waiting for player...')
 label.pack(pady=(25, 0))
 

@@ -22,14 +22,9 @@ from .grid import ButtonGrid, PickleButtonGrid
 from .squares import PickleSquare, Square
 from .functions import *
 from .updater import check_for_updates
+from .app import App
 import gc
 logging.info('Loading Single Player...')
-
-def console(*_):
-    if not console_open.get():
-        hide_console()
-    else:
-        show_console()
 
 
 def more_info(
@@ -114,15 +109,16 @@ def update_game(
         mines_found,
         additional_time
     )
-    result2 = result.pop('result')
+    result2 = result.get('result')
     while True:
         if not isinstance(result, dict):
             return None
         constants.after_cancel.append(game_window.after(100, do_nothing))
         constants.after_cancel.pop(constants.after_cancel.index(constants.after_cancel[-1]))
         result = _update_game(**result)
-        result2 = result.pop('result')
+        result2 = result.get('result')
         if result2['game over']:
+            result2['mines_found'] = result['mines_found']
             return result2
         try:
             game_window.winfo_exists()
@@ -147,7 +143,7 @@ def load_game(_=None):
     game_window.title('Pit Mopper')
 
     grid = data['grid'].grid
-    button_grid = ButtonGrid(data['grid'].grid_size, game_window, grid, dark_mode_state.get())
+    button_grid = ButtonGrid(data['grid'].grid_size, game_window, grid, window.dark_mode_state.get())
 
     start: datetime = data['start']
     time = data['time played']
@@ -219,7 +215,7 @@ def create_game(
             logging.warning(f'Number of mines high, game size {difficulty.get()}, mines: {mines.get()}')
             messagebox.showwarning(title='Number of mines high', message='You have chosen a high amount of mines, so it might take a long time to place them all')
 
-    if dark_mode_state.get():
+    if window.dark_mode_state.get():
         dark_title_bar(game_window)
 
     logging.info(f'''Creating game with following attributes:
@@ -242,7 +238,7 @@ additional_time:       {additional_time}
 
     if grid == None:
         logging.info('Creating grid of buttons...')
-        grid = ButtonGrid(difficulty.get(), game_window, dark_mode=dark_mode_state.get(), num_mines=mines.get())
+        grid = ButtonGrid(difficulty.get(), game_window, dark_mode=window.dark_mode_state.get(), num_mines=mines.get())
         if constants.APP_CLOSED:
             try:
                 game_window.destroy()
@@ -322,6 +318,7 @@ additional_time:       {additional_time}
         return
     win = result['win']
     seconds = result['seconds']
+    mines_found = result['mines_found']
     del result
     gc.collect()
     if win:
@@ -417,7 +414,7 @@ def show_highscores(_=None):
         new_window.grid_rowconfigure(0, weight=1)
         frame.grid(row=0, column=0)
 
-        if dark_mode_state.get():
+        if window.dark_mode_state.get():
             new_window.config(bg=DARK_MODE_BG)
             dark_title_bar(new_window)
             bg_of_labels = DARK_MODE_BG
@@ -442,22 +439,9 @@ def change_mines():
     logging.info(f'Setting custom mine count: {mines.get()}')
 
 
-def change_theme(*_):
-    constants.dark_mode = dark_mode_state.get()
-    base_change_theme(window)
-
-
-def quit_app():
-    base_quit_app(window)
-
-
 logging.info('Functions successfully defined, creating GUI')
 
-window = Tk()
-window.title('Game Loader')
-window.iconbitmap(default=LOGO, bitmap=LOGO)
-window.resizable(False, False)
-window.report_callback_exception = handle_exception
+window = App('Game Loader')
 
 Label(text='Select Difficulty').pack(pady=(25, 0))
 
@@ -495,12 +479,6 @@ Label(window, text='-1 means it will generate a random number/use default').pack
 
 Spinbox(window, textvariable=mines, width=4, from_= -1, to = 2000, command=change_mines).pack()
 
-chord_state = BooleanVar(window)
-console_open = BooleanVar(window, False)
-console_open.trace('w', console)
-dark_mode_state = BooleanVar(window)
-dark_mode_state.trace('w', change_theme)
-
 Button(window, text='Play!', command=create_game).pack(pady=(0, 20))
 
 # create a menubar
@@ -514,38 +492,18 @@ file_menu = Menu(
 )
 file_menu.add_command(label='Open File', command=load_game, accelerator='Ctrl+O')
 file_menu.add_command(label='Highscores', command=show_highscores, accelerator='Ctrl+H')
-file_menu.add_separator()
-file_menu.add_command(label='Exit', command=quit_app, accelerator='Ctrl+Q')
 
+chord_state = BooleanVar(window)
 settings = Menu(menubar, tearoff=0)
 settings.add_checkbutton(variable=chord_state, label='Enable Chording', accelerator='Ctrl+A')
-settings.add_checkbutton(variable=dark_mode_state, label='Dark Mode', accelerator='Ctrl+D')
-settings.add_separator()
-settings.add_command(label='Check for Updates', command=partial(check_for_updates, quit_app), accelerator='Ctrl+U')
-settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Pit Mopper Version: {VERSION}'), accelerator='Ctrl+I')
-settings.add_separator()
-settings.add_command(label='Delete all data', command=clear_all_data)
-settings.add_command(label='Delete Debug Logs', command=clear_debug)
-settings.add_command(label='Delete Highscore', command=clear_highscore)
-
-advanced = Menu(settings, tearoff=0)
-advanced.add_checkbutton(label='Console', variable=console_open, accelerator='Ctrl+X')
 
 # Keyboard Shortcuts
-bindWidget(window, '<Control-i>', True, lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {VERSION}'))
-bindWidget(window, '<Control-u>', True, lambda _: check_for_updates(quit_app))
-bindWidget(window, '<Control-q>', True, quit_app)
 bindWidget(window, '<Control-o>', True, load_game)
 bindWidget(window, '<space>', True, create_game)
-bindWidget(window, '<Control-a>', True, lambda _: chord_state.set(not chord_state.get()))
-bindWidget(window, '<Control-d>', True, lambda _: dark_mode_state.set(not dark_mode_state.get()))
 bindWidget(window, '<Control-h>', True, show_highscores)
-bindWidget(window, '<Control-x>', True, lambda _: console_open.set(not console_open.get()))
 
 menubar.add_menu(menu=file_menu, title='File')
 menubar.add_menu(menu=settings, title='Settings')
-menubar.add_menu(menu=advanced, title='Advanced')
-window.protocol('WM_DELETE_WINDOW', quit_app)
 
 logging.info('GUI successfully created')
 window.mainloop()

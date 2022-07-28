@@ -174,7 +174,7 @@ class ButtonGrid:
     def iter_squares(self):
         for row in self.grid:
             for square in row:
-                yield square, (self.grid.index(row), row.index(square))
+                yield square, square.position
 
 
 class PickleButtonGrid:

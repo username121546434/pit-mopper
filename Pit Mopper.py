@@ -1,10 +1,17 @@
+import logging
 import os
 from tkinter import *
 from tkinter import messagebox
+from Scripts.app import App
 from Scripts.constants import VERSION, DEBUG
 from Scripts.network import check_internet
+from Scripts.console_window import get_console
 import sys
+get_console()
+from Scripts.base_logger import init_logger
+init_logger()
 
+logging.info('Loading...')
 __version__ = VERSION
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
 
@@ -26,12 +33,10 @@ def run_multiplayer():
         messagebox.showerror('No Internet', 'You need internet for this')
 
 
-window = Tk()
-window.title('Pit Mopper')
-window.iconbitmap(r'data\images\logo.ico', default=r'data\images\logo.ico')
-window.config(padx=20, pady=20)
+window = App('Pit Mopper')
 
-Button(window, text='Single Player', command=run_single_player).pack()
-Button(window, text='Multiplayer', command=run_multiplayer).pack()
+Button(window, text='Single Player', command=run_single_player).pack(pady=(25, 0))
+Button(window, text='Multiplayer', command=run_multiplayer).pack(pady=(0, 20), padx=50)
 
+logging.info('Finished loading')
 window.mainloop()
