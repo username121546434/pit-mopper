@@ -113,8 +113,7 @@ def update_game(
     while True:
         if not isinstance(result, dict):
             return None
-        constants.after_cancel.append(game_window.after(100, do_nothing))
-        constants.after_cancel.pop(constants.after_cancel.index(constants.after_cancel[-1]))
+        game_window.after(100, do_nothing)
         result = _update_game(**result)
         result2 = result.get('result')
         if result2['game over']:

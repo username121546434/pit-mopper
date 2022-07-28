@@ -121,8 +121,6 @@ def dark_title_bar(window):
 def base_quit_app(window: Tk):
     constants.APP_CLOSED = True
     logging.info('Closing Pit Mopper...')
-    for code in constants.after_cancel:
-        window.after_cancel(code)
     window.setvar('button pressed', 39393)
     window.destroy()
     logging.shutdown()

@@ -36,7 +36,7 @@ def run_multiplayer():
 window = App('Pit Mopper')
 
 Button(window, text='Single Player', command=run_single_player).pack(pady=(25, 0))
-Button(window, text='Multiplayer', command=run_multiplayer).pack(pady=(0, 20), padx=50)
+Button(window, text='Multiplayer', command=run_multiplayer).pack(pady=(0, 20), padx=90)
 
 logging.info('Finished loading')
 window.mainloop()
