@@ -4,10 +4,9 @@ Pit Mopper is a game based on "Minesweeper" that was built in python.
 
 Project Structure:
 
-- ./code - Actual source code for Pit Mopper
-- ./code/data - Data files for Pit Mopper(ie: Images and Fonts)
-- ./code/multiplayer - Soon going to files for Pit Mopper multiplayer
-- ./images - Images used for documentation
+- ./Scripts - Python modules
+- ./Scripts/data - Data files for Pit Mopper(ie: Images and Fonts)
+- ./images - Images going used for documentation
 
 ## Keyboard Shorcuts
 
