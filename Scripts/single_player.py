@@ -481,29 +481,19 @@ Spinbox(window, textvariable=mines, width=4, from_= -1, to = 2000, command=chang
 
 Button(window, text='Play!', command=create_game).pack(pady=(0, 20))
 
-# create a menubar
-menubar = CustomMenuBar(window)
-menubar.place(x=0, y=0)
-
-# create the file_menu
-file_menu = Menu(
-    menubar,
-    tearoff=0
-)
-file_menu.add_command(label='Open File', command=load_game, accelerator='Ctrl+O')
-file_menu.add_command(label='Highscores', command=show_highscores, accelerator='Ctrl+H')
+window.file_menu.add_separator()
+window.file_menu.add_command(label='Open File', command=load_game, accelerator='Ctrl+O')
+window.file_menu.add_command(label='Highscores', command=show_highscores, accelerator='Ctrl+H')
 
 chord_state = BooleanVar(window)
-settings = Menu(menubar, tearoff=0)
-settings.add_checkbutton(variable=chord_state, label='Enable Chording', accelerator='Ctrl+A')
+
+window.settings.add_separator()
+window.settings.add_checkbutton(variable=chord_state, label='Enable Chording', accelerator='Ctrl+A')
 
 # Keyboard Shortcuts
 bindWidget(window, '<Control-o>', True, load_game)
 bindWidget(window, '<space>', True, create_game)
 bindWidget(window, '<Control-h>', True, show_highscores)
-
-menubar.add_menu(menu=file_menu, title='File')
-menubar.add_menu(menu=settings, title='Settings')
 
 logging.info('GUI successfully created')
 window.mainloop()
