@@ -4,8 +4,6 @@ from datetime import datetime
 class OnlineGame:
     def __init__(self, id) -> None:
         self.id = id
-        self.p2_name = ''
-        self.p1_name = ''
         self.p1_finished = False
         self.p2_finished = False
         self.p1_info = {'timer text': ''}
