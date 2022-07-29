@@ -19,7 +19,6 @@ from .squares import PickleSquare, Square
 from .grid import ButtonGrid, PickleButtonGrid
 from .squares import PickleSquare, Square
 from .functions import *
-from .updater import check_for_updates
 from .app import App
 import gc
 logging.info('Loading Single Player...')

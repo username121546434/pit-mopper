@@ -1,6 +1,7 @@
 """Soon going to the server for online multiplayer pit mopper games.
 Multiplayer games will most likely not coming anytime soon
 """
+import os
 import socket
 import threading
 import sys
@@ -9,11 +10,15 @@ from Scripts.game import OnlineGame
 import pickle
 import logging
 
+if not os.path.exists('./logs'):
+    os.mkdir('logs')
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s | %(threadName)s]: %(message)s",
     handlers=[
-        logging.StreamHandler()
+        logging.StreamHandler(),
+        logging.FileHandler(f"./logs/log.log")
     ]
 )
 
@@ -52,6 +57,11 @@ def new_client(conn: socket.socket, player: int, game_id: int):
     while True:
         try:
             recieved = pickle.loads(conn.recv(2048))
+            try:
+                _ = games[game_id]
+            except KeyError:
+                conn.sendall(pickle.dumps('restart'))
+                logging.info('Telling client to restart')
 
             if recieved == 'disconnect':
                 logging.info('Client Disconnected')
@@ -67,19 +77,17 @@ def new_client(conn: socket.socket, player: int, game_id: int):
 
             conn.sendall(pickle.dumps(games[game_id]))
         except Exception:
-            print(traceback.format_exc())
-            logging.error('Unknown error, disconnecting imeidietly')
+            logging.error(f'Unknown error, disconnecting imeidietly\n{traceback.format_exc()}')
             break
 
     logging.info('Disconnecting...')
-    if games[game_id].available:
-        logging.info('Game no longer available')
-        games[game_id].available = False
-        id_count -= 1
-    else:
-        logging.info('Deleting game...')
-        id_count -= 1
+    id_count -= 1
+    try:
         games.pop(game_id)
+    except KeyError:
+        logging.info('Failed to delete game as it was already deleted')
+    else:
+        logging.info('Deleted game')
     conn.close()
 
 

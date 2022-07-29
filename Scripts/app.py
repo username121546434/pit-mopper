@@ -5,6 +5,8 @@ from .functions import *
 from .console_window import show_console, hide_console
 from functools import partial
 from .updater import check_for_updates
+import shutil
+import os
 
 
 class App(Tk):

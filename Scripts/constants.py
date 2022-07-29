@@ -21,4 +21,4 @@ VERSION = '1.4.0'
 
 dark_mode = False
 del_data = 'none'
-debug_log_file = os.path.join(DEBUG, f"{datetime.now().strftime(STRFTIME.replace(':', '-'))}.log")
+debug_log_file = os.path.join(DEBUG, f"{datetime.now():{STRFTIME.replace(':', '-')}}.log")

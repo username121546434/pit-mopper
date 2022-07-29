@@ -27,6 +27,7 @@ class MultiplayerApp(App):
 logging.info('Loading multiplayer...')
 
 window = MultiplayerApp('Pit Mopper Multiplayer')
+
 label = Label(window, text='Waiting for player...')
 label.pack(pady=(25, 0))
 
@@ -39,6 +40,9 @@ grid = None
 game_window = None
 connected = False
 
+window.settings.add_separator()
+window.settings.add_command(label='Restart connection', command=n.restart)
+
 logging.info('GUI successfully created')
 logging.info('Waiting for player...')
 while True:
@@ -50,45 +54,54 @@ while True:
         label.config(text='Starting game...')
         progress_bar.pack_forget()
         connected = True
-        if grid == None and game_window == None:
-            game_window = Toplevel(window)
-            game_window.title('Pit Mopper Multiplayer')
+        game_window = Toplevel(window)
+        game_window.title('Pit Mopper Multiplayer')
 
-            timer = Label(game_window, text='Time: 0:00')
-            timer.grid(row=1, column=1)
+        timer = Label(game_window, text='Time: 0:00')
+        timer.grid(row=1, column=1)
 
-            self_info = StringVar(game_window)
-            Label(game_window, textvariable=self_info).grid(row=2, column=1)
+        self_info = StringVar(game_window)
+        Label(game_window, textvariable=self_info).grid(row=2, column=1)
 
-            other_info = Label(game_window)
-            other_info.grid(row=3, column=1)
+        other_info = Label(game_window)
+        other_info.grid(row=3, column=1)
 
-            grid = ButtonGrid((10, 10), game_window, row=4, click_random_square=True)
-            result = _update_game(
-                game_window,
-                grid,
-                datetime.now(),
-                self_info,
-                [],
-                grid.num_mines,
-                True,
-                with_time=False
-            )
-            while True:
-                if not game.available:
-                    break
-                if constants.APP_CLOSED:
-                    sys.exit()
-                result2 = result.get('result')
-                result = _update_game(**result)
-                if constants.APP_CLOSED:
-                    sys.exit()
-                if player == 2:
-                    other_info.config(text=f'Oponent: {game.p1_info["timer text"]}')
-                else:
-                    other_info.config(text=f'Oponent: {game.p2_info["timer text"]}')
-                timer.config(text=f'Time: {format_second(result["result"]["seconds"])}')
+        grid = ButtonGrid((10, 10), game_window, row=4, click_random_square=True)
+        result = _update_game(
+            game_window,
+            grid,
+            datetime.now(),
+            self_info,
+            [],
+            grid.num_mines,
+            True,
+            with_time=False
+        )
+        while True:
+            if not game.available:
+                break
+            if constants.APP_CLOSED:
+                sys.exit()
+            result2 = result.get('result')
+            result = _update_game(**result)
+            if constants.APP_CLOSED:
+                sys.exit()
+            if player == 2:
+                other_info.config(text=f'Oponent: {game.p1_info["timer text"]}')
+            else:
+                other_info.config(text=f'Oponent: {game.p2_info["timer text"]}')
+            timer.config(text=f'Time: {format_second(result["result"]["seconds"])}')
+            try:
                 game = n.send_data({'timer text': self_info.get()[4:]})
+                if game == 'restart':
+                    n.restart()
+                    player = n.data
+                    break
+            except Exception:
+                logging.error(f'Error while sending data\n{traceback.format_exc()}')
+                if messagebox.askokcancel('Connection Error', 'There was an error while sending data, would you like to restart the connection?'):
+                    n.restart()
+                    break
     else:
         if connected:
             connected = False

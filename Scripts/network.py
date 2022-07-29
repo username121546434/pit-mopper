@@ -1,5 +1,9 @@
+import logging
 import socket
 import pickle
+import time
+from .base_logger import init_logger
+
 
 class Network:
     def __init__(self) -> None:
@@ -8,20 +12,29 @@ class Network:
         self.port = 5555
         self.addr = (self.server, self.port)
         self.data = self.connect()
-    
+
     def connect(self):
-        try:
-            self.client.connect(self.addr)
-            return pickle.loads(self.client.recv(2048))
-        except Exception as e:
-            print(e)
-    
+        self.client.connect(self.addr)
+        return pickle.loads(self.client.recv(2048))
+
     def send_data(self, data):
+        self.client.send(pickle.dumps(data))
+        return pickle.loads(self.client.recv(2048))
+
+    def restart(self):
+        init_logger()
+        logging.info('Restarting connection...')
         try:
-            self.client.send(pickle.dumps(data))
-            return pickle.loads(self.client.recv(2048))
-        except socket.error as e:
-            print(e)
+            self.send_data('disconnect')
+        except Exception:
+            pass
+        time.sleep(2)
+        try:
+            self.client.close()
+        except Exception:
+            pass
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.data = self.connect()
 
 
 def check_internet(host="8.8.8.8", port=53, timeout=3):

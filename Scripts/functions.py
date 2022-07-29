@@ -1,12 +1,9 @@
 import ctypes
 from datetime import datetime
 import gc
-import os
-import shutil
 import sys
 from tkinter import messagebox
 from tkinter import *
-
 from .grid import ButtonGrid
 from . import constants
 from .squares import Square
