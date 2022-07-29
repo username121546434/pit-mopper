@@ -121,7 +121,10 @@ def dark_title_bar(window):
 def base_quit_app(window: Tk):
     constants.APP_CLOSED = True
     logging.info('Closing Pit Mopper...')
-    window.setvar('button pressed', 39393)
+    try:
+        window.setvar('button pressed', 39393)
+    except TclError:
+        pass
     window.destroy()
     logging.shutdown()
     if constants.del_data == 'all':
@@ -246,7 +249,8 @@ def _update_game(
     additional_time: float = 0.0,
     squares_checked: list = None,
     previous_sec: datetime = None,
-    result: dict = None
+    result: dict = None,
+    with_time: bool = True
 ):
     if previous_sec == None:
         previous_sec = datetime.now()
@@ -297,7 +301,10 @@ def _update_game(
         previous_sec = now
         seconds = (now - session_start).total_seconds() + additional_time
         percent = round(((len(squares_flaged))/num_mines) * 100, 2)
-        total_time.set(f'Time: {format_second(seconds)}  🚩 {len(squares_flaged)}/{num_mines} 💣 ({percent}%)')
+        if with_time:
+            total_time.set(f'Time: {format_second(seconds)}  🚩 {len(squares_flaged)}/{num_mines} 💣 ({percent}%)')
+        else:
+            total_time.set(f'You: 🚩 {len(squares_flaged)}/{num_mines} 💣 ({percent}%)')
     for row in grid.iter_rows():
         # Clicks Zeros
         for square in (square for square in row if (square.num == None) and (square.clicked_on) and (square not in zeros_checked) and (square.category != 'mine')):
@@ -403,4 +410,5 @@ def _update_game(
             'seconds': seconds,
             'game over': game_over
         },
+        'with_time': with_time
     }

@@ -1,5 +1,4 @@
 from tkinter.ttk import Progressbar
-
 from .app import App
 from .functions import _update_game
 from .grid import ButtonGrid
@@ -15,7 +14,7 @@ import logging
 init_logger()
 
 
-def quit_app():
+def _quit_app(*_):
     n.send_data('disconnect')
     base_quit_app(window)
 
@@ -23,7 +22,7 @@ def quit_app():
 logging.info('Loading multiplayer...')
 
 window = App('Pit Mopper Multiplayer')
-window.quit_app = quit_app
+window.quit_app = _quit_app
 label = Label(window, text='Waiting for player...')
 label.pack(pady=(25, 0))
 
@@ -39,8 +38,9 @@ connected = False
 logging.info('GUI successfully created')
 
 while True:
+    if constants.APP_CLOSED:
+        sys.exit()
     game: OnlineGame = n.send_data('get')
-    print(game)
     if game.available:
         label.config(text='Starting game...')
         progress_bar.pack_forget()
@@ -49,33 +49,39 @@ while True:
             game_window = Toplevel(window)
             game_window.title('Pit Mopper Multiplayer')
 
-            self_timer = StringVar(game_window)
-            Label(game_window, textvariable=self_timer).grid(row=1, column=1)
+            self_info = StringVar(game_window)
+            Label(game_window, textvariable=self_info).grid(row=1, column=1)
 
-            other_timer = Label(game_window)
-            other_timer.grid(row=2, column=1)
+            other_info = Label(game_window)
+            other_info.grid(row=2, column=1)
 
             grid = ButtonGrid((10, 10), game_window, row=3, click_random_square=True)
             result = _update_game(
                 game_window,
                 grid,
                 datetime.now(),
-                self_timer,
+                self_info,
                 [],
                 grid.num_mines,
-                True
+                True,
+                with_time=False
             )
             while True:
-                game_window.after(100, do_nothing)
+                if constants.APP_CLOSED:
+                    sys.exit()
                 result2 = result.get('result')
                 result = _update_game(**result)
                 game = n.send_data('get')
+                if constants.APP_CLOSED:
+                    sys.exit()
                 if player == 2:
-                    other_timer.config(text=game.p1_info['timer text'])
+                    other_info.config(text=f'Oponent: {game.p1_info["timer text"]}')
                 else:
-                    other_timer.config(text=game.p2_info['timer text'])
-                data = {'timer text': self_timer.get()}
-                game = n.send_data(data)
+                    other_info.config(text=f'Oponent: {game.p2_info["timer text"]}')
+                if not game.available:
+                    messagebox.showerror('Player disconnected', 'It seems like the player has disconnected, please re-open Pit Mopper')
+                    window.quit_app()
+                game = n.send_data({'timer text': self_info.get()[4:]})
     else:
         if connected:
             connected = False

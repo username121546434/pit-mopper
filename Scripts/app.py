@@ -58,7 +58,7 @@ class App(Tk):
         self.menubar.add_menu(menu=self.advanced, title='Advanced')
         self.protocol('WM_DELETE_WINDOW', self.quit_app)
     
-    def quit_app(self):
+    def quit_app(self, *_):
         base_quit_app(self)
 
     def console(self, *_):

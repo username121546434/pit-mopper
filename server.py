@@ -31,6 +31,7 @@ games: dict[int, OnlineGame] = {}
 id_count = 0
 
 def new_client(conn: socket.socket, player: int, game_id: int):
+    global id_count
     conn.send(pickle.dumps(player))
 
     while True:
@@ -58,7 +59,9 @@ def new_client(conn: socket.socket, player: int, game_id: int):
     print('Disconnecting...')
     if games[game_id].available:
         games[game_id].available = False
+        id_count -= 1
     else:
+        id_count -= 1
         try:
             games.pop(game_id)
         except KeyError:
