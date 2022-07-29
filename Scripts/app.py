@@ -59,7 +59,31 @@ class App(Tk):
         self.protocol('WM_DELETE_WINDOW', self.quit_app)
     
     def quit_app(self, *_):
-        base_quit_app(self)
+        constants.APP_CLOSED = True
+        logging.info('Closing Pit Mopper...')
+        try:
+            self.setvar('button pressed', 39393)
+        except TclError:
+            pass
+        self.destroy()
+        logging.shutdown()
+        if constants.del_data == 'all':
+            try:
+                shutil.rmtree(constants.APPDATA)
+            except FileNotFoundError:
+                pass
+        elif constants.del_data == 'debug':
+            try:
+                shutil.rmtree(constants.DEBUG)
+            except FileNotFoundError:
+                pass
+        elif constants.del_data == 'highscore':
+            try:
+                os.remove(constants.HIGHSCORE_TXT)
+            except FileNotFoundError:
+                pass
+        del self
+        sys.exit()
 
     def console(self, *_):
         if not self.console_open.get():

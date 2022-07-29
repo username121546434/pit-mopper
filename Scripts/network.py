@@ -7,9 +7,9 @@ class Network:
         self.server = '192.168.2.13'
         self.port = 5555
         self.addr = (self.server, self.port)
-        self.data = self.conect()
+        self.data = self.connect()
     
-    def conect(self):
+    def connect(self):
         try:
             self.client.connect(self.addr)
             return pickle.loads(self.client.recv(2048))

@@ -118,34 +118,6 @@ def dark_title_bar(window):
                          ctypes.sizeof(value))
 
 
-def base_quit_app(window: Tk):
-    constants.APP_CLOSED = True
-    logging.info('Closing Pit Mopper...')
-    try:
-        window.setvar('button pressed', 39393)
-    except TclError:
-        pass
-    window.destroy()
-    logging.shutdown()
-    if constants.del_data == 'all':
-        try:
-            shutil.rmtree(constants.APPDATA)
-        except FileNotFoundError:
-            pass
-    elif constants.del_data == 'debug':
-        try:
-            shutil.rmtree(constants.DEBUG)
-        except FileNotFoundError:
-            pass
-    elif constants.del_data == 'highscore':
-        try:
-            os.remove(constants.HIGHSCORE_TXT)
-        except FileNotFoundError:
-            pass
-    del window
-    sys.exit()
-
-
 def clear_all_data():
     if messagebox.askyesno('Delete Data', 'Are you sure you want to delete all data? This includes highscores and debug logs and may break some features.'):
         logging.info('Requested to delete all data')
