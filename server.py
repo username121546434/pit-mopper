@@ -1,10 +1,12 @@
 """Soon going to the server for online multiplayer pit mopper games.
 Multiplayer games will most likely not coming anytime soon
 """
+from datetime import datetime
 import os
 import socket
 import threading
 import sys
+import time
 import traceback
 from Scripts.game import OnlineGame
 import pickle
@@ -18,7 +20,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s | %(threadName)s]: %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler(f"./logs/log.log")
+        logging.FileHandler(f"./logs/log.log", encoding='utf-8')
     ]
 )
 
@@ -68,6 +70,11 @@ def new_client(conn: socket.socket, player: int, game_id: int):
                 break
             elif isinstance(recieved, dict):
                 games[game_id].update_info(player, recieved)
+            elif isinstance(recieved, datetime):
+                if player == 1:
+                    games[game_id].p1_finished = recieved
+                else:
+                    games[game_id].p2_finished = recieved
 
             logging.info(f'Received: {recieved}')
             logging.info(f'Sending: {games[game_id]}')
@@ -81,12 +88,12 @@ def new_client(conn: socket.socket, player: int, game_id: int):
             break
 
     logging.info('Disconnecting...')
-    id_count -= 1
     try:
         games.pop(game_id)
     except KeyError:
         logging.info('Failed to delete game as it was already deleted')
     else:
+        id_count -= 2
         logging.info('Deleted game')
     conn.close()
 
@@ -94,7 +101,7 @@ def new_client(conn: socket.socket, player: int, game_id: int):
 while True:
     conn, addr = s.accept()
     logging.info(f'Connected to: {addr}')
-
+    time.sleep(1.5)
     id_count += 1
     game_id = (id_count - 1)//2
     player = 1
