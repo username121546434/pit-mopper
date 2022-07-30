@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-APPDATA = os.path.expanduser(r'~\AppData\Local\Pit Mopper')
+APPDATA = os.path.join(os.getenv('LOCALAPPDATA'), 'Pit Mopper')
 DEBUG = APPDATA + r'\debug'
 SW_HIDE = 0
 SW_SHOW = 5
