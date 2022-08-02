@@ -3,6 +3,7 @@ Multiplayer games will most likely not coming anytime soon
 """
 from datetime import datetime
 import os
+import random
 import socket
 import threading
 import sys
@@ -51,10 +52,10 @@ s.listen()
 logging.info('Server started, waiting for connection...')
 
 games: dict[int, OnlineGame] = {}
-id_count = 0
+player_count = 0
 
 def new_client(conn: socket.socket, player: int, game_id: int):
-    global id_count
+    global player_count
     conn.send(pickle.dumps(player))
     while True:
         try:
@@ -89,27 +90,41 @@ def new_client(conn: socket.socket, player: int, game_id: int):
 
     logging.info('Disconnecting...')
     try:
+        games[game_id].quit = True
         games.pop(game_id)
     except KeyError:
         logging.info('Failed to delete game as it was already deleted')
     else:
-        id_count -= 2
         logging.info('Deleted game')
+    player_count -= 1
     conn.close()
 
 
 while True:
     conn, addr = s.accept()
     logging.info(f'Connected to: {addr}')
-    time.sleep(1.5)
-    id_count += 1
-    game_id = (id_count - 1)//2
-    player = 1
-    if id_count % 2 == 1:
-        logging.info('Creating new game...')
+    player_count += 1
+
+    logging.info('Looking for an available game...')
+    game_id = None
+    for game in games.values():
+        if not game.available and not game.quit:
+            game_id = game.id
+            break
+
+    if game_id is None:
+        logging.info('No game found, generating new game id')
+        game_id = random.randint(1000, 9999)
+        while game_id in games.keys():
+            game_id = random.randint(1000, 9999)
+
+    if game_id not in games:
+        logging.info(f'Creating new game... {game_id = }')
+        player = 1
         game = OnlineGame(game_id)
         games[game_id] = game
     else:
+        logging.info(f'Existing game found, {game_id = }')
         game = games[game_id]
         player = 2
 

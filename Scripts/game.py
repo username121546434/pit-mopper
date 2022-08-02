@@ -9,6 +9,7 @@ class OnlineGame:
         self.p1_info = {'timer text': ''}
         self.p2_info = {'timer text': ''}
         self.available = False
+        self.quit = False
     
     def update_info(self, player:int, info:dict):
         if player == 1:

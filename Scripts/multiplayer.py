@@ -53,7 +53,23 @@ logging.info('Waiting for player...')
 while True:
     if constants.APP_CLOSED:
         sys.exit()
-    if not connected and not game.available:
+    elif connected:
+        del result
+        connected = False
+        grid = None
+        game_window.destroy()
+        game_window = None
+        n.restart()
+        player = n.data
+        game: OnlineGame = n.send_data('get')
+        progress_bar.pack(pady=(0, 20), padx=50)
+        label.config(text='Waiting for player...')
+        if player_left:
+            messagebox.showerror('Connection Error', 'It seems that the other player disconnected')
+            player_left = False
+            logging.error('It seems like the player has disconnected')
+        logging.info('Waiting for new player...')
+    elif not connected and not game.available:
         game: OnlineGame = n.send_data('get')
         progress_bar['value'] += 0.1
     elif game.available and not connected:
@@ -87,7 +103,7 @@ while True:
         while True:
             if constants.APP_CLOSED:
                 sys.exit()
-            if not game.available:
+            if game.quit:
                 player_left = True
                 break
             if game.game_is_tie():
@@ -125,19 +141,4 @@ while True:
                 if game == 'restart':
                     player_left = True
                     break
-    elif connected:
-        del result, result2
-        connected = False
-        grid = None
-        game_window.destroy()
-        game_window = None
-        n.restart()
-        player = n.data
-        progress_bar.pack(pady=(0, 20), padx=50)
-        label.config(text='Waiting for player...')
-        if player_left:
-            messagebox.showerror('Connection Error', 'It seems that the other player disconected')
-            player_left = False
-            logging.error('It seems like the player has disconnected')
-        logging.info('Waiting for new player...')
     window.update()
