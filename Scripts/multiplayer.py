@@ -31,13 +31,20 @@ logging.info('Loading multiplayer...')
 
 window = MultiplayerApp('Pit Mopper Multiplayer')
 
+try:
+    window.update()
+    n = Network()
+except ConnectionError as e:
+    logging.error(f'There was an error while connecting to the server\n{traceback.format_exc()}')
+    messagebox.showerror('Connection error', 'There was an error while connecting to the server, This is either because you do not have internet or the server is shutdown for maintenence, Please try again later')
+    window.quit_app()
+
 label = Label(window, text='Waiting for player...')
 label.pack(pady=(25, 0))
 
 progress_bar = Progressbar(window, mode='indeterminate', length=200)
 progress_bar.pack(pady=(0, 20), padx=50)
 
-n = Network()
 player = n.data
 grid = None
 game_window = None
@@ -55,6 +62,10 @@ while True:
         sys.exit()
     elif connected:
         del result
+        if player_left:
+            messagebox.showerror('Connection Error', 'It seems that the other player disconnected')
+            player_left = False
+            logging.error('It seems like the player has disconnected')
         connected = False
         grid = None
         game_window.destroy()
@@ -64,10 +75,6 @@ while True:
         game: OnlineGame = n.send_data('get')
         progress_bar.pack(pady=(0, 20), padx=50)
         label.config(text='Waiting for player...')
-        if player_left:
-            messagebox.showerror('Connection Error', 'It seems that the other player disconnected')
-            player_left = False
-            logging.error('It seems like the player has disconnected')
         logging.info('Waiting for new player...')
     elif not connected and not game.available:
         game: OnlineGame = n.send_data('get')
