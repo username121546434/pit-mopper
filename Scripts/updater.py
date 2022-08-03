@@ -1,4 +1,5 @@
 import os
+from random import randint
 import requests
 from packaging.version import Version
 from tkinter import *
@@ -108,12 +109,23 @@ robocopy /MOV /MIR {dir} "{os.getcwd()}"
 rmdir {dir} /S /Q
 (goto) 2>nul & del "%~f0"''')
         else:
+            tempfile = os.path.join(os.getenv('TEMP'), f'{randint(34856485, 34534345345445)}.txt')
+            _, tempfile_name = os.path.split(tempfile)
+            with open(tempfile, 'w') as _:
+                pass
             with open(bat_file, 'w') as bat:
                 bat.write(f'''@echo off
 timeout 3
 "{os.path.abspath('./unins000.exe')}" /SILENT /SUPPRESSMSGBOXES
-{file} /DIR="{os.getcwd()}" /SILENT /SUPPRESSMSGBOXES /NOCANCEL /FORCECLOSEAPPLICATIONS
+copy {tempfile} {os.getcwd()}
+if %errorlevel% == 1 (
+    {file} /DIR="{os.getcwd()}" /SILENT /SUPPRESSMSGBOXES /NOCANCEL /FORCECLOSEAPPLICATIONS /ALLUSERS
+) else (
+    del /q {os.path.join(os.getcwd(), tempfile_name)}
+    {file} /DIR="{os.getcwd()}" /SILENT /SUPPRESSMSGBOXES /NOCANCEL /FORCECLOSEAPPLICATIONS /CURRENTUSER
+)
 del /q {file}
+del /q {tempfile}
 (goto) 2>nul & del "%~f0"''')
         os.startfile(bat_file)
         app_quit()
