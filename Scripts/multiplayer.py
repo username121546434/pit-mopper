@@ -80,7 +80,7 @@ def mainloop():
         logging.info('Waiting for new player...')
     elif not connected and not game.available:
         game = n.send_data('get')
-        progress_bar['value'] += 0.1
+        progress_bar['value'] += 1
     elif game.available and not connected:
         logging.info('Player joined, starting game')
         label.config(text='Starting game...')
@@ -151,7 +151,7 @@ def mainloop():
                 if game == 'restart':
                     player_left = True
                     break
-    window.after(1, mainloop)
+    window.after(10, mainloop)
 
 mainloop()
 window.mainloop()
