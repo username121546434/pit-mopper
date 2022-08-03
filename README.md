@@ -1,28 +1,70 @@
-# Beginning
+# Pit Mopper
 
 Pit Mopper is a game based on "Minesweeper" that was built in python.
 
-Project Structure:
+## Project Structure
 
-- ./code - Actual source code for Pit Mopper
-- ./code/data - Data files for Pit Mopper(ie: Images and Fonts)
-- ./code/multiplayer - Soon going to files for Pit Mopper multiplayer
-- ./images - Images used for documentation
+### Folders
+
+| Path To Folder | Purpose                                         |
+| -------------- | ----------------------------------------------- |
+| ./Scripts      | Python modules                                  |
+| ./Scripts/data | Data files for Pit Mopper(ie: Images and Fonts) |
+
+### Files
+
+#### Root Directory
+
+| Path To File      | Purpose                                                                                   |
+| ----------------- | ----------------------------------------------------------------------------------------- |
+| ./Pit Mopper.py   | Main Python file, run it to play the game                                                 |
+| ./setup.py        | Python Scripts which compiles program to an EXE                                           |
+| ./server.py       | Going to be the server for online multiplayer games                                       |
+| ./requirments.txt | List of modules required. Simply use `pip install -r requirments.txt` to install them all |
+| ./LICENSE.txt     | The Liecense for Pit Mopper                                                               |
+
+#### Scripts Directory
+
+| Path To File                | Purpose                                                                                                                                  |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| ./Scripts/app.py            | Defines the `App` class                                                                                                                  |
+| ./Scripts/base_logger.py    | Defines the `init_logger` function which initializes the `logging` module                                                                |
+| ./Scripts/console_window.py | Defines `get_console`, `show_console`, and `hide_console` functions, credits to [SO](https://stackoverflow.com/a/43314117)               |
+| ./Scripts/constants.py      | Defines lots of constants and variables used by almost all of the files                                                                  |
+| ./Scripts/custom_menubar.py | Has the `CustomMenuBar` class which was taken and edited from [SO](https://stackoverflow.com/a/63208829)                                 |
+| ./Scripts/functions.py      | Defines many functions used by most files                                                                                                |
+| ./Scripts/game.py           | Has the `OnlineGame` class, only used by `server.py` and `multiplayer.py`                                                                |
+| ./Scripts/grid.py           | Defines the `ButtonGrid` and `PickleButtonGrid` classes which create a grid of `Squares`, used by some files                             |
+| ./Scripts/load_font.py      | Has the `load_font` function for installing fonts, only used by `squares.py`, also taken from [SO](https://stackoverflow.com/a/30631309) |
+| ./Scripts/multiplayer.py    | A script that runs Pit Mopper in multiplayer mode                                                                                        |
+| ./Scripts/network.py        | Has `Network` class which acts as a websocket connection to the server, also has `check_internet` function                               |
+| ./Scripts/single_player.py  | A script that runs Pit Mopper in single player mode                                                                                      |
+| ./Scripts/squares.py        | Defines the `Square` class which represent a single square on the grid of buttons                                                        |
+| ./Scripts/updater.py        | Defines `check_for_updates` function which, well checks for updates and installs them                                                    |
+
+#### Other Files
+
+| Path To File                                   | Purpose                                                                               |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------- |
+| ./Scripts/data/fonts/DSEG7ClassicMini-Bold.ttf | A font used by the `Square` class. [DSEG Font](https://www.keshikan.net/fonts-e.html) |
+| ./Scripts/data/images/logo.ico                 | The logo for Pit Mopper                                                               |
 
 ## Keyboard Shorcuts
 
-1. Ctrl + I - Shows the Version of Pit Mopper
-2. Ctrl + U - Checks for updates
-3. Ctrl + Q - Quits Pit Mopper, same as just closing the game loader
-4. Ctrl + O - Loads a game from a Pit Mopper game file
-5. Ctrl + A - Enables/Disables Chording
-6. Ctrl + D - Enables/Disables Dark Mode
-7. Ctrl + S - Saves the current game, only applicable when a game is being played
-8. Space - Does the same thing that the "Play!" button in the game loader does
-9. Alt + Q - Closes the game, same as clicking the X
-10. Alt + I - Gives extra information about the current game, same as going to File > More Info
-11. Ctrl + H - Shows your highscores
-12. Ctrl + X - Shows/Hides Console window
+| Shortcut | What it does                                                                      |
+| -------- | --------------------------------------------------------------------------------- |
+| Ctrl + I | Shows the Version of Pit Mopper                                                   |
+| Ctrl + U | Checks for updates                                                                |
+| Ctrl + Q | Quits Pit Mopper, same as just closing the game loader                            |
+| Ctrl + O | Loads a game from a Pit Mopper game file                                          |
+| Ctrl + A | Enables/Disables Chording                                                         |
+| Ctrl + D | Enables/Disables Dark Mode                                                        |
+| Ctrl + S | Saves the current game, only applicable when a game is being played               |
+| Space    | Does the same thing that the "Play!" button in the game loader does               |
+| Alt + Q  | Closes the game, same as clicking the X                                           |
+| Alt + I  | Gives extra information about the current game, same as going to File > More Info |
+| Ctrl + H | Shows your highscores                                                             |
+| Ctrl + X | Shows/Hides Console window                                                        |
 
 ## Latest Features in v1.4.0
 
