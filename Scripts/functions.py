@@ -7,7 +7,6 @@ from tkinter import *
 from .grid import ButtonGrid
 from . import constants
 from .squares import Square
-from .custom_menubar import CustomMenuBar
 from .network import check_internet
 import traceback
 import pyperclip
@@ -32,52 +31,6 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 
 
 sys.excepthook = handle_exception
-
-
-def base_change_theme(window: Tk):
-    if constants.dark_mode:
-        logging.info('User switched theme to dark mode')
-        constants.CURRENT_BG = constants.DARK_MODE_BG
-        constants.CURRENT_FG = constants.DARK_MODE_FG
-        CURRENT_BG = constants.DARK_MODE_BG
-        CURRENT_FG = constants.DARK_MODE_FG
-        dark_title_bar(window)
-    else:
-        logging.info('User switched theme to light mode')
-        constants.CURRENT_BG = constants.DEFAULT_BG
-        constants.CURRENT_FG = constants.DEFAULT_FG
-        CURRENT_BG = constants.DEFAULT_BG
-        CURRENT_FG = constants.DEFAULT_FG
-        window.resizable(False, False)
-
-    window.config(bg=CURRENT_BG)
-    for child in window.winfo_children():
-        if not isinstance(child, Toplevel) and not isinstance(child, Spinbox) and not isinstance(child, CustomMenuBar):
-            child.config(bg=CURRENT_BG, fg=CURRENT_FG)
-        elif isinstance(child, CustomMenuBar):
-            child.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG)
-        elif isinstance(child, Spinbox):
-            if CURRENT_BG == constants.DEFAULT_BG:
-                child.config(bg='white', fg=CURRENT_FG)
-            else:
-                child.config(bg=CURRENT_BG, fg=CURRENT_FG)
-        elif isinstance(child, Toplevel):
-            if CURRENT_BG == constants.DARK_MODE_BG:
-                dark_title_bar(child)
-            else:
-                child.resizable(True, True)
-            child.config(bg=CURRENT_BG)
-            for child2 in child.winfo_children():
-                if not isinstance(child2, Frame) and not isinstance(child2, CustomMenuBar):
-                    child2.config(bg=CURRENT_BG, fg=CURRENT_FG)
-                elif isinstance(child2, CustomMenuBar):
-                    child2.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG)
-                elif isinstance(child2, Frame):
-                    for square in child2.winfo_children():
-                        if isinstance(square, Square):
-                            square.switch_theme()
-                        elif isinstance(square, Label):
-                            square.config(bg=CURRENT_BG, fg=CURRENT_FG)
 
 
 def do_nothing():
