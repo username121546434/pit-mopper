@@ -50,18 +50,20 @@ grid = None
 game_window = None
 connected = False
 player_left = False
-game = DummyGame()
+game: OnlineGame = DummyGame()
 
 window.settings.add_separator()
 window.settings.add_command(label='Restart connection', command=n.restart)
 
 logging.info('GUI successfully created')
 logging.info('Waiting for player...')
-while True:
+
+
+def mainloop():
+    global connected, player_left, player, grid, game_window, n, game
     if constants.APP_CLOSED:
         sys.exit()
     elif connected:
-        del result
         if player_left:
             messagebox.showerror('Connection Error', 'It seems that the other player disconnected')
             player_left = False
@@ -72,12 +74,12 @@ while True:
         game_window = None
         n.restart()
         player = n.data
-        game: OnlineGame = n.send_data('get')
+        game = n.send_data('get')
         progress_bar.pack(pady=(0, 20), padx=50)
         label.config(text='Waiting for player...')
         logging.info('Waiting for new player...')
     elif not connected and not game.available:
-        game: OnlineGame = n.send_data('get')
+        game = n.send_data('get')
         progress_bar['value'] += 0.1
     elif game.available and not connected:
         logging.info('Player joined, starting game')
@@ -96,7 +98,7 @@ while True:
         other_info = Label(game_window)
         other_info.grid(row=3, column=1)
 
-        grid = ButtonGrid((10, 10), game_window, row=4, click_random_square=True)
+        grid = ButtonGrid((10, 10), game_window, row=4, click_random_square=True, dark_mode=window.dark_mode_state.get())
         result = _update_game(
             game_window,
             grid,
@@ -107,6 +109,7 @@ while True:
             True,
             with_time=False
         )
+        result2 = result.get('result')
         while True:
             if constants.APP_CLOSED:
                 sys.exit()
@@ -114,15 +117,15 @@ while True:
                 player_left = True
                 break
             if game.game_is_tie():
-                messagebox.showinfo('Game Results', f'The game ended with a tie!\nYour time: {format_second(result2["seconds"])}')
+                messagebox.showinfo('Game Results', f'The game ended with a tie!\nTime taken: {format_second(result2["seconds"])}')
                 logging.info('Game Over, ended in a tie')
                 break
             elif game.player_who_won() == player:
-                messagebox.showinfo('Game Results', f'You won the game!\nYour time: {format_second(result2["seconds"])}')
+                messagebox.showinfo('Game Results', f'You won the game!\nTime taken: {format_second(result2["seconds"])}')
                 logging.info('Game Over, ended in a victory')
                 break
-            elif game.player_who_won() != None:
-                messagebox.showinfo('Game Results', f'You lost the game :( Better luck next time!\nYour time: {format_second(result2["seconds"])}')
+            elif game.player_who_won() != 12 and game.player_who_won() != None and game.player_who_won() != player:
+                messagebox.showinfo('Game Results', f'You lost the game :( Better luck next time!\nTime taken: {format_second(result2["seconds"])}')
                 logging.info('Game Over, ended in a loss')
                 break
             result2 = result.get('result')
@@ -135,7 +138,7 @@ while True:
                 other_info.config(text=f'Oponent: {game.p2_info["timer text"]}')
             timer.config(text=f'Time: {format_second(result["result"]["seconds"])}')
             if result2['game over']:
-                reply = datetime.now()
+                reply = result2['win']
             else:
                 reply = {'timer text': self_info.get()[4:]}
             try:
@@ -148,4 +151,7 @@ while True:
                 if game == 'restart':
                     player_left = True
                     break
-    window.update()
+    window.after(1, mainloop)
+
+mainloop()
+window.mainloop()

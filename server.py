@@ -1,4 +1,5 @@
-"""Soon going to the server for online multiplayer pit mopper games.
+"""
+Soon going to the server for online multiplayer pit mopper games.
 Multiplayer games will most likely not coming anytime soon
 """
 from datetime import datetime
@@ -7,7 +8,6 @@ import random
 import socket
 import threading
 import sys
-import time
 import traceback
 from Scripts.game import OnlineGame
 import pickle
@@ -71,11 +71,13 @@ def new_client(conn: socket.socket, player: int, game_id: int):
                 break
             elif isinstance(recieved, dict):
                 games[game_id].update_info(player, recieved)
-            elif isinstance(recieved, datetime):
+            elif isinstance(recieved, bool):
                 if player == 1:
-                    games[game_id].p1_finished = recieved
+                    games[game_id].p1_finished = datetime.now()
+                    games[game_id].p1_won = recieved
                 else:
-                    games[game_id].p2_finished = recieved
+                    games[game_id].p2_finished = datetime.now()
+                    games[game_id].p2_won = recieved
 
             logging.info(f'Received: {recieved}')
             logging.info(f'Sending: {games[game_id]}')
