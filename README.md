@@ -6,7 +6,7 @@ Project Structure:
 
 - ./Scripts - Python modules
 - ./Scripts/data - Data files for Pit Mopper(ie: Images and Fonts)
-- ./images - Images going used for documentation
+- ./Pit Mopper.py - Main Python file
 
 ## Keyboard Shorcuts
 
