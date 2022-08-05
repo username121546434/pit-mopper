@@ -154,14 +154,12 @@ class App(Tk):
             child.destroy()
         if not hasattr(self, 'bindings'):
             self.bindings = {}
-        for event, func in self.bindings.items():
+        for event, _ in self.bindings.items():
             self.unbind_all(event)
         self.bindings = {}
 
     def _update_game(self):
         self.game: Game
-        self.game.mines_found = 0
-
         squares_flaged = [
             square
             for row in self.game.grid.grid
@@ -283,27 +281,7 @@ class App(Tk):
                     square.config(text='✅')
                 elif square.num != None and square.cget('text') == '🚩':
                     square.config(text='❌')
+            self.game.quit = True
+            self.game.result = {'seconds': self.game.seconds, 'win': win}
         self.update()
-        try:
-            self.game = Game(**{
-                'grid': self.game.grid,
-                'session_start': self.game.session_start,
-                'total_time': self.game.total_time,
-                'zeros_checked': self.game.zeros_checked,
-                'num_mines': self.game.num_mines,
-                'chording': self.game.chording,
-                'mines_found': self.game.mines_found,
-                'additional_time': self.game.additional_time,
-                'squares_checked': self.game.squares_checked,
-                'previous_sec': self.game.previous_sec,
-                'result': {
-                    'win': win,
-                    'seconds': self.game.seconds,
-                    'game over': game_over
-                },
-                'with_time': self.game.with_time,
-                'quit': game_over
-            })
-        except AttributeError:
-            return
 
