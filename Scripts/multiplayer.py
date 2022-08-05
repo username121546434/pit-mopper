@@ -1,6 +1,5 @@
 from tkinter.ttk import Progressbar
 from .app import App
-from .functions import _update_game
 from .grid import ButtonGrid
 from .network import Network
 from .game import OnlineGame
@@ -21,6 +20,13 @@ class MultiplayerApp(App):
         except Exception:
             pass
         return super().quit_app(*_)
+    
+    def draw(self):
+        self.label = Label(self, text='Waiting for player...')
+        self.label.pack(pady=(25, 0))
+
+        self.progress_bar = Progressbar(self, mode='indeterminate', length=200)
+        self.progress_bar.pack(pady=(0, 20), padx=50)
 
 
 class DummyGame:
@@ -38,12 +44,6 @@ except ConnectionError as e:
     logging.error(f'There was an error while connecting to the server\n{traceback.format_exc()}')
     messagebox.showerror('Connection error', 'There was an error while connecting to the server, This is either because you do not have internet or the server is shutdown for maintenence, Please try again later')
     window.quit_app()
-
-label = Label(window, text='Waiting for player...')
-label.pack(pady=(25, 0))
-
-progress_bar = Progressbar(window, mode='indeterminate', length=200)
-progress_bar.pack(pady=(0, 20), padx=50)
 
 player = n.data
 grid = None
@@ -75,16 +75,16 @@ def mainloop():
         n.restart()
         player = n.data
         game = n.send_data('get')
-        progress_bar.pack(pady=(0, 20), padx=50)
-        label.config(text='Waiting for player...')
+        window.progress_bar.pack(pady=(0, 20), padx=50)
+        window.label.config(text='Waiting for player...')
         logging.info('Waiting for new player...')
     elif not connected and not game.available:
         game = n.send_data('get')
-        progress_bar['value'] += 1
+        window.progress_bar['value'] += 1
     elif game.available and not connected:
         logging.info('Player joined, starting game')
-        label.config(text='Starting game...')
-        progress_bar.pack_forget()
+        window.label.config(text='Starting game...')
+        window.progress_bar.pack_forget()
         connected = True
         game_window = Toplevel(window)
         game_window.title('Pit Mopper Multiplayer')
@@ -99,8 +99,7 @@ def mainloop():
         other_info.grid(row=3, column=1)
 
         grid = ButtonGrid((10, 10), game_window, row=4, click_random_square=True, dark_mode=window.dark_mode_state.get())
-        result = _update_game(
-            game_window,
+        result = window._update_game(
             grid,
             datetime.now(),
             self_info,
@@ -129,7 +128,7 @@ def mainloop():
                 logging.info('Game Over, ended in a loss')
                 break
             result2 = result.get('result')
-            result = _update_game(**result)
+            result = window._update_game(**result)
             if constants.APP_CLOSED:
                 sys.exit()
             if player == 2:

@@ -1,4 +1,12 @@
+from __future__ import annotations
 from datetime import datetime
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .grid import ButtonGrid
+    from .squares import Square
+    from tkinter import StringVar
 
 
 class OnlineGame:
@@ -50,3 +58,20 @@ class OnlineGame:
 
         return "%s(%s)" % (self.__class__.__name__, ', '.join(items))
 
+
+@dataclass(slots=True)
+class Game:
+    grid: ButtonGrid
+    session_start: datetime
+    total_time: StringVar
+    zeros_checked: list[Square] = field(default_factory=list)
+    num_mines: int = 0
+    chording: bool = True
+    mines_found: int = 0
+    additional_time: float = 0.0
+    squares_checked: list = field(default_factory=list)
+    previous_sec: datetime = field(default_factory=datetime.now)
+    with_time: bool = True
+    quit: bool = False
+    result: dict = field(default_factory=dict)
+    seconds: int = 0

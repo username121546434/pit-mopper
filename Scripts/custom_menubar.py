@@ -1,5 +1,6 @@
 # https://stackoverflow.com/a/63208829
 import tkinter as tk
+from .functions import bindWidget
 
 
 class CustomMenuBar(tk.Frame):
@@ -23,11 +24,11 @@ class CustomMenuBar(tk.Frame):
         """Add menu labels."""
         l = tk.Label(self, text=title, fg=self._fg, bg=self['bg'], padx=2, pady=2)
         l.pack(side='left')
-        l.bind('<Enter>', lambda e: l.config(bg=self._over_bg))
-        l.bind('<Leave>', lambda e: l.config(bg=self['bg']))
+        bindWidget(l, '<Enter>', func=lambda e: l.config(bg=self._over_bg))
+        bindWidget(l, '<Leave>', func=lambda e: l.config(bg=self['bg']))
         l.menu = menu  # Easy to access menu with the instance 
                        #   of the label saved in the `self._lb_list`
-        l.bind('<1>', lambda e: self._on_press(l, command))
+        bindWidget(l, '<1>', func=lambda e: self._on_press(l, command))
         self._lb_list.append(l)
     
     def change_bg_fg(self, bg=None, fg=None):

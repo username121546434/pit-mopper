@@ -1,6 +1,7 @@
 from tkinter import *
 from .load_font import load_font
 from .constants import DEFAULT_BG, DARK_MODE_BG
+from . import functions
 
 font_family, font_name = load_font(r"data\fonts\DSEG7ClassicMini-Bold.ttf")
 
@@ -42,9 +43,9 @@ class Square(Button):
 
         super().__init__(master, text=text, font=(font_name, 12))
 
-        self.bind('<Button-1>', self.clicked)
-        self.bind('<Button-2>', self.chord_self)
-        self.bind('<Button-3>', self.flag)
+        functions.bindWidget(self, '<Button-1>', func=self.clicked)
+        functions.bindWidget(self, '<Button-2>', func=self.chord_self)
+        functions.bindWidget(self, '<Button-3>', func=self.flag)
 
     def flag(self, _=None):
         if self.cget('text').replace(' ', '') == '':
