@@ -144,7 +144,7 @@ class App(Tk):
             elif isinstance(child, Frame):
                 for square in child.winfo_children():
                     if isinstance(square, Square):
-                        square.switch_theme()
+                        square.switch_theme(CURRENT_BG != constants.DEFAULT_BG)
                     elif isinstance(square, Label):
                         square.config(bg=CURRENT_BG, fg=CURRENT_FG)
 

@@ -83,8 +83,9 @@ class Square(Button):
             self.config(text='0')
         self.clicked_on = True
     
-    def switch_theme(self):
-        self.dark_mode = not self.dark_mode
+    def switch_theme(self, theme: bool | None = None):
+        if theme is None:
+            self.dark_mode = not self.dark_mode
         if not self.dark_mode:
             if self.clicked_on and self.num != None:
                 self.config(bg=num_colors[self.num])

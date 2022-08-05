@@ -318,6 +318,8 @@ class SinglePlayerApp(App):
         self.menubar.add_menu(menu=file_menu, title='Game')
 
         logging.info('Entering while loop...')
+        if self.dark_mode_state.get():
+            self.dark_mode_state.set(True)
 
         result = self._game(
             grid,
