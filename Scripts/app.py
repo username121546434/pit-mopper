@@ -1,6 +1,6 @@
 from tkinter import *
 from . import constants
-from .custom_menubar import CustomMenuBar
+from .custom_menubar import CustomMenuBar, SubMenu
 from .functions import *
 from .console_window import show_console, hide_console
 from functools import partial
@@ -51,13 +51,10 @@ class App(Tk):
         self.menubar.place(x=0, y=0)
 
         # create the file_menu
-        self.file_menu = Menu(
-            self.menubar,
-            tearoff=0
-        )
+        self.file_menu = SubMenu()
         self.file_menu.add_command(label='Exit', command=self.quit_app, accelerator='Ctrl+Q')
 
-        self.settings = Menu(self.menubar, tearoff=0)
+        self.settings = SubMenu()
         self.settings.add_checkbutton(variable=self.dark_mode_state, label='Dark Mode', accelerator='Ctrl+D')
         self.settings.add_separator()
         self.settings.add_command(label='Check for Updates', command=partial(check_for_updates, self.quit_app), accelerator='Ctrl+U')
@@ -67,7 +64,7 @@ class App(Tk):
         self.settings.add_command(label='Delete Debug Logs', command=clear_debug)
         self.settings.add_command(label='Delete Highscore', command=clear_highscore)
 
-        self.advanced = Menu(self.settings, tearoff=0)
+        self.advanced = SubMenu()
         self.advanced.add_checkbutton(label='Console', variable=self.console_open, accelerator='Ctrl+X')
         self.menubar.add_menu(menu=self.file_menu, title='File')
         self.menubar.add_menu(menu=self.settings, title='Settings')
@@ -104,7 +101,7 @@ class App(Tk):
             except FileNotFoundError:
                 pass
         del self
-        sys.exit()
+        os._exit(0)
 
     def console(self, *_):
         if not self.console_open.get():
@@ -127,14 +124,17 @@ class App(Tk):
             constants.CURRENT_FG = constants.DEFAULT_FG
             CURRENT_BG = constants.DEFAULT_BG
             CURRENT_FG = constants.DEFAULT_FG
-            self.resizable(False, False)
+            self.resizable(True, True)
 
         self.config(bg=CURRENT_BG)
         for child in self.winfo_children():
             if not isinstance(child, (Toplevel, Spinbox, CustomMenuBar, Progressbar, Frame)):
                 child.config(bg=CURRENT_BG, fg=CURRENT_FG)
             elif isinstance(child, CustomMenuBar):
-                child.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG)
+                if CURRENT_BG == constants.DEFAULT_BG:
+                    child.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG)
+                else:
+                    child.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG, sub_bg='black', sub_fg='white')
             elif isinstance(child, Spinbox):
                 if CURRENT_BG == constants.DEFAULT_BG:
                     child.config(bg='white', fg=CURRENT_FG)

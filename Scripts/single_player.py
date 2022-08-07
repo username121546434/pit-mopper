@@ -5,6 +5,8 @@ import os
 from datetime import datetime
 from tkinter import filedialog, messagebox
 
+from .custom_menubar import SubMenu
+
 from . import constants
 from .console_window import *
 get_console()
@@ -13,7 +15,6 @@ if not os.path.exists(DEBUG):
     os.makedirs(DEBUG)
 from .base_logger import init_logger
 init_logger()
-from .custom_menubar import CustomMenuBar
 from .squares import PickleSquare, Square
 from .grid import ButtonGrid, PickleButtonGrid
 from .squares import PickleSquare, Square
@@ -299,10 +300,7 @@ class SinglePlayerApp(App):
             highscore = float('inf')
         seconds = additional_time
         self.draw_menubar()
-        file_menu = Menu(
-            self.menubar,
-            tearoff=0
-        )
+        file_menu = SubMenu()
         bindWidget(self, '<Control-s>', func=lambda _: save_game(start, seconds, grid, zeros_checked, num_mines, chording))
         bindWidget(self, '<Alt-q>', func=lambda _:  [self.clear(), setattr(self.game, 'quit', True), self.draw_all()])
         bindWidget(self, '<Alt-i>', func=lambda _: more_info(
