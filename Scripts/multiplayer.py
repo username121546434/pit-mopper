@@ -2,7 +2,7 @@ from tkinter.ttk import Progressbar
 from .app import App
 from .grid import ButtonGrid
 from .network import Network
-from .game import OnlineGame
+from .game import Game, OnlineGame
 from tkinter import *
 from . import constants
 from .functions import *
@@ -13,10 +13,24 @@ import logging
 init_logger()
 
 
+class DummyGame:
+    available = False
+
+
 class MultiplayerApp(App):
+    def __init__(self, title: str) -> None:
+        try:
+            self.n = Network()
+        except ConnectionError as e:
+            logging.error(f'There was an error while connecting to the server\n{traceback.format_exc()}')
+            messagebox.showerror('Connection error', 'There was an error while connecting to the server, Please try again later')
+        self.online_game: OnlineGame = self.n.send_data('get')
+        self.player = self.n.data
+        super().__init__(title)
+
     def quit_app(self, *_):
         try:
-            n.send_data('disconnect')
+            self.n.send_data('disconnect')
         except Exception:
             pass
         return super().quit_app(*_)
@@ -27,79 +41,35 @@ class MultiplayerApp(App):
 
         self.progress_bar = Progressbar(self, mode='indeterminate', length=200)
         self.progress_bar.pack(pady=(0, 20), padx=50)
-
-
-class DummyGame:
-    available = False
-
-
-logging.info('Loading multiplayer...')
-
-window = MultiplayerApp('Pit Mopper Multiplayer')
-
-try:
-    window.update()
-    n = Network()
-except ConnectionError as e:
-    logging.error(f'There was an error while connecting to the server\n{traceback.format_exc()}')
-    messagebox.showerror('Connection error', 'There was an error while connecting to the server, This is either because you do not have internet or the server is shutdown for maintenence, Please try again later')
-    window.quit_app()
-
-player = n.data
-grid = None
-game_window = None
-connected = False
-player_left = False
-game: OnlineGame = DummyGame()
-
-window.settings.add_separator()
-window.settings.add_command(label='Restart connection', command=n.restart)
-
-logging.info('GUI successfully created')
-logging.info('Waiting for player...')
-
-
-def mainloop():
-    global connected, player_left, player, grid, game_window, n, game
-    if constants.APP_CLOSED:
-        sys.exit()
-    elif connected:
-        if player_left:
-            messagebox.showerror('Connection Error', 'It seems that the other player disconnected')
-            player_left = False
-            logging.error('It seems like the player has disconnected')
-        connected = False
-        grid = None
-        game_window.destroy()
-        game_window = None
-        n.restart()
-        player = n.data
-        game = n.send_data('get')
-        window.progress_bar.pack(pady=(0, 20), padx=50)
-        window.label.config(text='Waiting for player...')
-        logging.info('Waiting for new player...')
-    elif not connected and not game.available:
-        game = n.send_data('get')
-        window.progress_bar['value'] += 1
-    elif game.available and not connected:
+    
+    def draw_menubar(self):
+        super().draw_menubar()
+        self.settings.add_separator()
+        self.settings.add_command(label='Restart connection', command=self.n.restart)
+    
+    def set_variables(self):
+        super().set_variables()
+        self.connected = False
+        self.player_left = False
+    
+    def draw_game(self):
         logging.info('Player joined, starting game')
-        window.label.config(text='Starting game...')
-        window.progress_bar.pack_forget()
-        connected = True
-        game_window = Toplevel(window)
-        game_window.title('Pit Mopper Multiplayer')
+        self.clear()
+        self.draw_menubar()
+        self.connected = True
+        self.title('Pit Mopper Multiplayer')
 
-        timer = Label(game_window, text='Time: 0:00')
+        timer = Label(self, text='Time: 0:00')
         timer.grid(row=1, column=1)
 
-        self_info = StringVar(game_window)
-        Label(game_window, textvariable=self_info).grid(row=2, column=1)
+        self_info = StringVar(self)
+        Label(self, textvariable=self_info).grid(row=2, column=1)
 
-        other_info = Label(game_window)
+        other_info = Label(self)
         other_info.grid(row=3, column=1)
 
-        grid = ButtonGrid((10, 10), game_window, row=4, click_random_square=True, dark_mode=window.dark_mode_state.get())
-        result = window._update_game(
+        grid = ButtonGrid((10, 10), self, row=4, click_random_square=True, dark_mode=self.dark_mode_state.get())
+        self.game = Game(
             grid,
             datetime.now(),
             self_info,
@@ -108,48 +78,77 @@ def mainloop():
             True,
             with_time=False
         )
-        result2 = result.get('result')
+        self._update_game()
         while True:
             if constants.APP_CLOSED:
                 sys.exit()
-            if game.quit:
-                player_left = True
+            if self.online_game.quit:
+                self.player_left = True
                 break
-            if game.game_is_tie():
-                messagebox.showinfo('Game Results', f'The game ended with a tie!\nTime taken: {format_second(result2["seconds"])}')
+            if self.online_game.game_is_tie():
+                messagebox.showinfo('Game Results', f'The game ended with a tie!\nTime taken: {format_second(self.game.result["seconds"])}')
                 logging.info('Game Over, ended in a tie')
                 break
-            elif game.player_who_won() == player:
-                messagebox.showinfo('Game Results', f'You won the game!\nTime taken: {format_second(result2["seconds"])}')
+            elif self.online_game.player_who_won() == self.player:
+                messagebox.showinfo('Game Results', f'You won the game!\nTime taken: {format_second(self.game.result["seconds"])}')
                 logging.info('Game Over, ended in a victory')
                 break
-            elif game.player_who_won() != 12 and game.player_who_won() != None and game.player_who_won() != player:
-                messagebox.showinfo('Game Results', f'You lost the game :( Better luck next time!\nTime taken: {format_second(result2["seconds"])}')
+            elif self.online_game.player_who_won() != 12 and self.online_game.player_who_won() != None and self.online_game.player_who_won() != self.player:
+                messagebox.showinfo('Game Results', f'You lost the game :( Better luck next time!\nTime taken: {format_second(self.game.result["seconds"])}')
                 logging.info('Game Over, ended in a loss')
                 break
-            result2 = result.get('result')
-            result = window._update_game(**result)
+            self._update_game()
             if constants.APP_CLOSED:
                 sys.exit()
-            if player == 2:
-                other_info.config(text=f'Oponent: {game.p1_info["timer text"]}')
+            if self.player == 2:
+                other_info.config(text=f'Oponent: {self.online_game.p1_info["timer text"]}')
             else:
-                other_info.config(text=f'Oponent: {game.p2_info["timer text"]}')
-            timer.config(text=f'Time: {format_second(result["result"]["seconds"])}')
-            if result2['game over']:
-                reply = result2['win']
+                other_info.config(text=f'Oponent: {self.online_game.p2_info["timer text"]}')
+            timer.config(text=f'Time: {format_second(self.game.result["seconds"])}')
+            if self.game.result['game over']:
+                reply = self.game.result['win']
             else:
                 reply = {'timer text': self_info.get()[4:]}
             try:
-                game = n.send_data(reply)
+                self.online_game = self.n.send_data(reply)
             except Exception:
                 logging.error(f'Error while sending data\n{traceback.format_exc()}')
                 if messagebox.askokcancel('Connection Error', 'There was an error while sending data, would you like to restart the connection?'):
                     break
             else:
-                if game == 'restart':
-                    player_left = True
+                if self.online_game == 'restart':
+                    self.player_left = True
                     break
+
+
+logging.info('Loading multiplayer...')
+
+window = MultiplayerApp('Pit Mopper Multiplayer')
+
+logging.info('GUI successfully created')
+logging.info('Waiting for player...')
+
+
+def mainloop():
+    if constants.APP_CLOSED:
+        sys.exit()
+    elif window.connected:
+        if window.player_left:
+            messagebox.showerror('Connection Error', 'It seems that the other player disconnected')
+            window.player_left = False
+            logging.error('It seems like the player has disconnected')
+        window.clear()
+        window.connected = False
+        window.n.restart()
+        window.player = window.n.data
+        window.online_game = window.n.send_data('get')
+        logging.info('Waiting for new player...')
+        window.draw_all()
+    elif not window.connected and not window.online_game.available:
+        window.online_game = window.n.send_data('get')
+        window.progress_bar['value'] += 1
+    elif window.online_game.available and not window.connected:
+        window.draw_game()
     window.after(10, mainloop)
 
 mainloop()
