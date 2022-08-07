@@ -21,11 +21,10 @@ class MultiplayerApp(App):
     def __init__(self, title: str) -> None:
         try:
             self.n = Network()
-        except ConnectionError as e:
+        except ConnectionError:
             logging.error(f'There was an error while connecting to the server\n{traceback.format_exc()}')
             messagebox.showerror('Connection error', 'There was an error while connecting to the server, Please try again later')
-        self.online_game: OnlineGame = self.n.send_data('get')
-        self.player = self.n.data
+            self.quit_app()
         super().__init__(title)
 
     def quit_app(self, *_):
@@ -51,6 +50,8 @@ class MultiplayerApp(App):
         super().set_variables()
         self.connected = False
         self.player_left = False
+        self.online_game: OnlineGame = self.n.send_data('get')
+        self.player = self.n.data
     
     def draw_game(self):
         logging.info('Player joined, starting game')
@@ -138,15 +139,12 @@ def mainloop():
             window.player_left = False
             logging.error('It seems like the player has disconnected')
         window.clear()
-        window.connected = False
         window.n.restart()
-        window.player = window.n.data
-        window.online_game = window.n.send_data('get')
         logging.info('Waiting for new player...')
         window.draw_all()
     elif not window.connected and not window.online_game.available:
         window.online_game = window.n.send_data('get')
-        window.progress_bar['value'] += 1
+        window.progress_bar.step()
     elif window.online_game.available and not window.connected:
         window.draw_game()
     window.after(10, mainloop)

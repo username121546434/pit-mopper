@@ -81,9 +81,12 @@ class App(Tk):
         logging.info('Closing Pit Mopper...')
         try:
             self.setvar('button pressed', 39393)
-        except TclError:
+        except Exception:
             pass
-        self.destroy()
+        try:
+            self.destroy()
+        except RecursionError:
+            pass
         logging.shutdown()
         if constants.del_data == 'all':
             try:
