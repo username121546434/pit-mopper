@@ -1,4 +1,5 @@
 from tkinter.ttk import Progressbar
+from .custom_menubar import SubMenu
 from .app import App
 from .grid import ButtonGrid
 from .network import Network
@@ -44,7 +45,7 @@ class MultiplayerApp(App):
     def draw_menubar(self):
         super().draw_menubar()
         self.settings.add_separator()
-        self.settings.add_command(label='Restart connection', command=self.n.restart)
+        self.settings.add_command(label='Restart connection', command=self.n.restart, accelerator='Ctrl+R')
     
     def set_variables(self):
         super().set_variables()
@@ -53,10 +54,15 @@ class MultiplayerApp(App):
         self.online_game: OnlineGame = self.n.send_data('get')
         self.player = self.n.data
     
+    def set_keyboard_shorcuts(self):
+        super().set_keyboard_shorcuts()
+        bindWidget(self, '<Control-r>', all=True, func=lambda _: self.n.restart())
+    
     def draw_game(self):
         logging.info('Player joined, starting game')
         self.clear()
         self.draw_menubar()
+        self.set_keyboard_shorcuts()
         self.connected = True
         self.title('Pit Mopper Multiplayer')
 
@@ -79,6 +85,12 @@ class MultiplayerApp(App):
             True,
             with_time=False
         )
+        game_menu = SubMenu()
+        game_menu.add_command(label='Leave', accelerator='Alt+Q', command=self.leave_game)
+        self.menubar.add_menu('Game', game_menu)
+
+        bindWidget(self, '<Alt-q>', all=True, func=lambda _: self.leave_game())
+
         self._update_game()
         while True:
             if constants.APP_CLOSED:
@@ -101,10 +113,13 @@ class MultiplayerApp(App):
             self._update_game()
             if constants.APP_CLOSED:
                 sys.exit()
-            if self.player == 2:
-                other_info.config(text=f'Oponent: {self.online_game.p1_info["timer text"]}')
-            else:
-                other_info.config(text=f'Oponent: {self.online_game.p2_info["timer text"]}')
+            try:
+                if self.player == 2:
+                    other_info.config(text=f'Oponent: {self.online_game.p1_info["timer text"]}')
+                else:
+                    other_info.config(text=f'Oponent: {self.online_game.p2_info["timer text"]}')
+            except TclError:
+                break
             timer.config(text=f'Time: {format_second(self.game.result["seconds"])}')
             if self.game.result['game over']:
                 reply = self.game.result['win']
@@ -120,6 +135,17 @@ class MultiplayerApp(App):
                 if self.online_game == 'restart':
                     self.player_left = True
                     break
+    
+    def leave_game(self):
+        self.game.quit = True
+        if self.player_left:
+            messagebox.showerror('Connection Error', 'It seems that the other player disconnected')
+            self.player_left = False
+            logging.error('It seems like the player has disconnected')
+        self.clear()
+        self.n.restart()
+        logging.info('Waiting for new player...')
+        self.draw_all()
 
 
 logging.info('Loading multiplayer...')
@@ -134,14 +160,7 @@ def mainloop():
     if constants.APP_CLOSED:
         sys.exit()
     elif window.connected:
-        if window.player_left:
-            messagebox.showerror('Connection Error', 'It seems that the other player disconnected')
-            window.player_left = False
-            logging.error('It seems like the player has disconnected')
-        window.clear()
-        window.n.restart()
-        logging.info('Waiting for new player...')
-        window.draw_all()
+        window.leave_game()
     elif not window.connected and not window.online_game.available:
         window.online_game = window.n.send_data('get')
         window.progress_bar.step()

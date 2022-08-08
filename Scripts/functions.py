@@ -124,8 +124,7 @@ def bug_report():
 
     Button(new_window, text='Continue', command=lambda: make_github_issue(body=description.get('1.0', 'end'))).pack()
     new_window.master.wait_window(new_window)
-    if not constants.APP_CLOSED:
-        new_window.master.bind_all('<space>', func)
+    new_window.master.bind_all('<space>', func)
 
 
 def make_github_issue(body=None):

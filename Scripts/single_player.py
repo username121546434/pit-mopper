@@ -231,6 +231,8 @@ class SinglePlayerApp(App):
             messagebox.showwarning(title='Number of mines high', message='You have chosen a high amount of mines, so it might take a long time to place them all')
 
         self.clear()
+        self.set_keyboard_shorcuts()
+        self.draw_menubar()
         self.title('Pit Mopper')
         self.grid_columnconfigure(1, weight=1)
         session_start: datetime = datetime.now()
@@ -299,21 +301,20 @@ class SinglePlayerApp(App):
         else:
             highscore = float('inf')
         seconds = additional_time
-        self.draw_menubar()
-        file_menu = SubMenu()
+        game_menu = SubMenu()
         bindWidget(self, '<Control-s>', func=lambda _: save_game(start, seconds, grid, zeros_checked, num_mines, chording))
         bindWidget(self, '<Alt-q>', func=lambda _:  [self.clear(), setattr(self.game, 'quit', True), self.draw_all()])
         bindWidget(self, '<Alt-i>', func=lambda _: more_info(
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start,  grid.grid_size[0] * grid.grid_size[1]))
 
-        file_menu.add_command(label='Save As', accelerator='Ctrl+S', command=partial(save_game, start, seconds, grid, [
+        game_menu.add_command(label='Save As', accelerator='Ctrl+S', command=partial(save_game, start, seconds, grid, [
                             PickleSquare.from_square(square) for square in zeros_checked], num_mines, chording))
-        file_menu.add_command(label='More Info', command=lambda: more_info(
+        game_menu.add_command(label='More Info', command=lambda: more_info(
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start, grid.grid_size[0] * grid.grid_size[1]),
             accelerator='Alt+I')
-        file_menu.add_command(label='Exit', command=lambda: [self.clear(), setattr(self.game, 'quit', True), self.draw_all()], accelerator='Alt+Q')
+        game_menu.add_command(label='Exit', command=lambda: [self.clear(), setattr(self.game, 'quit', True), self.draw_all()], accelerator='Alt+Q')
 
-        self.menubar.add_menu(menu=file_menu, title='Game')
+        self.menubar.add_menu(menu=game_menu, title='Game')
 
         logging.info('Entering while loop...')
         if self.dark_mode_state.get():
