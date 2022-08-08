@@ -232,7 +232,6 @@ class SinglePlayerApp(App):
 
         self.clear()
         self.set_keyboard_shorcuts()
-        self.draw_menubar()
         self.title('Pit Mopper')
         self.grid_columnconfigure(1, weight=1)
         session_start: datetime = datetime.now()
@@ -301,6 +300,7 @@ class SinglePlayerApp(App):
         else:
             highscore = float('inf')
         seconds = additional_time
+        self.draw_menubar()
         game_menu = SubMenu()
         bindWidget(self, '<Control-s>', func=lambda _: save_game(start, seconds, grid, zeros_checked, num_mines, chording))
         bindWidget(self, '<Alt-q>', func=lambda _:  [self.clear(), setattr(self.game, 'quit', True), self.draw_all()])

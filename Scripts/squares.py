@@ -29,7 +29,22 @@ dark_mode_colors = {
 
 
 class Square(Button):
-    __slots__ = ('category', 'num', 'game_over', 'flaged', 'position', 'chord', 'completed', 'clicked_on', 'dark_mode')
+    __slots__ = (
+        'category',
+        'num',
+        'game_over',
+        'flaged',
+        'position',
+        'chord',
+        'completed',
+        'clicked_on',
+        'dark_mode',
+        'last_bg',
+        'last_fg',
+        'tk',
+        '_w',
+        'widgetName'
+    )
     def __init__(self, master: Misc | None = ..., text='') -> None:
         self.category: str | None = None
         self.num: int | None = None
@@ -46,6 +61,8 @@ class Square(Button):
         functions.bindWidget(self, '<Button-1>', func=self.clicked)
         functions.bindWidget(self, '<Button-2>', func=self.chord_self)
         functions.bindWidget(self, '<Button-3>', func=self.flag)
+        functions.bindWidget(self, '<Enter>', func=self.hover_enter)
+        functions.bindWidget(self, '<Leave>', func=self.hover_leave)
 
     def flag(self, _=None):
         if self.cget('text').replace(' ', '') == '':
@@ -102,6 +119,20 @@ class Square(Button):
                 self.config(fg='white', bg=DARK_MODE_BG)
             else:
                 self.config(bg=DARK_MODE_BG)
+        self.last_bg = self.cget('bg')
+    
+    def hover_enter(self, _):
+        self.last_bg = self.cget('bg')
+        self.last_fg = self.cget('fg')
+        self.config(bg='#bdd1a9')
+    
+    def hover_leave(self, _):
+        self.config(bg=self.last_bg, fg=self.last_fg)
+        if self.flaged:
+            self.flag()
+            self.flag()
+        elif self.clicked_on:
+            self.clicked()
 
 
 class PickleSquare:
