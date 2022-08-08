@@ -30,7 +30,7 @@ class MultiplayerApp(App):
 
     def quit_app(self, *_):
         try:
-            self.n.send_data('disconnect')
+            self.n.disconnect()
         except Exception:
             pass
         return super().quit_app(*_)
@@ -58,7 +58,7 @@ class MultiplayerApp(App):
         super().set_keyboard_shorcuts()
         bindWidget(self, '<Control-r>', all=True, func=lambda _: self.n.restart())
     
-    def draw_game(self):
+    def create_game(self):
         logging.info('Player joined, starting game')
         self.clear()
         self.draw_menubar()
@@ -165,7 +165,7 @@ def mainloop():
         window.online_game = window.n.send_data('get')
         window.progress_bar.step()
     elif window.online_game.available and not window.connected:
-        window.draw_game()
+        window.create_game()
     window.after(10, mainloop)
 
 mainloop()

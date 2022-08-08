@@ -20,15 +20,18 @@ class Network:
     def send_data(self, data):
         self.client.send(pickle.dumps(data))
         return pickle.loads(self.client.recv(2048))
+    
+    def disconnect(self):
+        self.send_data('disconnect')
 
     def restart(self):
         init_logger()
         logging.info('Restarting connection...')
         try:
-            self.send_data('disconnect')
+            self.disconnect()
         except Exception:
             pass
-        time.sleep(2)
+        time.sleep(2) # Wait for the server to respond to the disconnect
         try:
             self.client.close()
         except Exception:
