@@ -118,7 +118,7 @@ class MultiplayerApp(App):
                     other_info.config(text=f'Oponent: {self.online_game.p1_info["timer text"]}')
                 else:
                     other_info.config(text=f'Oponent: {self.online_game.p2_info["timer text"]}')
-            except TclError:
+            except TclError: # Game left using menubar or Alt + Q
                 break
             timer.config(text=f'Time: {format_second(self.game.result["seconds"])}')
             if self.game.result['game over']:
