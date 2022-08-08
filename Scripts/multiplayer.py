@@ -54,6 +54,11 @@ class MultiplayerApp(App):
         self.online_game: OnlineGame = self.n.send_data('get')
         self.player = self.n.data
     
+    def draw_all(self):
+        super().draw_all()
+        if self.dark_mode_state.get():
+            self.change_theme()
+    
     def set_keyboard_shorcuts(self):
         super().set_keyboard_shorcuts()
         bindWidget(self, '<Control-r>', all=True, func=lambda _: self.n.restart())
@@ -90,6 +95,8 @@ class MultiplayerApp(App):
         self.menubar.add_menu('Game', game_menu)
 
         bindWidget(self, '<Alt-q>', all=True, func=lambda _: self.leave_game())
+        if self.dark_mode_state.get():
+            self.change_theme()
 
         self._update_game()
         while True:
