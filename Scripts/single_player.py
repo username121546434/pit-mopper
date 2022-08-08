@@ -53,7 +53,6 @@ def save_game(
     num_mines,
     chording,
 ):
-    global difficulty
     logging.info(f'''Saving game with the following attributes:
 
 start:               {start}
@@ -71,7 +70,7 @@ grid.grid_size       {grid.grid_size}
         'zeros checked': zeros_checked,
         'num mines': num_mines,
         'chording': chording,
-        'difficulty': difficulty.get()
+        'difficulty': window.difficulty.get()
     }
     logging.info(f'Data to save: {data}')
     with filedialog.asksaveasfile('wb', filetypes=(('Pit Mopper Game Files', '*.min'), ('Any File', '*.*'))) as f:  # Pickling
@@ -400,16 +399,21 @@ class SinglePlayerApp(App):
     
     def load_game(self, _=None):
         logging.info('Opening game...')
-        file = filedialog.askopenfile('rb', filetypes=(('Pit Mopper Game Files', '*.min'), ('Any File', '*.*')))
+        file = filedialog.askopenfilename('rb', filetypes=(('Pit Mopper Game Files', '*.min'), ('Any File', '*.*')))
         if file == None:
             return
         else:
             logging.info(f'Reading {file}...')
-            with file as f:  # Un Pickling
-                data = pickle.load(f)
+            with open(file) as f:  # Un Pickling
+                try:
+                    data = pickle.load(f)
+                except Exception:
+                    messagebox.showerror('Invalid File', 'It seems like this is an invalid file, most likely because it is from an older version')
+                    return
                 data: dict[str]
         logging.info(f'{file} successfully read, setting up game...')
 
+        self.clear()
         grid = data['grid'].grid
         button_grid = ButtonGrid(data['grid'].grid_size, self, grid, window.dark_mode_state.get())
 
