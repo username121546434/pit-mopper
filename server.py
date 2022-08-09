@@ -131,4 +131,4 @@ while True:
     logging.info(f'Connected to: {addr}')
     player_count += 1
 
-    threading.Thread(target=new_client, args=(conn)).start()
+    threading.Thread(target=new_client, args=[conn]).start()
