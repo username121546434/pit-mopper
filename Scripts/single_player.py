@@ -305,12 +305,14 @@ class SinglePlayerApp(App):
         bindWidget(self, '<Alt-q>', func=lambda _:  [self.clear(), setattr(self.game, 'quit', True), self.draw_all()])
         bindWidget(self, '<Alt-i>', func=lambda _: more_info(
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start,  grid.grid_size[0] * grid.grid_size[1]))
+        bindWidget(self, '<F11>', all=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
 
         game_menu.add_command(label='Save As', accelerator='Ctrl+S', command=partial(save_game, start, seconds, grid, [
                             PickleSquare.from_square(square) for square in zeros_checked], num_mines, chording))
         game_menu.add_command(label='More Info', command=lambda: more_info(
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start, grid.grid_size[0] * grid.grid_size[1]),
             accelerator='Alt+I')
+        game_menu.add_checkbutton(label='Fullscreen', variable=self.fullscreen_state, accelerator='F11')
         game_menu.add_command(label='Exit', command=lambda: [self.clear(), setattr(self.game, 'quit', True), self.draw_all()], accelerator='Alt+Q')
 
         self.menubar.add_menu(menu=game_menu, title='Game')
@@ -336,10 +338,14 @@ class SinglePlayerApp(App):
         mines_found = self.game.mines_found
         if win:
             messagebox.showinfo(
-                'Game Over', f'Game Over.\nYou won!\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}')
+                'Game Over',
+                f'Game Over.\nYou won!\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}'
+            )
         else:
             messagebox.showinfo(
-                'Game Over', f'Game Over.\nYou lost.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}')
+                'Game Over',
+                f'Game Over.\nYou lost.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}'
+            )
         if win and seconds < highscore:
             logging.info('Highscore has been beaten, writing new highscore data')
             with open(HIGHSCORE_TXT, 'wb') as f:
@@ -350,6 +356,7 @@ class SinglePlayerApp(App):
                 new_highscore_data[game_size_str] = seconds
                 pickle.dump(new_highscore_data, f)
         logging.info('Destroying window')
+        self.fullscreen_state.set(False)
         self.clear()
         self.draw_all()
         delattr(self, 'game')

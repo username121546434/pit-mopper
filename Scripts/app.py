@@ -36,6 +36,8 @@ class App(Tk):
         self.console_open.trace('w', self.console)
         self.dark_mode_state = BooleanVar(self, constants.dark_mode)
         self.dark_mode_state.trace('w', self.change_theme)
+        self.fullscreen_state = BooleanVar(self)
+        self.fullscreen_state.trace('w', lambda *_: self.attributes("-fullscreen", self.fullscreen_state.get()))
     
     def set_keyboard_shorcuts(self):
         # Keyboard Shortcuts

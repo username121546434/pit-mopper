@@ -91,10 +91,13 @@ class MultiplayerApp(App):
             with_time=False
         )
         game_menu = SubMenu()
+        game_menu.add_checkbutton(label='Full Screen', accelerator='F11', variable=self.fullscreen_state)
         game_menu.add_command(label='Leave', accelerator='Alt+Q', command=self.leave_game)
         self.menubar.add_menu('Game', game_menu)
 
         bindWidget(self, '<Alt-q>', all=True, func=lambda _: self.leave_game())
+        bindWidget(self, '<F11>', all=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
+
         if self.dark_mode_state.get():
             self.change_theme()
 
@@ -145,6 +148,7 @@ class MultiplayerApp(App):
     
     def leave_game(self):
         self.game.quit = True
+        self.fullscreen_state.set(False)
         if self.player_left:
             messagebox.showerror('Connection Error', 'It seems that the other player disconnected')
             self.player_left = False
