@@ -54,8 +54,32 @@ logging.info('Server started, waiting for connection...')
 games: dict[int, OnlineGame] = {}
 player_count = 0
 
-def new_client(conn: socket.socket, player: int, game_id: int):
+def new_client(conn: socket.socket):
     global player_count
+
+    logging.info('Looking for an available game...')
+    game_id = None
+    for game in games.values():
+        if not game.available and not game.quit:
+            game_id = game.id
+            break
+
+    if game_id is None:
+        logging.info('No game found, generating new game id')
+        game_id = random.randint(1000, 9999)
+        while game_id in games.keys():
+            game_id = random.randint(1000, 9999)
+
+    if game_id not in games:
+        logging.info(f'Creating new game... {game_id = }')
+        player = 1
+        game = OnlineGame(game_id)
+        games[game_id] = game
+    else:
+        logging.info(f'Existing game found, {game_id = }')
+        game = games[game_id]
+        player = 2
+
     conn.send(pickle.dumps(player))
     while True:
         try:
@@ -107,27 +131,4 @@ while True:
     logging.info(f'Connected to: {addr}')
     player_count += 1
 
-    logging.info('Looking for an available game...')
-    game_id = None
-    for game in games.values():
-        if not game.available and not game.quit:
-            game_id = game.id
-            break
-
-    if game_id is None:
-        logging.info('No game found, generating new game id')
-        game_id = random.randint(1000, 9999)
-        while game_id in games.keys():
-            game_id = random.randint(1000, 9999)
-
-    if game_id not in games:
-        logging.info(f'Creating new game... {game_id = }')
-        player = 1
-        game = OnlineGame(game_id)
-        games[game_id] = game
-    else:
-        logging.info(f'Existing game found, {game_id = }')
-        game = games[game_id]
-        player = 2
-
-    threading.Thread(target=new_client, args=(conn, player, game_id)).start()
+    threading.Thread(target=new_client, args=(conn)).start()
