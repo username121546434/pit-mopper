@@ -1,13 +1,8 @@
 import ctypes
-from datetime import datetime
-import functools
-import gc
 import sys
 from tkinter import messagebox
 from tkinter import *
-from .grid import ButtonGrid
 from . import constants
-from .squares import Square
 from .network import check_internet
 import traceback
 import pyperclip
