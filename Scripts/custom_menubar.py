@@ -23,8 +23,13 @@ class SubMenu:
     def on_popup(self, *_):
         for label in self.parent._lb_list:
             if label.menu._open:
-                label.menu._popup.destroy()
-                label.menu._open = False
+                if label.menu is self:
+                    self._popup.destroy()
+                    self._open = False
+                    return
+                else:
+                    label.menu._popup.destroy()
+                    label.menu._open = False
         if not self._open:
             x, y, height = self.label.winfo_rootx(), self.label.winfo_rooty(), self.label.winfo_height()
 
@@ -95,6 +100,8 @@ class SubMenu:
 
     def _on_command(self, event: tk.Event, checkbutton: bool=False):
         w = event.widget
+        if isinstance(w, ttk.Separator):
+            return
 
         self._popup.destroy()
         self._open = False
