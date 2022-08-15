@@ -2,9 +2,10 @@ from __future__ import annotations
 from datetime import datetime
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
+from .grid import PickleButtonGrid, ButtonGrid
+
 
 if TYPE_CHECKING:
-    from .grid import ButtonGrid
     from .squares import Square
     from tkinter import StringVar
 
@@ -61,17 +62,62 @@ class OnlineGame:
 
 @dataclass(slots=True)
 class Game:
+    """Holds all data for a game"""
     grid: ButtonGrid
-    session_start: datetime
     total_time: StringVar
+    session_start: datetime = field(default_factory=datetime.now)
     zeros_checked: list[Square] = field(default_factory=list)
     num_mines: int = 0
     chording: bool = True
     mines_found: int = 0
     additional_time: float = 0.0
-    squares_checked: list = field(default_factory=list)
+    squares_checked: list[Square] = field(default_factory=list)
     previous_sec: datetime = field(default_factory=datetime.now)
     with_time: bool = True
     quit: bool = False
     result: dict = field(default_factory=dict)
     seconds: int = 0
+    start: datetime = field(default_factory=datetime.now)
+
+
+@dataclass(slots=True)
+class PickleGame:
+    """Same as `Game` but it can be pickled and has less attributes"""
+    grid: PickleButtonGrid
+    start: datetime
+    num_mines: int
+    additional_time: float = 0.0
+    seconds: int = 0
+    chording: bool = False
+    
+    @classmethod
+    def from_game(cls, game: Game):
+        return cls(
+            grid=PickleButtonGrid.from_grid(game.grid),
+            start=game.start,
+            num_mines=game.num_mines,
+            additional_time=game.additional_time,
+            seconds=game.seconds,
+            chording=game.chording
+        )
+    
+    def to_game(self, total_time: StringVar, window):
+        return Game(
+            grid=self.grid.to_grid(window),
+            start=self.start,
+            total_time=total_time,
+            chording=self.chording,
+            additional_time=self.additional_time + self.seconds,
+            num_mines=self.num_mines
+        )
+    
+    @classmethod
+    def from_dict(cls, data: dict[str]):
+        return cls(
+            grid=data['grid'],
+            start=data['start'],
+            num_mines=data['num mines'],
+            additional_time=data['time played'],
+            chording=data['chording']
+        )
+

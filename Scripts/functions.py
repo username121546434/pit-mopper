@@ -85,20 +85,15 @@ def clear_highscore():
         messagebox.showinfo('Delete Data', 'As soon as you close Pit Mopper, the your highscores will be deleted')
 
 
-def bindWidget(widget: Widget, event, all:bool=False, func=None):
+def bindWidget(widget: Widget, event, all_:bool=False, func=None):
     # https://stackoverflow.com/a/226141/19581763
     '''Set or retrieve the binding for an event on a widget'''
-    try:
-        _ = widget.__dict__['bindings']
-    except KeyError:
-        has_binding_key = False
-    else:
-        has_binding_key = True
+    has_binding_key = hasattr(widget, 'bindings')
     if not has_binding_key:
         setattr(widget, 'bindings', dict())
 
     if func:
-        if not all:
+        if not all_:
             widget.bind(event, func)
         else:
             widget.bind_all(event, func)

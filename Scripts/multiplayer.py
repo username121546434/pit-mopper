@@ -1,3 +1,4 @@
+from datetime import datetime
 from tkinter.ttk import Progressbar
 from .custom_menubar import SubMenu
 from .app import App
@@ -61,7 +62,7 @@ class MultiplayerApp(App):
     
     def set_keyboard_shorcuts(self):
         super().set_keyboard_shorcuts()
-        bindWidget(self, '<Control-r>', all=True, func=lambda _: self.n.restart())
+        bindWidget(self, '<Control-r>', all_=True, func=lambda _: self.n.restart())
     
     def create_game(self):
         logging.info('Player joined, starting game')
@@ -83,8 +84,8 @@ class MultiplayerApp(App):
         grid = ButtonGrid((10, 10), self, row=4, click_random_square=True, dark_mode=self.dark_mode_state.get())
         self.game = Game(
             grid,
-            datetime.now(),
             self_info,
+            datetime.now(),
             [],
             grid.num_mines,
             True,
@@ -95,8 +96,8 @@ class MultiplayerApp(App):
         game_menu.add_command(label='Leave', accelerator='Alt+Q', command=self.leave_game)
         self.menubar.add_menu('Game', game_menu)
 
-        bindWidget(self, '<Alt-q>', all=True, func=lambda _: self.leave_game())
-        bindWidget(self, '<F11>', all=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
+        bindWidget(self, '<Alt-q>', all_=True, func=lambda _: self.leave_game())
+        bindWidget(self, '<F11>', all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
 
         if self.dark_mode_state.get():
             self.change_theme()

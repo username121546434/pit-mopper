@@ -43,7 +43,8 @@ class Square(Button):
         'last_fg',
         'tk',
         '_w',
-        'widgetName'
+        'widgetName',
+        'bindings'
     )
     def __init__(self, master: Misc | None = ..., text='') -> None:
         self.category: str | None = None
@@ -137,8 +138,18 @@ class Square(Button):
 
 class PickleSquare:
     """Same as `Square` but is used to pickle and save data"""
-
-    def __init__(self, category: str, position: tuple[int, int], num, chord=False, completed=False, clicked_on=False, game_over=False, flaged:bool = False, dark_mode:bool = False) -> None:
+    __slots__ = ('chord', 'completed', 'clicked_on', 'category', 'position', 'game_over', 'num', 'flaged')
+    def __init__(
+        self,
+        category: str,
+        position: tuple[int, int],
+        num,
+        chord=False,
+        completed=False,
+        clicked_on=False,
+        game_over=False,
+        flaged:bool = False,
+    ) -> None:
         self.chord: bool = chord
         self.completed: bool = completed
         self.clicked_on: bool = clicked_on
@@ -147,24 +158,17 @@ class PickleSquare:
         self.game_over = game_over
         self.num = num
         self.flaged = flaged
-        self.dark_mode = dark_mode
 
     def to_square(self, master) -> Square:
         square = Square(master)
-        for key, value in self.__dict__.items():
-            square.__dict__[key] = value
+        for key in self.__slots__:
+            value = getattr(self, key)
+            setattr(square, key, value)
         return square
 
     @classmethod
     def from_square(cls, square: Square):
-        return cls(
-            square.category,
-            square.position,
-            square.num,
-            square.chord,
-            square.completed,
-            square.clicked_on,
-            square.game_over,
-            square.flaged,
-            square.dark_mode
-        )
+        new_square = cls(square.category, square.position, square.num)
+        for attr in cls.__slots__:
+            setattr(new_square, attr, getattr(square, attr))
+        return new_square

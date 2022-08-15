@@ -20,7 +20,7 @@ from .grid import ButtonGrid, PickleButtonGrid
 from .squares import PickleSquare, Square
 from .functions import *
 from .app import App
-from .game import Game
+from .game import Game, PickleGame
 logging.info('Loading Single Player...')
 
 
@@ -43,42 +43,6 @@ Ratio of mines: {round((num_mines/total_squares) * 100, 2)}%
 Started Game: {start.strftime(STRFTIME)}
 Session Started: {session_start.strftime(STRFTIME)}
 ''')
-
-
-def save_game(
-    start,
-    total_time,
-    grid,
-    zeros_checked,
-    num_mines,
-    chording,
-):
-    logging.info(f'''Saving game with the following attributes:
-
-start:               {start}
-total_time:          {total_time}
-grid:                {grid}
-zeros_checked:       {zeros_checked}
-num_mines:           {num_mines}
-chording:            {chording}
-grid.grid_size       {grid.grid_size}
-''')
-    data = {
-        'start': start,
-        'time played': total_time,
-        'grid': PickleButtonGrid.from_grid(grid),
-        'zeros checked': zeros_checked,
-        'num mines': num_mines,
-        'chording': chording,
-        'difficulty': window.difficulty.get()
-    }
-    logging.info(f'Data to save: {data}')
-    with filedialog.asksaveasfile('wb', filetypes=(('Pit Mopper Game Files', '*.min'), ('Any File', '*.*'))) as f:  # Pickling
-        messagebox.showinfo('Save Game', 'You game is being saved right now, this may a few moments. Please wait until another popup comes before closing the game.')
-        logging.info('Saving data...')
-        pickle.dump(data, f)
-        logging.info('Data successfully saved')
-        messagebox.showinfo('Save Game', 'Your game has been saved, you can now close the game.')
 
 
 def load_highscore() -> dict[str, float | int] | float:
@@ -197,37 +161,28 @@ class SinglePlayerApp(App):
             self.difficulty.set((self.rows.get(), self.cols.get()))
         self.game_size.set(f'Your game size will be {self.difficulty.get()[0]} rows and {self.difficulty.get()[1]} columns')
     
-    def create_game(
-        self,
-        _ = None,
-        start: datetime = None,
-        grid: ButtonGrid = None,
-        zeros_checked: list[Square] = None,
-        num_mines: int = 0,
-        chording: bool = None,
-        mines_found: int = 0,
-        additional_time: float = 0.0
-    ):
-        if zeros_checked is None:
-            zeros_checked = []
-        if self.difficulty.get() == (None, None) or self.difficulty.get() == ('None', 'None'):
-            logging.error('Game size not chosen')
-            messagebox.showerror(title='Game Size not chosen', message='You have not chosen a game size!')
-            return
-        elif self.difficulty.get() >= (60, 60):
-            logging.warning(f'Size too big {self.difficulty.get()}')
-            messagebox.showwarning(title='Size too big', message='Warning: When the game is a size of 60x60 or above, the expierence might be so laggy it is unplayable.')
-        elif self.mines.get() > (self.difficulty.get()[0] * self.difficulty.get()[1]) - 10:
-            logging.error(f'Mines too high, game size {self.difficulty.get()}, mines: {self.mines.get()}')
-            messagebox.showerror(title='Mines too high', message='You have chosen too many mines.')
-            return
-        elif self.mines.get() == 0 or self.mines.get() < -1:
-            logging.error(f'Mines too low ({self.mines.get()})')
-            messagebox.showerror('Mines too low', 'You cannot have a mine count below 0 with -1 being a special number')
-            return
-        elif self.mines.get() > ((self.difficulty.get()[0] * self.difficulty.get()[1])/2):
-            logging.warning(f'Number of mines high, game size {self.difficulty.get()}, mines: {self.mines.get()}')
-            messagebox.showwarning(title='Number of mines high', message='You have chosen a high amount of mines, so it might take a long time to place them all')
+    def create_game(self, _ = None, game: PickleGame | None = None):
+        zeros_checked = []
+        print(game)
+        if game is None:
+            if self.difficulty.get() == (None, None) or self.difficulty.get() == ('None', 'None'):
+                logging.error('Game size not chosen')
+                messagebox.showerror(title='Game Size not chosen', message='You have not chosen a game size!')
+                return
+            elif self.difficulty.get() >= (60, 60):
+                logging.warning(f'Size too big {self.difficulty.get()}')
+                messagebox.showwarning(title='Size too big', message='Warning: When the game is a size of 60x60 or above, the expierence might be so laggy it is unplayable.')
+            elif self.mines.get() > (self.difficulty.get()[0] * self.difficulty.get()[1]) - 10:
+                logging.error(f'Mines too high, game size {self.difficulty.get()}, mines: {self.mines.get()}')
+                messagebox.showerror(title='Mines too high', message='You have chosen too many mines.')
+                return
+            elif self.mines.get() == 0 or self.mines.get() < -1:
+                logging.error(f'Mines too low ({self.mines.get()})')
+                messagebox.showerror('Mines too low', 'You cannot have a mine count below 0 with -1 being a special number')
+                return
+            elif self.mines.get() > ((self.difficulty.get()[0] * self.difficulty.get()[1])/2):
+                logging.warning(f'Number of mines high, game size {self.difficulty.get()}, mines: {self.mines.get()}')
+                messagebox.showwarning(title='Number of mines high', message='You have chosen a high amount of mines, so it might take a long time to place them all')
 
         self.clear()
         self.set_keyboard_shorcuts()
@@ -241,7 +196,9 @@ class SinglePlayerApp(App):
             row=1, column=1, sticky=N+S+E+W, pady=(5, 0))
         self.config(bg=constants.CURRENT_BG)
 
-        if grid is None:
+        if game is None:
+            chording = self.chord_state.get()
+            start = datetime.now()
             logging.info('Creating grid of buttons...')
             grid = ButtonGrid(self.difficulty.get(), self, dark_mode=self.dark_mode_state.get(), num_mines=self.mines.get())
             if constants.APP_CLOSED:
@@ -249,27 +206,38 @@ class SinglePlayerApp(App):
                     self.destroy()
                 except TclError:
                     return
+            num_mines = 0
+            for square, _ in grid.iter_squares():
+                if square.category == 'mine':
+                    num_mines += 1
+            mines_found = 0
+
+            logging.info(f'''Creating game with following attributes:
+
+start:                 {start}
+grid:                  {grid}
+zeros_checked:         {zeros_checked}
+num_mines:             {num_mines}
+chording:              {chording}
+mines_found:           {mines_found}
+additional_time:       0
+''')
+            game_size_str = 'x'.join(str(i) for i in self.difficulty.get())
+
+        if isinstance(game, PickleGame):
+            start = game.start
+            chording = game.chording
+            num_mines = game.num_mines
+            grid = game.grid
+            game_size_str = 'x'.join(str(i) for i in grid.grid_size)
+            total_time.set(f'Time: {format_second(int(game.additional_time))} 🚩0/{game.num_mines}💣')
+
+            mines_found = 0
             for row in grid.grid:
                 for square in row:
-                    if square.category == 'mine':
-                        num_mines += 1
-        if chording is None:
-            chording = self.chord_state.get()
-
-        if start is None:
-            start = datetime.now()
-
-        logging.info(f'''Creating game with following attributes:
-
-    start:                 {start}
-    grid:                  {grid}
-    zeros_checked:         {zeros_checked}
-    num_mines:             {num_mines}
-    chording:              {chording}
-    mines_found:           {mines_found}
-    additional_time:       {additional_time}
-    ''')
-
+                    if square.category == 'bomb' and square.clicked_on:
+                        mines_found += 1
+        
         squares_clicked_on = [
             square
             for row in grid.grid
@@ -284,11 +252,7 @@ class SinglePlayerApp(App):
             if square.clicked_on == False
         ]
 
-        if additional_time != 0.0:
-            total_time.set(f'Time: {format_second(int(additional_time))} 🚩0/{num_mines}💣')
-
         highscore_data = load_highscore()
-        game_size_str = f'{self.difficulty.get()[0]}x{self.difficulty.get()[1]}'
         self.title(f'{game_size_str} Pit Mopper Game')
         logging.info(f'{game_size_str} Pit Mopper Game starting...')
         if not isinstance(highscore_data, float):
@@ -298,17 +262,19 @@ class SinglePlayerApp(App):
                 highscore = float('inf')
         else:
             highscore = float('inf')
-        seconds = additional_time
+        if isinstance(game, PickleGame):
+            seconds = game.additional_time
+        else:
+            seconds = 0.0
         self.draw_menubar()
         game_menu = SubMenu()
-        bindWidget(self, '<Control-s>', func=lambda _: save_game(start, seconds, grid, zeros_checked, num_mines, chording))
+        bindWidget(self, '<Control-s>', func=lambda _: self.save_game())
         bindWidget(self, '<Alt-q>', func=lambda _:  [self.clear(), setattr(self.game, 'quit', True), self.draw_all()])
         bindWidget(self, '<Alt-i>', func=lambda _: more_info(
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start,  grid.grid_size[0] * grid.grid_size[1]))
-        bindWidget(self, '<F11>', all=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
+        bindWidget(self, '<F11>', all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
 
-        game_menu.add_command(label='Save As', accelerator='Ctrl+S', command=partial(save_game, start, seconds, grid, [
-                            PickleSquare.from_square(square) for square in zeros_checked], num_mines, chording))
+        game_menu.add_command(label='Save As', accelerator='Ctrl+S', command=self.save_game)
         game_menu.add_command(label='More Info', command=lambda: more_info(
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start, grid.grid_size[0] * grid.grid_size[1]),
             accelerator='Alt+I')
@@ -322,6 +288,7 @@ class SinglePlayerApp(App):
             self.dark_mode_state.set(True)
 
         result = self._game(
+            game,
             grid,
             session_start,
             total_time,
@@ -329,7 +296,6 @@ class SinglePlayerApp(App):
             num_mines,
             chording,
             mines_found,
-            additional_time
         )
         if not result:
             return
@@ -406,51 +372,40 @@ class SinglePlayerApp(App):
     
     def load_game(self, _=None):
         logging.info('Opening game...')
-        file = filedialog.askopenfilename('rb', filetypes=(('Pit Mopper Game Files', '*.min'), ('Any File', '*.*')))
+        file = filedialog.askopenfilename(filetypes=(('Pit Mopper Game Files', '*.ptmpr'), ('Any File', '*.*')))
         if file == None:
             return
-        else:
-            logging.info(f'Reading {file}...')
-            with open(file) as f:  # Un Pickling
-                try:
-                    data = pickle.load(f)
-                except Exception:
-                    messagebox.showerror('Invalid File', 'It seems like this is an invalid file, most likely because it is from an older version')
-                    return
-                data: dict[str]
+
+        logging.info(f'Reading {file}...')
+        with open(file, 'rb') as f:  # Un Pickling
+            try:
+                data = pickle.load(f)
+            except Exception:
+                messagebox.showerror('Invalid File', 'It seems like this is an invalid file')
+                logging.info(f'Invalid File:\n\n{traceback.format_exc()}')
+                return
+        if not isinstance(data, (PickleGame, dict)):
+            messagebox.showerror('Invalid Data', 'It seems like this is a file which has invalid data')
+            logging.info(f'Invalid File Data:\n\n{data}')
+            return
+        
+        if isinstance(data, dict):
+            try:
+                data = PickleGame.from_dict(data)
+            except Exception:
+                messagebox.showerror('Load Error', 'There was an error while loading the file')
+                logging.info(f'Load Error File Data:\n\n{data}')
+                return
+
+
         logging.info(f'{file} successfully read, setting up game...')
 
-        self.clear()
-        grid = data['grid'].grid
-        button_grid = ButtonGrid(data['grid'].grid_size, self, grid, window.dark_mode_state.get())
-
-        start: datetime = data['start']
-        time = data['time played']
-        num_mines: int = data['num mines']
-        zeros_checked = data['zeros checked']
-        chording = data['chording']
-        self.grid_columnconfigure(1, weight=1)
-
-        mines_found = 0
-        for row in button_grid.grid:
-            for square in row:
-                if square.category == 'mine' and square.cget('text') == '🚩':
-                    mines_found += 1
-
-        self.create_game(
-            None,
-            start,
-            button_grid,
-            zeros_checked,
-            num_mines,
-            chording,
-            mines_found,
-            additional_time=time,
-        )
+        self.create_game(None, game=data)
     
     def _game(
         self,
-        grid: ButtonGrid,
+        game: PickleGame | None,
+        grid: ButtonGrid | None,
         session_start: datetime,
         total_time: StringVar,
         zeros_checked: list[Square] = None,
@@ -461,21 +416,40 @@ class SinglePlayerApp(App):
     ):
         if zeros_checked == None:
             zeros_checked = []
-        self.game = Game(
-            grid,
-            session_start,
-            total_time,
-            zeros_checked,
-            num_mines,
-            chording,
-            mines_found,
-            additional_time,
-        )
+        if game is None:
+            self.game = Game(
+                grid,
+                total_time,
+                session_start,
+                zeros_checked,
+                num_mines,
+                chording,
+                mines_found,
+                additional_time,
+            )
+        else:
+            self.game = game.to_game(total_time, self)
         self.after(50, self._update_game())
         while True:
             self.after(50, self._update_game())
             if self.game.quit:
                 return True
+    
+    def save_game(self):
+        data = PickleGame.from_game(self.game)
+        logging.info(f'''Saving game with the following attributes:
+    {data}
+    ''')
+        logging.info(f'Data to save: {data}')
+        filename = filedialog.asksaveasfilename(filetypes=(('Pit Mopper Game Files', '*.ptmpr'), ('Any File', '*.*')))
+        if not filename:
+            return
+        with open(filename, 'wb') as f:  # Pickling
+            messagebox.showinfo('Save Game', 'You game is being saved right now, this may a few moments. Please wait until another popup comes before closing the game.')
+            logging.info('Saving data...')
+            pickle.dump(data, f)
+            logging.info('Data successfully saved')
+            messagebox.showinfo('Save Game', 'Your game has been saved, you can now close the game.')
 
 
 logging.info('Functions successfully defined, creating GUI')
