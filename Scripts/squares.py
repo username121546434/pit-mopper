@@ -59,11 +59,11 @@ class Square(Button):
 
         super().__init__(master, text=text, font=(font_name, 12))
 
-        functions.bindWidget(self, '<Button-1>', func=self.clicked)
-        functions.bindWidget(self, '<Button-2>', func=self.chord_self)
-        functions.bindWidget(self, '<Button-3>', func=self.flag)
-        functions.bindWidget(self, '<Enter>', func=self.hover_enter)
-        functions.bindWidget(self, '<Leave>', func=self.hover_leave)
+        functions.bind_widget(self, '<Button-1>', func=self.clicked)
+        functions.bind_widget(self, '<Button-2>', func=self.chord_self)
+        functions.bind_widget(self, '<Button-3>', func=self.flag)
+        functions.bind_widget(self, '<Enter>', func=self.hover_enter)
+        functions.bind_widget(self, '<Leave>', func=self.hover_leave)
 
     def flag(self, _=None):
         if self.cget('text').replace(' ', '') == '':

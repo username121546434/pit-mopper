@@ -85,9 +85,11 @@ def clear_highscore():
         messagebox.showinfo('Delete Data', 'As soon as you close Pit Mopper, the your highscores will be deleted')
 
 
-def bindWidget(widget: Widget, event, all_:bool=False, func=None):
-    # https://stackoverflow.com/a/226141/19581763
-    '''Set or retrieve the binding for an event on a widget'''
+def bind_widget(widget: Widget, event, all_:bool=False, func=None):
+    """
+    Set or retrieve the binding for an event on a widget
+    taken from https://stackoverflow.com/a/226141/19581763
+    """
     has_binding_key = hasattr(widget, 'bindings')
     if not has_binding_key:
         setattr(widget, 'bindings', dict())
@@ -105,7 +107,7 @@ def bindWidget(widget: Widget, event, all_:bool=False, func=None):
 def bug_report():
     new_window = Toplevel()
     new_window.config(padx=20, pady=20)
-    func = bindWidget(new_window.master, '<space>')
+    func = bind_widget(new_window.master, '<space>')
     new_window.master.unbind_all('<space>')
 
     Label(new_window, text='Enter a description of what happenned below, also include information about which platform you are on etc').pack()

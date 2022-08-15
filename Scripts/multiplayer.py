@@ -62,7 +62,7 @@ class MultiplayerApp(App):
     
     def set_keyboard_shorcuts(self):
         super().set_keyboard_shorcuts()
-        bindWidget(self, '<Control-r>', all_=True, func=lambda _: self.n.restart())
+        bind_widget(self, '<Control-r>', all_=True, func=lambda _: self.n.restart())
     
     def create_game(self):
         logging.info('Player joined, starting game')
@@ -96,8 +96,8 @@ class MultiplayerApp(App):
         game_menu.add_command(label='Leave', accelerator='Alt+Q', command=self.leave_game)
         self.menubar.add_menu('Game', game_menu)
 
-        bindWidget(self, '<Alt-q>', all_=True, func=lambda _: self.leave_game())
-        bindWidget(self, '<F11>', all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
+        bind_widget(self, '<Alt-q>', all_=True, func=lambda _: self.leave_game())
+        bind_widget(self, '<F11>', all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
 
         if self.dark_mode_state.get():
             self.change_theme()

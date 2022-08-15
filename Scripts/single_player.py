@@ -144,9 +144,9 @@ class SinglePlayerApp(App):
     
     def set_keyboard_shorcuts(self):
         super().set_keyboard_shorcuts()
-        bindWidget(self, '<Control-o>', True, self.load_game)
-        bindWidget(self, '<space>', True, self.create_game)
-        bindWidget(self, '<Control-h>', True, self.show_highscores)
+        bind_widget(self, '<Control-o>', True, self.load_game)
+        bind_widget(self, '<space>', True, self.create_game)
+        bind_widget(self, '<Control-h>', True, self.show_highscores)
     
     def change_mines(self):
         self.mines_counter.set(f'Your game will have {self.mines.get()} mines')
@@ -268,11 +268,11 @@ additional_time:       0
             seconds = 0.0
         self.draw_menubar()
         game_menu = SubMenu()
-        bindWidget(self, '<Control-s>', func=lambda _: self.save_game())
-        bindWidget(self, '<Alt-q>', func=lambda _:  [self.clear(), setattr(self.game, 'quit', True), self.draw_all()])
-        bindWidget(self, '<Alt-i>', func=lambda _: more_info(
+        bind_widget(self, '<Control-s>', func=lambda _: self.save_game())
+        bind_widget(self, '<Alt-q>', func=lambda _:  [self.clear(), setattr(self.game, 'quit', True), self.draw_all()])
+        bind_widget(self, '<Alt-i>', func=lambda _: more_info(
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start,  grid.grid_size[0] * grid.grid_size[1]))
-        bindWidget(self, '<F11>', all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
+        bind_widget(self, '<F11>', all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
 
         game_menu.add_command(label='Save As', accelerator='Ctrl+S', command=self.save_game)
         game_menu.add_command(label='More Info', command=lambda: more_info(

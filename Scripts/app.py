@@ -43,11 +43,11 @@ class App(Tk):
     
     def set_keyboard_shorcuts(self):
         # Keyboard Shortcuts
-        bindWidget(self, '<Control-i>', True, lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {constants.VERSION}'))
-        bindWidget(self, '<Control-u>', True, lambda _: check_for_updates(self.quit_app))
-        bindWidget(self, '<Control-q>', True, self.quit_app)
-        bindWidget(self, '<Control-d>', True, lambda _: self.dark_mode_state.set(not self.dark_mode_state.get()))
-        bindWidget(self, '<Control-x>', True, lambda _: self.console_open.set(not self.console_open.get()))
+        bind_widget(self, '<Control-i>', True, lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {constants.VERSION}'))
+        bind_widget(self, '<Control-u>', True, lambda _: check_for_updates(self.quit_app))
+        bind_widget(self, '<Control-q>', True, self.quit_app)
+        bind_widget(self, '<Control-d>', True, lambda _: self.dark_mode_state.set(not self.dark_mode_state.get()))
+        bind_widget(self, '<Control-x>', True, lambda _: self.console_open.set(not self.console_open.get()))
     
     def draw_menubar(self):
         # create a menubar
