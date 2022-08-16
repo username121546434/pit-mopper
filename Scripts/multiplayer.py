@@ -175,7 +175,7 @@ def _mainloop(window: MultiplayerApp):
         window.progress_bar.step()
     elif window.online_game.available and not window.connected:
         window.create_game()
-    window.after(10, _mainloop)
+    window.after(10, lambda: _mainloop(window))
 
 
 def main():

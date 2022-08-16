@@ -4,8 +4,6 @@ from .load_font import load_font
 from .constants import DEFAULT_BG, DARK_MODE_BG
 from . import functions
 
-font_family, font_name = load_font(r"data\fonts\DSEG7ClassicMini-Bold.ttf")
-
 num_colors = {
     1: 'blue',
     2: 'green',
@@ -59,6 +57,7 @@ class Square(Button):
         self.clicked_on: bool = False
         self.dark_mode: bool = False
 
+        _, font_name = load_font(r"data\fonts\DSEG7ClassicMini-Bold.ttf")
         super().__init__(master, text=text, font=(font_name, 12))
 
         functions.bind_widget(self, '<Button-1>', func=self.clicked)
