@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 from tkinter import filedialog, messagebox
 
-from .custom_menubar import SubMenu
+from .custom_menubar import CustomMenuBar, SubMenu
 
 from . import constants
 from .console_window import *
@@ -185,7 +185,6 @@ class SinglePlayerApp(App):
                 messagebox.showwarning(title='Number of mines high', message='You have chosen a high amount of mines, so it might take a long time to place them all')
 
         self.clear()
-        self.set_keyboard_shorcuts()
         self.title('Pit Mopper')
         self.grid_columnconfigure(1, weight=1)
         session_start: datetime = datetime.now()
@@ -266,14 +265,18 @@ additional_time:       0
             seconds = game.additional_time
         else:
             seconds = 0.0
-        self.draw_menubar()
+        self.menubar = CustomMenuBar(self)
+        self.menubar.place(x=0, y=0)
         game_menu = SubMenu()
         bind_widget(self, '<Control-s>', func=lambda _: self.save_game())
         bind_widget(self, '<Alt-q>', func=lambda _:  [self.clear(), setattr(self.game, 'quit', True), self.draw_all()])
         bind_widget(self, '<Alt-i>', func=lambda _: more_info(
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start,  grid.grid_size[0] * grid.grid_size[1]))
         bind_widget(self, '<F11>', all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
+        bind_widget(self, '<Control-d>', all_=True, func=lambda *_: self.dark_mode_state.set(not self.dark_mode_state.get()))
 
+        game_menu.add_checkbutton(label='Dark Mode', accelerator='Ctrl+D', variable=self.dark_mode_state)
+        game_menu.add_separator()
         game_menu.add_command(label='Save As', accelerator='Ctrl+S', command=self.save_game)
         game_menu.add_command(label='More Info', command=lambda: more_info(
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start, grid.grid_size[0] * grid.grid_size[1]),

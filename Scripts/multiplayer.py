@@ -1,7 +1,7 @@
 """A module that that has the `MultiplayerApp` class"""
 from datetime import datetime
 from tkinter.ttk import Progressbar
-from .custom_menubar import SubMenu
+from .custom_menubar import CustomMenuBar, SubMenu
 from .app import App
 from .grid import ButtonGrid
 from .network import Network
@@ -69,8 +69,6 @@ class MultiplayerApp(App):
     def create_game(self):
         logging.info('Player joined, starting game')
         self.clear()
-        self.draw_menubar()
-        self.set_keyboard_shorcuts()
         self.connected = True
         self.title('Pit Mopper Multiplayer')
 
@@ -93,13 +91,18 @@ class MultiplayerApp(App):
             True,
             with_time=False
         )
+        self.menubar = CustomMenuBar(self)
+        self.menubar.place(x=0, y=0)
         game_menu = SubMenu()
+        game_menu.add_checkbutton(label='Dark Mode', accelerator='Ctrl+D', variable=self.dark_mode_state)
+        game_menu.add_separator()
         game_menu.add_checkbutton(label='Full Screen', accelerator='F11', variable=self.fullscreen_state)
         game_menu.add_command(label='Leave', accelerator='Alt+Q', command=self.leave_game)
         self.menubar.add_menu('Game', game_menu)
 
         bind_widget(self, '<Alt-q>', all_=True, func=lambda _: self.leave_game())
         bind_widget(self, '<F11>', all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
+        bind_widget(self, '<Control-d>', all_=True, func=lambda *_: self.dark_mode_state.set(not self.dark_mode_state.get()))
 
         if self.dark_mode_state.get():
             self.change_theme()
