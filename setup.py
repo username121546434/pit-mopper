@@ -1,3 +1,4 @@
+"""Python Script which compiles program to an EXE"""
 from cx_Freeze import setup, Executable
 
 base = None    

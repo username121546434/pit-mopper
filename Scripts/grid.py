@@ -7,6 +7,7 @@ import logging
 
 
 class ButtonGrid:
+    """Creates and stores information of a grid of buttons"""
     __slots__ = ('root', 'dark_mode', 'grid_size', 'num_mines', 'grid')
     def __init__(
         self, grid_size: tuple[int, int],
@@ -28,6 +29,7 @@ class ButtonGrid:
             self.grid = self.setup_grid(grid, row, column)
 
     def button_grid(self, row_num, col_num, click_random_square: bool = False) -> list[list[Square]]:
+        """Create a new grid of buttons"""
         init_logger()
         Grid.rowconfigure(self.root, row_num, weight=1)
         Grid.columnconfigure(self.root, col_num, weight=1)
@@ -107,6 +109,7 @@ class ButtonGrid:
         return grid
     
     def setup_grid(self, grid: list[list[PickleSquare]], row_num, col_num) -> list[list[Square]]:
+        """Takes a list `PickleSquare`s and places them on the screen"""
         Grid.rowconfigure(self.root, row_num, weight=1)
         Grid.columnconfigure(self.root, col_num, weight=1)
         new_grid = []
@@ -131,6 +134,7 @@ class ButtonGrid:
         return new_grid
 
     def around_square(self, row_num: int, col_num: int, print_=False):
+        """Return a list of `Square` objects which are next to the coordinates"""
         around:list[Square] = []
         coors = []
 
@@ -178,7 +182,7 @@ class ButtonGrid:
 
 
 class PickleButtonGrid:
-    """Same as `ButtonGrid` but is used to pickle and save data"""
+    """Same as `ButtonGrid` but has less attributes and can be pickled"""
 
     def __init__(self, grid_size: tuple[int, int], grid: list[list[PickleSquare]]) -> None:
         self.grid_size = grid_size

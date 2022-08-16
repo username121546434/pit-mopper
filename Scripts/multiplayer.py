@@ -1,3 +1,4 @@
+"""A script that runs Pit Mopper in multiplayer mode"""
 from datetime import datetime
 from tkinter.ttk import Progressbar
 from .custom_menubar import SubMenu
@@ -20,6 +21,7 @@ class DummyGame:
 
 
 class MultiplayerApp(App):
+    """Subclass of `App`"""
     def __init__(self, title: str) -> None:
         try:
             self.n = Network()

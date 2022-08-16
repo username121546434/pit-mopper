@@ -18,7 +18,7 @@ Pit Mopper is a game based on "Minesweeper" that was built in python.
 | Path To File      | Purpose                                                                                   |
 | ----------------- | ----------------------------------------------------------------------------------------- |
 | ./Pit Mopper.py   | Main Python file, run it to play the game                                                 |
-| ./setup.py        | Python Scripts which compiles program to an EXE                                           |
+| ./setup.py        | Python Script which compiles program to an EXE                                            |
 | ./server.py       | Going to be the server for online multiplayer games                                       |
 | ./requirments.txt | List of modules required. Simply use `pip install -r requirments.txt` to install them all |
 | ./LICENSE.txt     | The Liecense for Pit Mopper                                                               |
@@ -39,7 +39,7 @@ Pit Mopper is a game based on "Minesweeper" that was built in python.
 | ./Scripts/multiplayer.py    | A script that runs Pit Mopper in multiplayer mode                                                                                        |
 | ./Scripts/network.py        | Has `Network` class which acts as a websocket connection to the server, also has `check_internet` function                               |
 | ./Scripts/single_player.py  | A script that runs Pit Mopper in single player mode                                                                                      |
-| ./Scripts/squares.py        | Defines the `Square` class which represent a single square on the grid of buttons                                                        |
+| ./Scripts/squares.py        | Defines the `Square` class which represents a single square on the grid of buttons                                                       |
 | ./Scripts/updater.py        | Defines `check_for_updates` function which, well checks for updates and installs them                                                    |
 
 #### Other Files

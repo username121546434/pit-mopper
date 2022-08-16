@@ -1,3 +1,4 @@
+"""A script that runs Pit Mopper in single player mode"""
 import pickle
 from functools import partial
 from tkinter import *
@@ -15,9 +16,8 @@ if not os.path.exists(DEBUG):
     os.makedirs(DEBUG)
 from .base_logger import init_logger
 init_logger()
-from .squares import PickleSquare, Square
-from .grid import ButtonGrid, PickleButtonGrid
-from .squares import PickleSquare, Square
+from .squares import Square
+from .grid import ButtonGrid
 from .functions import *
 from .app import App
 from .game import Game, PickleGame
@@ -88,6 +88,7 @@ def load_highscore() -> dict[str, float | int] | float:
 
 
 class SinglePlayerApp(App):
+    """Subclass of `App`"""
     def draw_menubar(self):
         super().draw_menubar()
         self.file_menu.add_separator()

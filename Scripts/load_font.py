@@ -1,4 +1,4 @@
-# Taken from https://stackoverflow.com/a/30631309 and edited slightly
+"""Taken from https://stackoverflow.com/a/30631309 and edited slightly"""
 from ctypes import windll, byref, create_unicode_buffer, create_string_buffer
 from fontTools import ttLib
 FR_PRIVATE = 0x10

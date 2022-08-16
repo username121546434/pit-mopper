@@ -1,3 +1,4 @@
+"""Has all classes related to the menubar"""
 import tkinter as tk
 from tkinter import ttk
 
@@ -8,6 +9,7 @@ def pad_with_tabs(s,maxlen):
 
 
 class SubMenu:
+    """Acts as a submenu for the `CustomMenuBar` class"""
     def __init__(self):
         self._popup = None
         self._menubutton: list[dict[str]] = []
@@ -21,6 +23,7 @@ class SubMenu:
 
 
     def on_popup(self, *_):
+        """Called to show the menubar"""
         for label in self.parent._lb_list:
             if label.menu._open:
                 if label.menu is self:
@@ -58,16 +61,29 @@ class SubMenu:
             self._open = True
         
     def add_checkbutton(self, **kwargs):
+        """Add a checkbutton, accepts same arguments as `add_command` but `variable` is a required argument now"""
         kwargs[tk.CHECKBUTTON] = True
         self._menubutton.append(kwargs)
 
     def add_command(self, **kwargs):
+        """
+        Add a command to the menubar.
+
+        Parameters
+        ----------
+        `label`: The label of this item
+        `command`: The command that is executed when button is clicked
+        `accelerator`: The accelerator for this item
+
+        Any other parameters will be added to the `MenuButton` instance
+        """
         self._menubutton.append(kwargs)
     
     def _add_separator(self):
         ttk.Separator(self._popup, orient='horizontal').grid(row=self.num, sticky=tk.NSEW, column=0)
     
     def add_separator(self):
+        """Add a seperator"""
         self._menubutton.append({tk.SEPARATOR: True})
 
     def _add_command(self, **kwargs):
@@ -123,7 +139,11 @@ class SubMenu:
 
 
 class CustomMenuBar(tk.Frame):
+    """
+    Used as the menubar for Pit Mopper, taken from https://stackoverflow.com/a/63208829/19581763
+    """
     def __init__(self, master=None, cnf={}, **kw):
+        """Arguments are: `foreground` and overbackground"""
         kw = tk._cnfmerge((cnf, kw))
         kw['relief'] = kw.get('relief', 'raised')
         self._fg = kw.pop('fg', kw.pop('foreground', 'black'))

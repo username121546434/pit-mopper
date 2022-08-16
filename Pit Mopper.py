@@ -1,3 +1,4 @@
+"""Main Python file, run it to play the game"""
 import logging
 import os
 from tkinter import *

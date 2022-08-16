@@ -1,3 +1,4 @@
+"""Has all constants and variable for all of the files"""
 import os
 from datetime import datetime
 

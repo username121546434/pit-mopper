@@ -3,7 +3,6 @@ import sys
 from tkinter import messagebox
 from tkinter import *
 from . import constants
-from .network import check_internet
 import traceback
 import pyperclip
 import logging
@@ -13,27 +12,27 @@ import webbrowser
 
 def handle_exception(exc_type, exc_value, exc_traceback):
     init_logger()
-    if issubclass(exc_type, KeyboardInterrupt):
+    if not issubclass(exc_type, Exception): # The error is SystemExit, KeyboardInterupt...
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
     sys.last_type = exc_type
     sys.last_value = exc_value
     sys.last_traceback = exc_traceback
     messagebox.showerror('Unknown Error', f'There has been an error, details are below\n\n{exc_value}')
-    if check_internet():
-        if messagebox.askyesno('Unknown Error', 'Would you like to submit a bug report?'):
-            bug_report()
+    if messagebox.askyesno('Unknown Error', 'Would you like to submit a bug report?'):
+        bug_report()
     logging.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
 
 
 sys.excepthook = handle_exception
 
 
-def do_nothing():
-    pass
-
-
 def format_second(seconds: int | float):
+    """
+    Takes a number like 12 and formats it like it would on a clock
+    
+    For example, `format_second(69)` would return `1:09` and `format_second(3)` returns `0:03`
+    """
     if seconds != float('inf'):
         seconds = int(seconds)
         minutes = int(seconds / 60)
@@ -48,10 +47,12 @@ def format_second(seconds: int | float):
 
 def dark_title_bar(window):
     """
-    MORE INFO:
-    https://docs.microsoft.com/en-us/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute
+    Adds a dark title bar to a tkinter window
+    
+    Apperantely, this is supposed to only work on Windows 11 but sometimes it works on Windows 10
+
+    Taken from https://stackoverflow.com/a/70724666
     """
-    # https://stackoverflow.com/a/70724666
     window.update()
     DWMWA_USE_IMMERSIVE_DARK_MODE = 20
     set_window_attribute = ctypes.windll.dwmapi.DwmSetWindowAttribute
@@ -93,6 +94,8 @@ def bind_widget(widget: Widget, event, all_:bool=False, func=None):
     has_binding_key = hasattr(widget, 'bindings')
     if not has_binding_key:
         setattr(widget, 'bindings', dict())
+    
+    dict.get()
 
     if func:
         if not all_:
@@ -101,10 +104,11 @@ def bind_widget(widget: Widget, event, all_:bool=False, func=None):
             widget.bind_all(event, func)
         widget.bindings[event] = func
     else:
-        return(widget.bindings.setdefault(event, None))
+        return widget.bindings.get(event, None)
 
 
 def bug_report():
+    """Called when an unknown error occurs, and the user accepts the bug report messagebox"""
     new_window = Toplevel()
     new_window.config(padx=20, pady=20)
     func = bind_widget(new_window.master, '<space>')
@@ -116,7 +120,8 @@ def bug_report():
 
     Button(new_window, text='Continue', command=lambda: make_github_issue(body=description.get('1.0', 'end'))).pack()
     new_window.master.wait_window(new_window)
-    new_window.master.bind_all('<space>', func)
+    if func is not None:
+        new_window.master.bind_all('<space>', func)
 
 
 def make_github_issue(body=None):
@@ -148,4 +153,4 @@ Full Traceback:
 '''
     messagebox.showinfo('Bug Report', 'As soon as you press OK, you will be directed to a link where you can report this bug and an auto generated issue will be copied to your clipboard')
     pyperclip.copy(body)
-    webbrowser.open('https://github.com/username121546434/pit-mopper/issues')
+    webbrowser.open('https://github.com/username121546434/pit-mopper/issues/new')

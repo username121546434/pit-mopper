@@ -1,6 +1,5 @@
 """
 Soon going to the server for online multiplayer pit mopper games.
-Multiplayer games will most likely not coming anytime soon
 """
 from datetime import datetime
 import os

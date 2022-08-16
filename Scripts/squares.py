@@ -1,3 +1,4 @@
+"""Defines the `Square` and `PickleSquare` class"""
 from tkinter import *
 from .load_font import load_font
 from .constants import DEFAULT_BG, DARK_MODE_BG
@@ -29,6 +30,7 @@ dark_mode_colors = {
 
 
 class Square(Button):
+    """Holds data for a square in the game. `Square` is a subclass of the `Button` class from tkinter"""
     __slots__ = (
         'category',
         'num',
@@ -137,7 +139,7 @@ class Square(Button):
 
 
 class PickleSquare:
-    """Same as `Square` but is used to pickle and save data"""
+    """Same as `Square` but is has less attributes and can be pickled"""
     __slots__ = ('chord', 'completed', 'clicked_on', 'category', 'position', 'game_over', 'num', 'flaged')
     def __init__(
         self,

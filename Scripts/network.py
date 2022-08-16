@@ -6,6 +6,7 @@ from .base_logger import init_logger
 
 
 class Network:
+    """Acts as a socket connection to the server for multiplayer games."""
     def __init__(self) -> None:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server = '192.168.2.13'

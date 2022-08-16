@@ -1,3 +1,4 @@
+"""Defines the `App` class"""
 from tkinter import *
 from . import constants
 from .custom_menubar import CustomMenuBar, SubMenu
@@ -14,6 +15,10 @@ from .game import Game
 
 
 class App(Tk):
+    """
+    Base class for `SinglePlayerApp` and `MultiplayerApp`.
+    It defines all keyboard shorcuts, menubar options, and variables common in both
+    """
     def __init__(self, title: str) -> None:
         logging.info('Loading new app instance...')
         super().__init__()

@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 
 class OnlineGame:
+    """Holds data for an online game, this object is constantly passed back and forth between the client and server in a game"""
     def __init__(self, id) -> None:
         self.id = id
         self.p1_finished: bool | datetime = False
