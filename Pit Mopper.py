@@ -7,6 +7,7 @@ from Scripts.app import App
 from Scripts.constants import VERSION, DEBUG, debug_log_file
 from Scripts.network import check_internet
 from Scripts.console_window import get_console
+from Scripts import multiplayer, single_player
 import sys
 get_console()
 
@@ -24,14 +25,14 @@ __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
 
 def run_single_player():
     window.destroy()
-    import Scripts.single_player
+    single_player.main()
     sys.exit()
 
 
 def run_multiplayer():
     if check_internet():
         window.destroy()
-        import Scripts.multiplayer
+        multiplayer.main()
         sys.exit()
     else:
         messagebox.showerror('No Internet', 'You need internet for this')

@@ -94,8 +94,6 @@ def bind_widget(widget: Widget, event, all_:bool=False, func=None):
     has_binding_key = hasattr(widget, 'bindings')
     if not has_binding_key:
         setattr(widget, 'bindings', dict())
-    
-    dict.get()
 
     if func:
         if not all_:

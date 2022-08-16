@@ -1,4 +1,4 @@
-"""A script that runs Pit Mopper in single player mode"""
+"""A module that that has the `SinglePlayerApp` class"""
 import pickle
 from functools import partial
 from tkinter import *
@@ -21,7 +21,6 @@ from .grid import ButtonGrid
 from .functions import *
 from .app import App
 from .game import Game, PickleGame
-logging.info('Loading Single Player...')
 
 
 def more_info(
@@ -453,9 +452,10 @@ additional_time:       0
             messagebox.showinfo('Save Game', 'Your game has been saved, you can now close the game.')
 
 
-logging.info('Functions successfully defined, creating GUI')
+def main():
+    logging.info('Loading single player...')
 
-window = SinglePlayerApp('Game Loader')
+    window = SinglePlayerApp('Game Loader')
 
-logging.info('GUI successfully created')
-window.mainloop()
+    logging.info('GUI successfully created')
+    window.mainloop()

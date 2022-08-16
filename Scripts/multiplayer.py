@@ -1,4 +1,4 @@
-"""A script that runs Pit Mopper in multiplayer mode"""
+"""A module that that has the `MultiplayerApp` class"""
 from datetime import datetime
 from tkinter.ttk import Progressbar
 from .custom_menubar import SubMenu
@@ -162,15 +162,7 @@ class MultiplayerApp(App):
         self.draw_all()
 
 
-logging.info('Loading multiplayer...')
-
-window = MultiplayerApp('Pit Mopper Multiplayer')
-
-logging.info('GUI successfully created')
-logging.info('Waiting for player...')
-
-
-def mainloop():
+def _mainloop(window: MultiplayerApp):
     if constants.APP_CLOSED:
         sys.exit()
     elif window.connected:
@@ -180,7 +172,19 @@ def mainloop():
         window.progress_bar.step()
     elif window.online_game.available and not window.connected:
         window.create_game()
-    window.after(10, mainloop)
+    window.after(10, _mainloop)
 
-mainloop()
-window.mainloop()
+
+def main():
+    logging.info('Loading multiplayer...')
+
+    window = MultiplayerApp('Pit Mopper Multiplayer')
+
+    logging.info('GUI successfully created')
+    logging.info('Waiting for player...')
+    _mainloop(window)
+    window.mainloop()
+
+
+if __name__ == '__main__':
+    main()

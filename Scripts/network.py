@@ -32,7 +32,7 @@ class Network:
             self.disconnect()
         except Exception:
             pass
-        time.sleep(2) # Wait for the server to respond to the disconnect
+        time.sleep(1) # Wait for the server to respond to the disconnect
         try:
             self.client.close()
         except Exception:
