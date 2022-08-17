@@ -38,6 +38,15 @@ def run_multiplayer():
         messagebox.showerror('No Internet', 'You need internet for this')
 
 
+if '-s' in sys.argv:
+    logging.info('-s command arg given, loading single player...')
+    single_player.main()
+elif os.path.exists(sys.argv[1]):
+    single_player.main()
+elif '-m' in sys.argv:
+    logging.info('-m command arg given, loading multiplayer...')
+    multiplayer.main()
+
 window = App('Pit Mopper')
 
 Button(window, text='Single Player', command=run_single_player).pack(pady=(25, 0))

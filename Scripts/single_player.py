@@ -373,10 +373,11 @@ additional_time:       0
             logging.info('No highscores found')
             messagebox.showinfo('Highscores', 'No highscores were found, play a game and win it to get some')
     
-    def load_game(self, _=None):
+    def load_game(self, _=None, file: str|None=None):
         logging.info('Opening game...')
-        file = filedialog.askopenfilename(filetypes=(('Pit Mopper Game Files', '*.ptmpr'), ('Any File', '*.*')))
-        if file == None:
+        if file is None:
+            file = filedialog.askopenfilename(filetypes=(('Pit Mopper Game Files', '*.ptmpr'), ('Any File', '*.*')))
+        if file is None:
             return
 
         logging.info(f'Reading {file}...')
@@ -459,6 +460,15 @@ def main():
     logging.info('Loading single player...')
 
     window = SinglePlayerApp('Game Loader')
+
+    for arg in sys.argv:
+        if '--file' in arg:
+            logging.info('File arg given')
+            window.load_game(file=arg.split('=')[-1])
+    
+    if os.path.exists(sys.argv[1]):
+        logging.info('User opened app with a file')
+        window.load_game(file=sys.argv[1])
 
     logging.info('GUI successfully created')
     window.mainloop()
