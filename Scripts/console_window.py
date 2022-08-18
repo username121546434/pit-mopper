@@ -1,12 +1,18 @@
-import ctypes
-from ctypes import wintypes
-import sys
-from .constants import *
-from .base_logger import init_logger
-import logging
+import os
+from tkinter import messagebox
+
+if os.name == 'nt':
+    import ctypes
+    from ctypes import wintypes
+    import sys
+    from .constants import *
+    from .base_logger import init_logger
+    import logging
 
 
 def get_console():
+    if os.name != 'nt': # This is Windows specific
+        return
     global user32, kernel32, allocated_console
     user32 = ctypes.WinDLL('user32', use_last_error=True)
     kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
@@ -31,6 +37,9 @@ def get_console():
 
 
 def show_console():
+    if os.name != 'nt':
+        messagebox.showerror('Platform Error', 'This is not available on your platform')
+        return
     init_logger()
     logging.info('Showing Console')
     logging.warning('If you close this window, the app will terminate')
@@ -39,6 +48,9 @@ def show_console():
 
 
 def hide_console():
+    if os.name != 'nt':
+        messagebox.showerror('Platform Error', 'This is not available on your platform')
+        return
     init_logger()
     logging.info('Hiding Console')
     hwnd = kernel32.GetConsoleWindow()

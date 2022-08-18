@@ -1,8 +1,11 @@
 """Taken from https://stackoverflow.com/a/30631309 and edited slightly"""
-from ctypes import windll, byref, create_unicode_buffer, create_string_buffer
-from fontTools import ttLib
-FR_PRIVATE = 0x10
-FR_NOT_ENUM = 0x20
+import os
+
+if os.name == 'nt':
+    from ctypes import windll, byref, create_unicode_buffer, create_string_buffer
+    from fontTools import ttLib
+    FR_PRIVATE = 0x10
+    FR_NOT_ENUM = 0x20
 
 
 def load_font(fontpath, private=True, enumerable=False):
@@ -16,6 +19,8 @@ def load_font(fontpath, private=True, enumerable=False):
     See https://msdn.microsoft.com/en-us/library/dd183327(VS.85).aspx
 
     '''
+    if os.name != 'nt': # If not on windows, just use Comic Sans
+        return '', 'comicsans'
     # This function was taken from
     # https://github.com/ifwe/digsby/blob/f5fe00244744aa131e07f09348d10563f3d8fa99/digsby/src/gui/native/win/winfonts.py#L15
     # This function is written for Python 2.x. For 3.x, you

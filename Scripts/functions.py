@@ -1,4 +1,5 @@
 import ctypes
+import os
 import sys
 from tkinter import messagebox
 from tkinter import *
@@ -53,16 +54,17 @@ def dark_title_bar(window):
 
     Taken from https://stackoverflow.com/a/70724666
     """
-    window.update()
-    DWMWA_USE_IMMERSIVE_DARK_MODE = 20
-    set_window_attribute = ctypes.windll.dwmapi.DwmSetWindowAttribute
-    get_parent = ctypes.windll.user32.GetParent
-    hwnd = get_parent(window.winfo_id())
-    rendering_policy = DWMWA_USE_IMMERSIVE_DARK_MODE
-    value = 2
-    value = ctypes.c_int(value)
-    set_window_attribute(hwnd, rendering_policy, ctypes.byref(value),
-                         ctypes.sizeof(value))
+    if os.name == 'nt': # This is Windows specific
+        window.update()
+        DWMWA_USE_IMMERSIVE_DARK_MODE = 20
+        set_window_attribute = ctypes.windll.dwmapi.DwmSetWindowAttribute
+        get_parent = ctypes.windll.user32.GetParent
+        hwnd = get_parent(window.winfo_id())
+        rendering_policy = DWMWA_USE_IMMERSIVE_DARK_MODE
+        value = 2
+        value = ctypes.c_int(value)
+        set_window_attribute(hwnd, rendering_policy, ctypes.byref(value),
+                            ctypes.sizeof(value))
 
 
 def clear_all_data():

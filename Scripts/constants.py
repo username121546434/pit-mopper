@@ -2,13 +2,26 @@
 import os
 from datetime import datetime
 
-APPDATA = os.path.join(os.getenv('LOCALAPPDATA'), 'Pit Mopper')
-DEBUG = APPDATA + r'\debug'
+if os.name == 'nt':
+    # Use the local appdata folder if on Windows
+    APPDATA = os.path.join(os.getenv('LOCALAPPDATA'), 'Pit Mopper')
+    # *.xbm is Linux specific, use *.
+    LOGO = "data\\images\\windows_icon.ico"
+else:
+    # Otherwise, assume we are are on Linux
+    APPDATA = os.path.join(os.getenv('HOME'), '.pitmopper')
+    # *.ico is Windows specific, use *.xbm instead
+    LOGO = '@' + os.path.abspath("data/images/linux_icon.xbm")
+
+DEBUG = os.path.join(APPDATA, 'debug')
+
+if not os.path.exists(DEBUG):
+    os.makedirs(DEBUG)
+
 SW_HIDE = 0
 SW_SHOW = 5
 STRFTIME = r'%A %B %d, %I:%M %p %Y %Z'
 HIGHSCORE_TXT = os.path.join(APPDATA, 'highscore.txt')
-LOGO = "data\\images\\logo.ico"
 MAX_ROWS_AND_COLS = 75
 MIN_ROWS_AND_COLS = 4
 DARK_MODE_BG = '#282828'

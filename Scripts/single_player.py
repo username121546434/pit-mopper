@@ -9,11 +9,8 @@ from tkinter import filedialog, messagebox
 from .custom_menubar import CustomMenuBar, SubMenu
 
 from . import constants
-from .console_window import *
+from .console_window import get_console
 get_console()
-# Creates AppData folder if doesn't exist
-if not os.path.exists(DEBUG):
-    os.makedirs(DEBUG)
 from .base_logger import init_logger
 init_logger()
 from .squares import Square
@@ -39,15 +36,15 @@ Squares clicked on: {len(squares_clicked_on)}
 Squares not clicked on: {len(squares_not_clicked_on)}
 Total squares: {total_squares}
 Ratio of mines: {round((num_mines/total_squares) * 100, 2)}%
-Started Game: {start.strftime(STRFTIME)}
-Session Started: {session_start.strftime(STRFTIME)}
+Started Game: {start.strftime(constants.STRFTIME)}
+Session Started: {session_start.strftime(constants.STRFTIME)}
 ''')
 
 
 def load_highscore() -> dict[str, float | int] | float:
     logging.info('Loading highscore...')
-    if not os.path.exists(HIGHSCORE_TXT):
-        logging.info(f'{HIGHSCORE_TXT} does not exist, looking in root directory')
+    if not os.path.exists(constants.HIGHSCORE_TXT):
+        logging.info(f'{constants.HIGHSCORE_TXT} does not exist, looking in root directory')
         if not os.path.exists(os.path.join(os.getcwd(), 'highscore.txt')):
             logging.info('No highscore was found')
             return float('inf')
@@ -60,11 +57,11 @@ def load_highscore() -> dict[str, float | int] | float:
                 logging.info(f'highscore.txt contains invalid data: {value}')
                 messagebox.showerror('Highscore value invalide', 'The highscore file contains an invalid value, press OK to delete the content of it')
                 logging.info('Removing file...')
-                os.remove(HIGHSCORE_TXT)
+                os.remove(constants.HIGHSCORE_TXT)
                 value = float('inf')
             messagebox.showerror('Highscore file in wrong place', 'The highscore file was found, but in the wrong spot, as soon as you click OK, Pit Mopper will attempt to move the file to a new location, you might have to delete the file yourself.')
             if not isinstance(value, float):
-                with open(HIGHSCORE_TXT, 'wb') as f:
+                with open(constants.HIGHSCORE_TXT, 'wb') as f:
                     pickle.dump(value, f)
             try:
                 os.remove(os.path.join(os.getcwd(), 'highscore.txt'))
@@ -72,17 +69,17 @@ def load_highscore() -> dict[str, float | int] | float:
                 messagebox.showerror('File Delete', 'Unable to delete file, you will have to delete it yourself')
             return value
     else:
-        logging.info(f'{HIGHSCORE_TXT} does exist, reading data from it')
-        with open(HIGHSCORE_TXT, 'rb') as f:
+        logging.info(f'{constants.HIGHSCORE_TXT} does exist, reading data from it')
+        with open(constants.HIGHSCORE_TXT, 'rb') as f:
             value = pickle.load(f)
         if isinstance(value, dict):
-            logging.info(f'{HIGHSCORE_TXT} successfully read')
+            logging.info(f'{constants.HIGHSCORE_TXT} successfully read')
             return value
         else:
-            logging.info(f'{HIGHSCORE_TXT} contains invalid data: {value}')
+            logging.info(f'{constants.HIGHSCORE_TXT} contains invalid data: {value}')
             messagebox.showerror('Highscore value invalide', 'The highscore file contains an invalid value, press OK to delete the content of it')
             logging.info('Removing file...')
-            os.remove(HIGHSCORE_TXT)
+            os.remove(constants.HIGHSCORE_TXT)
             return float('inf')
 
 
@@ -129,8 +126,8 @@ class SinglePlayerApp(App):
 
         Label(self, textvariable=self.game_size).pack()
 
-        Spinbox(self, from_=MIN_ROWS_AND_COLS, to=MAX_ROWS_AND_COLS, textvariable=self.rows, width=4, command=partial(self.change_difficulty, True)).pack()
-        Spinbox(self, from_=MIN_ROWS_AND_COLS, to=MAX_ROWS_AND_COLS, textvariable=self.cols, width=4, command=partial(self.change_difficulty, True)).pack()
+        Spinbox(self, from_=constants.MIN_ROWS_AND_COLS, to=constants.MAX_ROWS_AND_COLS, textvariable=self.rows, width=4, command=partial(self.change_difficulty, True)).pack()
+        Spinbox(self, from_=constants.MIN_ROWS_AND_COLS, to=constants.MAX_ROWS_AND_COLS, textvariable=self.cols, width=4, command=partial(self.change_difficulty, True)).pack()
 
         Label(self, textvariable=self.mines_counter).pack()
         Label(self, text='-1 means it will generate a random number/use default').pack(padx=20)
@@ -163,7 +160,6 @@ class SinglePlayerApp(App):
     
     def create_game(self, _ = None, game: PickleGame | None = None):
         zeros_checked = []
-        print(game)
         if game is None:
             if self.difficulty.get() == (None, None) or self.difficulty.get() == ('None', 'None'):
                 logging.error('Game size not chosen')
@@ -317,7 +313,7 @@ additional_time:       0
             )
         if win and seconds < highscore:
             logging.info('Highscore has been beaten, writing new highscore data')
-            with open(HIGHSCORE_TXT, 'wb') as f:
+            with open(constants.HIGHSCORE_TXT, 'wb') as f:
                 if isinstance(highscore_data, dict):
                     new_highscore_data = highscore_data.copy()
                 else:
@@ -341,7 +337,6 @@ additional_time:       0
                 data.append([key, str(round(value, 1))])
             self.clear()
             self.title('Highscores')
-            self.iconbitmap(LOGO)
             self.config(padx=50, pady=20)
             frame = Frame(self, bg='black')
             self.grid_columnconfigure(0, weight=1)
@@ -349,13 +344,13 @@ additional_time:       0
             frame.grid(row=0, column=0)
 
             if self.dark_mode_state.get():
-                self.config(bg=DARK_MODE_BG)
+                self.config(bg=constants.DARK_MODE_BG)
                 dark_title_bar(self)
-                bg_of_labels = DARK_MODE_BG
-                fg_of_labels = DARK_MODE_FG
+                bg_of_labels = constants.DARK_MODE_BG
+                fg_of_labels = constants.DARK_MODE_FG
             else:
-                bg_of_labels = DEFAULT_BG
-                fg_of_labels = DEFAULT_FG
+                bg_of_labels = constants.DEFAULT_BG
+                fg_of_labels = constants.DEFAULT_FG
 
             for y, row in enumerate(data):
                 Grid.rowconfigure(frame, y, weight=1)
@@ -377,7 +372,7 @@ additional_time:       0
         logging.info('Opening game...')
         if file is None:
             file = filedialog.askopenfilename(filetypes=(('Pit Mopper Game Files', '*.ptmpr'), ('Any File', '*.*')))
-        if file is None:
+        if not isinstance(file, os.PathLike):
             return
 
         logging.info(f'Reading {file}...')
@@ -466,9 +461,10 @@ def main():
             logging.info('File arg given')
             window.load_game(file=arg.split('=')[-1])
     
-    if os.path.exists(sys.argv[1]):
-        logging.info('User opened app with a file')
-        window.load_game(file=sys.argv[1])
+    for arg in sys.argv[1:]:
+        if os.path.exists(arg):
+            logging.info('User opened app with a file')
+            window.load_game(file=sys.argv[1])
 
     logging.info('GUI successfully created')
     window.mainloop()

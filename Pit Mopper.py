@@ -4,15 +4,12 @@ import os
 from tkinter import *
 from tkinter import messagebox
 from Scripts.app import App
-from Scripts.constants import VERSION, DEBUG, debug_log_file
+from Scripts.constants import VERSION, debug_log_file
 from Scripts.network import check_internet
 from Scripts.console_window import get_console
 from Scripts import multiplayer, single_player
 import sys
 get_console()
-
-if not os.path.exists(DEBUG):
-    os.makedirs(DEBUG)
 
 with open(debug_log_file, 'w') as _:
     pass
@@ -41,11 +38,14 @@ def run_multiplayer():
 if '-s' in sys.argv:
     logging.info('-s command arg given, loading single player...')
     single_player.main()
-elif os.path.exists(sys.argv[1]):
-    single_player.main()
 elif '-m' in sys.argv:
     logging.info('-m command arg given, loading multiplayer...')
     multiplayer.main()
+else:
+    for arg in sys.argv[1:]:
+        if os.path.exists(arg):
+            single_player.main()
+            break
 
 window = App('Pit Mopper')
 

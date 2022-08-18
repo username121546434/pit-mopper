@@ -26,7 +26,9 @@ class App(Tk):
         self.report_callback_exception = handle_exception
 
         self.title(title)
-        self.iconbitmap(constants.LOGO, constants.LOGO)
+
+        self.iconbitmap(constants.LOGO)
+        constants.DEFAULT_BG = self['bg']
 
         self.draw_all()
 
@@ -133,7 +135,8 @@ class App(Tk):
             constants.CURRENT_FG = constants.DEFAULT_FG
             CURRENT_BG = constants.DEFAULT_BG
             CURRENT_FG = constants.DEFAULT_FG
-            self.resizable(True, True)
+            if os.name == 'nt':
+                self.resizable(True, True)
 
         self.config(bg=CURRENT_BG)
         for child in self.winfo_children():
