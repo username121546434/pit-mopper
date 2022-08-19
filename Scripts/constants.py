@@ -11,7 +11,8 @@ else:
     # Otherwise, assume we are are on Linux
     APPDATA = os.path.join(os.getenv('HOME'), '.pitmopper')
     # *.ico is Windows specific, use *.xbm instead
-    LOGO = '@' + os.path.abspath("data/images/linux_icon.xbm")
+    # for some reason, on linux the path to the icon has to be prefixed with an "@"
+    LOGO = '@' + "data/images/linux_icon.xbm"
 
 DEBUG = os.path.join(APPDATA, 'debug')
 
@@ -26,7 +27,7 @@ MAX_ROWS_AND_COLS = 75
 MIN_ROWS_AND_COLS = 4
 DARK_MODE_BG = '#282828'
 DARK_MODE_FG = '#FFFFFF'
-DEFAULT_BG = '#f0f0f0f0f0f0'
+DEFAULT_BG = '#f0f0f0f0f0f0' if os.name == 'nt' else "#d9d9d9"
 DEFAULT_FG = '#000000'
 CURRENT_BG = DEFAULT_BG
 CURRENT_FG = DEFAULT_FG

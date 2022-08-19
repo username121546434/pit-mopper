@@ -27,8 +27,10 @@ class App(Tk):
 
         self.title(title)
 
-        self.iconbitmap(constants.LOGO)
-        constants.DEFAULT_BG = self['bg']
+        if os.name == 'nt':
+            self.iconbitmap(constants.LOGO, constants.LOGO)
+        else:
+            self.iconbitmap(constants.LOGO)
 
         self.draw_all()
 
