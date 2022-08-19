@@ -455,11 +455,6 @@ def main():
     logging.info('Loading single player...')
 
     window = SinglePlayerApp('Game Loader')
-
-    for arg in sys.argv:
-        if '--file' in arg:
-            logging.info('File arg given')
-            window.load_game(file=arg.split('=')[-1])
     
     for arg in sys.argv[1:]:
         if os.path.exists(arg):
