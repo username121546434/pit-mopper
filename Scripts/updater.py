@@ -1,5 +1,6 @@
 import os
 from random import randint
+import webbrowser
 import requests
 from packaging.version import Version
 from tkinter import *
@@ -58,8 +59,15 @@ def check_for_updates(app_quit):
 
         Button(window, text='Continue', command=window.destroy).pack()
         window.master.wait_window(window)
+    else:
+        messagebox.showinfo(title='Update', message='There are no updates available')
+        return
+    
+    if os.name == 'posix' and choice.get():
+        messagebox.showinfo('Update', 'Automatic updates are not supported on Linux, but you will be taken to the download link')
+        webbrowser.open('https://github.com/username121546434/pit-mopper/releases/latest')
 
-    if Version(latest_version) > Version(VERSION) and choice.get():
+    elif os.name == 'nt' and choice.get():
         messagebox.showinfo(title='Update', message='Press "Ok" to update Pit Mopper')
         if os.path.exists('unins000.exe'):
             download_zip = False
@@ -130,9 +138,4 @@ del /q {tempfile}
         os.startfile(bat_file)
         app_quit()
     else:
-        try:
-            _ = choice
-        except NameError:
-            messagebox.showinfo(title='Update', message='There are no updates available')
-        else:
-            messagebox.showinfo(title='Update Rejected', message='You have rejected the update')
+        messagebox.showinfo(title='Update Rejected', message='You have rejected the update')

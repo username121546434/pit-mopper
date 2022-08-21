@@ -32,7 +32,7 @@ DEFAULT_FG = '#000000'
 CURRENT_BG = DEFAULT_BG
 CURRENT_FG = DEFAULT_FG
 APP_CLOSED = False
-VERSION = '1.4.0'
+VERSION = '2.0.0-alpha'
 
 dark_mode = False
 del_data = 'none'
