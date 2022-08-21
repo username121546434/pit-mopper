@@ -1,12 +1,15 @@
 """Python Script which compiles program to an EXE"""
+from Scripts.constants import VERSION, LOGO
+import os
 from cx_Freeze import setup, Executable
 
-base = None    
+base = 'Win32GUI' if os.name == 'nt' else None
+icon = LOGO if os.name == 'nt' else LOGO[1:]
 
 executables = [Executable(
     "./Pit Mopper.py",
-    base='Win32GUI',
-    icon='./Scripts/data/images/logo.ico',
+    base=base,
+    icon=icon,
     copyright='GNU GPL v3, see LICENSE.txt for more info'
 )]
 
@@ -17,7 +20,7 @@ include_files = [
     './Scripts/data'
 ]
 options = {
-    'build_exe': {    
+    'build_exe': {
         'packages':packages,
         'include_files':include_files
     },
@@ -26,7 +29,7 @@ options = {
 setup(
     name = "Pit Mopper",
     options = options,
-    version = "1.4.0",
+    version = VERSION,
     description = '',
     executables = executables
 ) 
