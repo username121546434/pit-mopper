@@ -5,7 +5,7 @@ from datetime import datetime
 if os.name == 'nt':
     # Use the local appdata folder if on Windows
     APPDATA = os.path.join(os.getenv('LOCALAPPDATA'), 'Pit Mopper')
-    # *.xbm is Linux specific, use *.
+    # *.xbm is Linux specific, use *.ico instead
     LOGO = "data\\images\\windows_icon.ico"
 else:
     # Otherwise, assume we are are on Linux
