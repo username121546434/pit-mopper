@@ -64,7 +64,7 @@ def check_for_updates(app_quit):
         return
     
     if os.name == 'posix' and choice.get():
-        messagebox.showinfo('Update', 'Automatic updates are not supported on Linux, but you will be taken to the download link')
+        messagebox.showinfo('Update', 'Automatic updates are not supported on your platform, but you will be taken to the download link')
         webbrowser.open('https://github.com/username121546434/pit-mopper/releases/latest')
 
     elif os.name == 'nt' and choice.get():
