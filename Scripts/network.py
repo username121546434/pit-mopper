@@ -1,44 +1,53 @@
+from __future__ import annotations
 import logging
 import socket
 import pickle
 import time
+from typing import TYPE_CHECKING
 from .base_logger import init_logger
+
+if TYPE_CHECKING:
+    from .game import OnlineGameInfo
 
 
 class Network:
     """Acts as a socket connection to the server for multiplayer games."""
-    def __init__(self) -> None:
+    def __init__(self, game_info: OnlineGameInfo) -> None:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server = '192.168.2.13'
         self.port = 5555
         self.addr = (self.server, self.port)
-        self.data = self.connect()
+        self.game_info = game_info
+        self.connect()
 
     def connect(self):
         self.client.connect(self.addr)
-        return pickle.loads(self.client.recv(2048))
+        self.data = self.send_data(self.game_info)
 
     def send_data(self, data):
         self.client.send(pickle.dumps(data))
         return pickle.loads(self.client.recv(2048))
     
     def disconnect(self):
-        self.send_data('disconnect')
+        try:
+            self.send_data('disconnect')
+        except Exception:
+            pass
 
     def restart(self):
         init_logger()
         logging.info('Restarting connection...')
-        try:
-            self.disconnect()
-        except Exception:
-            pass
+        self.disconnect()
         time.sleep(1) # Wait for the server to respond to the disconnect
+
+        # Ideally, the server would have closed the conection for us,
+        # but just in case it didn't, we manually leave below
         try:
             self.client.close()
         except Exception:
             pass
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.data = self.connect()
+        self.connect()
 
 
 def check_internet(host="8.8.8.8", port=53, timeout=3):

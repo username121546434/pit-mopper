@@ -4,8 +4,9 @@ from tkinter.ttk import Progressbar
 from .custom_menubar import CustomMenuBar, SubMenu
 from .app import App
 from .grid import ButtonGrid
+from .single_player import SinglePlayerApp
 from .network import Network
-from .game import Game, OnlineGame
+from .game import Game, OnlineGame, OnlineGameInfo
 from tkinter import *
 from . import constants
 from .functions import *
@@ -20,15 +21,9 @@ class DummyGame:
     available = False
 
 
-class MultiplayerApp(App):
-    """Subclass of `App`"""
+class MultiplayerApp(SinglePlayerApp):
+    """Subclass of `SinglePlayerApp`"""
     def __init__(self, title: str) -> None:
-        try:
-            self.n = Network()
-        except ConnectionError:
-            logging.error(f'There was an error while connecting to the server\n{traceback.format_exc()}')
-            messagebox.showerror('Connection error', 'There was an error while connecting to the server, Please try again later')
-            self.quit_app()
         super().__init__(title)
 
     def quit_app(self, *_):
@@ -38,20 +33,36 @@ class MultiplayerApp(App):
             pass
         return super().quit_app(*_)
     
-    def draw(self):
+    def draw_waiting(self):
         self.label = Label(self, text='Waiting for player...')
         self.label.pack(pady=(25, 0))
 
         self.progress_bar = Progressbar(self, mode='indeterminate', length=200)
-        self.progress_bar.pack(pady=(0, 20), padx=50)
+        self.progress_bar.pack(padx=50)
+
+        Button(self, text='Cancel', command=self.leave_waiting).pack(pady=(0, 20))
     
     def draw_menubar(self):
         super().draw_menubar()
+        for _ in range(3):
+            self.file_menu._menubutton.pop()
+    
+    def draw_waiting_menubar(self):
+        self.draw_menubar()
         self.settings.add_separator()
         self.settings.add_command(label='Restart connection', command=self.n.restart, accelerator='Ctrl+R')
     
-    def set_variables(self):
-        super().set_variables()
+    def set_waiting_variables(self):
+        App.set_variables(self)
+        while True:
+            try:
+                self.n = Network(self.game_info)
+            except:
+                logging.error(f'There was an error while connecting to the server\n{traceback.format_exc()}')
+                if not messagebox.askretrycancel('Connection error', 'There was an error while connecting to the server'):
+                    self.quit_app()
+            else:
+                break
         self.connected = False
         self.player_left = False
         self.online_game: OnlineGame = self.n.send_data('get')
@@ -59,14 +70,22 @@ class MultiplayerApp(App):
     
     def draw_all(self):
         super().draw_all()
-        if self.dark_mode_state.get():
-            self.change_theme()
+        self.play_button.config(command=self.draw_all_waiting)
+    
+    def draw_all_waiting(self, *_):
+        self.game_info = OnlineGameInfo(self.difficulty.get(), self.mines.get(), self.chord_state.get())
+        logging.info('Waiting for player...')
+        self.clear()
+        self.set_waiting_variables()
+        self.draw_waiting()
+        self.draw_waiting_menubar()
+        self.wait_for_game_mainloop()
     
     def set_keyboard_shorcuts(self):
-        super().set_keyboard_shorcuts()
         bind_widget(self, '<Control-r>', all_=True, func=lambda _: self.n.restart())
+        bind_widget(self, '<space>', True, self.draw_all_waiting)
     
-    def create_game(self):
+    def create_game(self, *_):
         logging.info('Player joined, starting game')
         self.clear()
         self.connected = True
@@ -88,7 +107,7 @@ class MultiplayerApp(App):
             datetime.now(),
             [],
             grid.num_mines,
-            True,
+            chording=self.game_info.chording,
             with_time=False
         )
         self.menubar = CustomMenuBar(self)
@@ -105,7 +124,7 @@ class MultiplayerApp(App):
         bind_widget(self, '<Control-d>', all_=True, func=lambda *_: self.dark_mode_state.set(not self.dark_mode_state.get()))
 
         if self.dark_mode_state.get():
-            self.change_theme()
+            self._change_theme()
 
         self._update_game()
         while True:
@@ -151,31 +170,39 @@ class MultiplayerApp(App):
                 if self.online_game == 'restart':
                     self.player_left = True
                     break
+        self.leave_game()
     
     def leave_game(self):
         self.game.quit = True
         self.fullscreen_state.set(False)
         if self.player_left:
+            logging.error('It seems like the player has disconnected')
             messagebox.showerror('Connection Error', 'It seems that the other player disconnected')
             self.player_left = False
-            logging.error('It seems like the player has disconnected')
         self.clear()
-        self.n.restart()
+        self.n.disconnect()
+        del self.n
         logging.info('Waiting for new player...')
         self.draw_all()
-
-
-def _mainloop(window: MultiplayerApp):
-    if constants.APP_CLOSED:
-        sys.exit()
-    elif window.connected:
-        window.leave_game()
-    elif not window.connected and not window.online_game.available:
-        window.online_game = window.n.send_data('get')
-        window.progress_bar.step()
-    elif window.online_game.available and not window.connected:
-        window.create_game()
-    window.after(10, lambda: _mainloop(window))
+    
+    def wait_for_game_mainloop(self):
+        self.after_cancel_code = self.after(10, lambda: self.wait_for_game_mainloop())
+        if self.connected:
+            self.leave_game()
+            self.after_cancel(self.after_cancel_code)
+        elif not self.connected and not self.online_game.available:
+            self.online_game = self.n.send_data('get')
+            self.progress_bar.step()
+        elif self.online_game.available and not self.connected:
+            self.after_cancel(self.after_cancel_code)
+            self.create_game()
+    
+    def leave_waiting(self):
+        self.after_cancel(self.after_cancel_code)
+        self.n.disconnect()
+        del self.n
+        self.clear()
+        self.draw_all()
 
 
 def main():
@@ -185,5 +212,4 @@ def main():
 
     logging.info('GUI successfully created')
     logging.info('Waiting for player...')
-    _mainloop(window)
     window.mainloop()

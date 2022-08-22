@@ -33,7 +33,7 @@ Pit Mopper is a game based on "Minesweeper" that was built in python.
 | ./Scripts/constants.py      | Defines lots of constants and variables used by almost all of the files                                                                  |
 | ./Scripts/custom_menubar.py | Has the `CustomMenuBar` class which was taken and edited from [SO](https://stackoverflow.com/a/63208829)                                 |
 | ./Scripts/functions.py      | Defines many functions used by most files                                                                                                |
-| ./Scripts/game.py           | Has the `OnlineGame` class, only used by `server.py` and `multiplayer.py`                                                                |
+| ./Scripts/game.py           | Has a variety of game classes which are all dataclasses meaning they are used to store data                                              |
 | ./Scripts/grid.py           | Defines the `ButtonGrid` and `PickleButtonGrid` classes which create a grid of `Squares`, used by some files                             |
 | ./Scripts/load_font.py      | Has the `load_font` function for installing fonts, only used by `squares.py`, also taken from [SO](https://stackoverflow.com/a/30631309) |
 | ./Scripts/multiplayer.py    | A script that runs Pit Mopper in multiplayer mode                                                                                        |

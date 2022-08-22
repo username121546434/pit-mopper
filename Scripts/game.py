@@ -10,6 +10,14 @@ if TYPE_CHECKING:
     from tkinter import StringVar
 
 
+@dataclass(slots=True, frozen=True, eq=True)
+class OnlineGameInfo:
+    """This is initially sent from the client to the server to determine what settings to use"""
+    game_size: tuple[int, int]
+    mine_count: int
+    chording: bool
+
+
 class OnlineGame:
     """Holds data for an online game, this object is constantly passed back and forth between the client and server in a game"""
     def __init__(self, id) -> None:

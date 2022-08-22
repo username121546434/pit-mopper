@@ -8,7 +8,7 @@ import socket
 import threading
 import sys
 import traceback
-from Scripts.game import OnlineGame
+from Scripts.game import OnlineGame, OnlineGameInfo
 import pickle
 import logging
 
@@ -50,15 +50,19 @@ logging.info('Socket binded successfully')
 s.listen()
 logging.info('Server started, waiting for connection...')
 
-games: dict[int, OnlineGame] = {}
+games: dict[OnlineGameInfo, dict[int, OnlineGame]] = {}
 player_count = 0
 
 def new_client(conn: socket.socket):
     global player_count
+    game_info = pickle.loads(conn.recv(2048))
+    logging.info(f'{game_info = }')
+    if game_info not in games:
+        games[game_info] = {}
 
     logging.info('Looking for an available game...')
     game_id = None
-    for game in games.values():
+    for game in games[game_info].values():
         if not game.available and not game.quit:
             game_id = game.id
             break
@@ -66,25 +70,27 @@ def new_client(conn: socket.socket):
     if game_id is None:
         logging.info('No game found, generating new game id')
         game_id = random.randint(1000, 9999)
-        while game_id in games.keys():
+        while game_id in games[game_info].keys():
             game_id = random.randint(1000, 9999)
 
-    if game_id not in games:
+    if game_id not in games[game_info]:
         logging.info(f'Creating new game... {game_id = }')
         player = 1
         game = OnlineGame(game_id)
-        games[game_id] = game
+        games[game_info][game_id] = game
     else:
         logging.info(f'Existing game found, {game_id = }')
-        game = games[game_id]
+        game = games[game_info][game_id]
         player = 2
 
+    logging.info(f'Sending player info... {player = }')
     conn.send(pickle.dumps(player))
+    logging.info('Sent player info')
     while True:
         try:
             recieved = pickle.loads(conn.recv(2048))
             try:
-                _ = games[game_id]
+                _ = games[game_info][game_id]
             except KeyError:
                 conn.sendall(pickle.dumps('restart'))
                 logging.info('Telling client to restart')
@@ -93,30 +99,30 @@ def new_client(conn: socket.socket):
                 logging.info('Client Disconnected')
                 break
             elif isinstance(recieved, dict):
-                games[game_id].update_info(player, recieved)
+                games[game_info][game_id].update_info(player, recieved)
             elif isinstance(recieved, bool):
                 if player == 1:
-                    games[game_id].p1_finished = datetime.now()
-                    games[game_id].p1_won = recieved
+                    games[game_info][game_id].p1_finished = datetime.now()
+                    games[game_info][game_id].p1_won = recieved
                 else:
-                    games[game_id].p2_finished = datetime.now()
-                    games[game_id].p2_won = recieved
+                    games[game_info][game_id].p2_finished = datetime.now()
+                    games[game_info][game_id].p2_won = recieved
 
             logging.info(f'Received: {recieved}')
-            logging.info(f'Sending: {games[game_id]}')
+            logging.info(f'Sending: {games[game_info][game_id]}')
 
-            if player == 2 and not games[game_id].available:
-                games[game_id].available = True
+            if player == 2 and not games[game_info][game_id].available:
+                games[game_info][game_id].available = True
 
-            conn.sendall(pickle.dumps(games[game_id]))
+            conn.sendall(pickle.dumps(games[game_info][game_id]))
         except Exception:
             logging.error(f'Unknown error, disconnecting imeidietly\n{traceback.format_exc()}')
             break
 
     logging.info('Disconnecting...')
     try:
-        games[game_id].quit = True
-        games.pop(game_id)
+        games[game_info][game_id].quit = True
+        games[game_info].pop(game_id)
     except KeyError:
         logging.info('Failed to delete game as it was already deleted')
     else:

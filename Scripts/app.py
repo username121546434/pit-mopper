@@ -41,6 +41,8 @@ class App(Tk):
         self.draw_menubar()
         self.set_keyboard_shorcuts()
         self.draw()
+        if self.dark_mode_state.get():
+            self._change_theme()
     
     def set_variables(self):
         self.console_open = BooleanVar(self, False)
@@ -128,18 +130,17 @@ class App(Tk):
             logging.info('User switched theme to dark mode')
             constants.CURRENT_BG = constants.DARK_MODE_BG
             constants.CURRENT_FG = constants.DARK_MODE_FG
-            CURRENT_BG = constants.DARK_MODE_BG
-            CURRENT_FG = constants.DARK_MODE_FG
             dark_title_bar(self)
         else:
             logging.info('User switched theme to light mode')
             constants.CURRENT_BG = constants.DEFAULT_BG
             constants.CURRENT_FG = constants.DEFAULT_FG
-            CURRENT_BG = constants.DEFAULT_BG
-            CURRENT_FG = constants.DEFAULT_FG
             if os.name == 'nt':
                 self.resizable(True, True)
 
+    def _change_theme(self):
+        CURRENT_BG = constants.CURRENT_BG
+        CURRENT_FG = constants.CURRENT_FG
         self.config(bg=CURRENT_BG)
         for child in self.winfo_children():
             if not isinstance(child, (Toplevel, Spinbox, CustomMenuBar, Progressbar, Frame)):

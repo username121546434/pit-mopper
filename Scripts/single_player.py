@@ -110,7 +110,6 @@ class SinglePlayerApp(App):
     def draw(self):
         super().draw()
         Label(text='Select Difficulty').pack(pady=(25, 0))
-        # Variable to hold on to which radio button value is checked.
 
         Radiobutton(
             text="Easy", value=(10, 10), variable=self.difficulty, command=self.change_difficulty
@@ -134,7 +133,8 @@ class SinglePlayerApp(App):
 
         Spinbox(self, textvariable=self.mines, width=4, from_= -1, to = 2000, command=self.change_mines).pack()
 
-        Button(self, text='Play!', command=self.create_game).pack(pady=(0, 20))
+        self.play_button = Button(self, text='Play!', command=self.create_game)
+        self.play_button.pack(pady=(0, 20))
 
         if self.dark_mode_state.get():
             self.dark_mode_state.set(True)
@@ -326,7 +326,7 @@ additional_time:       0
         self.draw_all()
         delattr(self, 'game')
     
-    def show_highscores(self):
+    def show_highscores(self, *_):
         logging.info('User requested highscores')
         highscore_data = load_highscore()
 
