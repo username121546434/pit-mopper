@@ -131,12 +131,15 @@ class App(Tk):
             constants.CURRENT_BG = constants.DARK_MODE_BG
             constants.CURRENT_FG = constants.DARK_MODE_FG
             dark_title_bar(self)
+            self.iconbitmap(constants.DARK_MODE_LOGO)
         else:
             logging.info('User switched theme to light mode')
             constants.CURRENT_BG = constants.DEFAULT_BG
             constants.CURRENT_FG = constants.DEFAULT_FG
             if os.name == 'nt':
                 self.resizable(True, True)
+            self.iconbitmap(constants.LOGO)
+        self._change_theme()
 
     def _change_theme(self):
         CURRENT_BG = constants.CURRENT_BG

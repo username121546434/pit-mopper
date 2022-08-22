@@ -7,12 +7,14 @@ if os.name == 'nt':
     APPDATA = os.path.join(os.getenv('LOCALAPPDATA'), 'Pit Mopper')
     # *.xbm is Linux specific, use *.ico instead
     LOGO = "data\\images\\windows_icon.ico"
+    DARK_MODE_LOGO = "data\\images\\windows_icon_darkmode.ico"
 else:
     # Otherwise, assume we are are on Linux
     APPDATA = os.path.join(os.getenv('HOME'), '.pitmopper')
     # *.ico is Windows specific, use *.xbm instead
     # for some reason, on linux the path to the icon has to be prefixed with an "@"
     LOGO = '@' + "data/images/linux_icon.xbm"
+    DARK_MODE_LOGO = '@' + 'data/images/linux_icon_darkmode.xbm'
 
 DEBUG = os.path.join(APPDATA, 'debug')
 
@@ -33,6 +35,7 @@ CURRENT_BG = DEFAULT_BG
 CURRENT_FG = DEFAULT_FG
 APP_CLOSED = False
 VERSION = '2.0.0-alpha'
+SQUARES_FONT = r"data\fonts\DSEG7ClassicMini-Bold.ttf"
 
 dark_mode = False
 del_data = 'none'
