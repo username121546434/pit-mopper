@@ -205,7 +205,7 @@ class MultiplayerApp(SinglePlayerApp):
                 self.online_game = self.n.send_data(reply)
             except Exception:
                 logging.error(f'Error while sending data\n{traceback.format_exc()}')
-                if messagebox.askokcancel('Connection Error', 'There was an error while sending data, would you like to restart the connection?'):
+                if messagebox.askokcancel('Connection Error', 'There was an error while sending data, would you like to leave the game?'):
                     break
             else:
                 if self.online_game == 'restart':
