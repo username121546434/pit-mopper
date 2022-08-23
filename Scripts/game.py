@@ -28,7 +28,7 @@ class OnlineGame:
         self.p2_info = {'timer text': ''}
         self.p1_won: bool | None = None
         self.p2_won: bool | None = None
-        self.available = False
+        self.is_full = False
         self.quit = False
     
     def update_info(self, player:int, info:dict):

@@ -143,6 +143,7 @@ class SinglePlayerApp(App):
         super().set_keyboard_shorcuts()
         bind_widget(self, '<Control-o>', True, self.load_game)
         bind_widget(self, '<space>', True, self.create_game)
+        bind_widget(self, '<Control-a>', True, func=lambda _: self.chord_state.set(not self.chord_state.get()))
         bind_widget(self, '<Control-h>', True, self.show_highscores)
     
     def change_mines(self):
@@ -267,9 +268,9 @@ additional_time:       0
         self.menubar = CustomMenuBar(self)
         self.menubar.place(x=0, y=0)
         game_menu = SubMenu()
-        bind_widget(self, '<Control-s>', func=lambda _: self.save_game())
-        bind_widget(self, '<Alt-q>', func=lambda _:  [self.clear(), setattr(self.game, 'quit', True), self.draw_all()])
-        bind_widget(self, '<Alt-i>', func=lambda _: more_info(
+        bind_widget(self, '<Control-s>', True, func=lambda _: self.save_game())
+        bind_widget(self, '<Alt-q>', True, func=lambda _:  [self.clear(), setattr(self.game, 'quit', True), self.draw_all()])
+        bind_widget(self, '<Alt-i>', True, func=lambda _: more_info(
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start,  grid.grid_size[0] * grid.grid_size[1]))
         bind_widget(self, '<F11>', all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
         bind_widget(self, '<Control-d>', all_=True, func=lambda *_: self.dark_mode_state.set(not self.dark_mode_state.get()))

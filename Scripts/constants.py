@@ -8,6 +8,9 @@ if os.name == 'nt':
     # *.xbm is Linux specific, use *.ico instead
     LOGO = "data\\images\\windows_icon.ico"
     DARK_MODE_LOGO = "data\\images\\windows_icon_darkmode.ico"
+    # Below is console related info
+    SW_HIDE = 0
+    SW_SHOW = 5
 else:
     # Otherwise, assume we are are on Linux
     APPDATA = os.path.join(os.getenv('HOME'), '.pitmopper')
@@ -21,8 +24,6 @@ DEBUG = os.path.join(APPDATA, 'debug')
 if not os.path.exists(DEBUG):
     os.makedirs(DEBUG)
 
-SW_HIDE = 0
-SW_SHOW = 5
 STRFTIME = r'%A %B %d, %I:%M %p %Y %Z'
 HIGHSCORE_TXT = os.path.join(APPDATA, 'highscore.txt')
 MAX_ROWS_AND_COLS = 75
@@ -36,6 +37,8 @@ CURRENT_FG = DEFAULT_FG
 APP_CLOSED = False
 VERSION = '2.0.0-alpha'
 SQUARES_FONT = r"data\fonts\DSEG7ClassicMini-Bold.ttf"
+GAME_ID_MIN = 1000
+GAME_ID_MAX = 9999
 
 dark_mode = False
 del_data = 'none'

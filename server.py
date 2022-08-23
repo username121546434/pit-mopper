@@ -7,10 +7,12 @@ import random
 import socket
 import threading
 import sys
+import time
 import traceback
 from Scripts.game import OnlineGame, OnlineGameInfo
 import pickle
 import logging
+from Scripts.constants import GAME_ID_MAX, GAME_ID_MIN
 
 if not os.path.exists('./logs'):
     os.mkdir('logs')
@@ -53,35 +55,61 @@ logging.info('Server started, waiting for connection...')
 games: dict[OnlineGameInfo, dict[int, OnlineGame]] = {}
 player_count = 0
 
+
+def get_game_from_id(id_to_search: int, /):
+    for game_info, value in games.items():
+        for game_id, _ in value.items():
+            if id_to_search == game_id:
+                return game_info
+
+
 def new_client(conn: socket.socket):
     global player_count
-    game_info = pickle.loads(conn.recv(2048))
+    game_info: OnlineGameInfo | int = pickle.loads(conn.recv(2048))
     logging.info(f'{game_info = }')
-    if game_info not in games:
-        games[game_info] = {}
+    if isinstance(game_info, OnlineGameInfo):
+        if game_info not in games:
+            games[game_info] = {}
 
-    logging.info('Looking for an available game...')
-    game_id = None
-    for game in games[game_info].values():
-        if not game.available and not game.quit:
-            game_id = game.id
-            break
+        logging.info('Looking for an available game...')
+        game_id = None
+        for game in games[game_info].values():
+            if not game.is_full and not game.quit:
+                game_id = game.id
+                break
 
-    if game_id is None:
-        logging.info('No game found, generating new game id')
-        game_id = random.randint(1000, 9999)
-        while game_id in games[game_info].keys():
-            game_id = random.randint(1000, 9999)
+        if game_id is None:
+            logging.info('No game found, generating new game id')
+            game_id = random.randint(GAME_ID_MIN, GAME_ID_MAX)
+            while game_id in games[game_info].keys():
+                game_id = random.randint(GAME_ID_MIN, GAME_ID_MAX)
 
-    if game_id not in games[game_info]:
-        logging.info(f'Creating new game... {game_id = }')
-        player = 1
-        game = OnlineGame(game_id)
-        games[game_info][game_id] = game
+        if game_id not in games[game_info]:
+            logging.info(f'Creating new game... {game_id = }')
+            player = 1
+            game = OnlineGame(game_id)
+            games[game_info][game_id] = game
+        else:
+            logging.info(f'Existing game found, {game_id = }')
+            game = games[game_info][game_id]
+            player = 2
     else:
-        logging.info(f'Existing game found, {game_id = }')
-        game = games[game_info][game_id]
-        player = 2
+        logging.info(f'Getting game from id...')
+        _game_info = get_game_from_id(game_info)
+        if _game_info is None: # Game does not exist
+            logging.info('Game does not exist')
+            conn.send(pickle.dumps(False))
+            time.sleep(0.5) # Give the client time to respond
+            return
+        else:
+            if games[_game_info][game_info].is_full: # Game is being played
+                logging.info('Game is being played')
+                conn.send(pickle.dumps(True))
+                time.sleep(0.5) # Give the client time to respond
+                return
+            game_id = game_info
+            game_info = _game_info
+            player = 2
 
     logging.info(f'Sending player info... {player = }')
     conn.send(pickle.dumps(player))
@@ -108,11 +136,11 @@ def new_client(conn: socket.socket):
                     games[game_info][game_id].p2_finished = datetime.now()
                     games[game_info][game_id].p2_won = recieved
 
-            logging.info(f'Received: {recieved}')
-            logging.info(f'Sending: {games[game_info][game_id]}')
+            print(f'Received: {recieved}')
+            print(f'Sending: {games[game_info][game_id]}')
 
-            if player == 2 and not games[game_info][game_id].available:
-                games[game_info][game_id].available = True
+            if player == 2 and not games[game_info][game_id].is_full:
+                games[game_info][game_id].is_full = True
 
             conn.sendall(pickle.dumps(games[game_info][game_id]))
         except Exception:

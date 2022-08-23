@@ -34,7 +34,7 @@ class MultiplayerApp(SinglePlayerApp):
         return super().quit_app(*_)
     
     def draw_waiting(self):
-        self.label = Label(self, text='Waiting for player...')
+        self.label = Label(self, text=f'Waiting for player... Game id: {self.online_game.id}')
         self.label.pack(pady=(25, 0))
 
         self.progress_bar = Progressbar(self, mode='indeterminate', length=200)
@@ -52,11 +52,22 @@ class MultiplayerApp(SinglePlayerApp):
         self.settings.add_separator()
         self.settings.add_command(label='Restart connection', command=self.n.restart, accelerator='Ctrl+R')
     
-    def set_waiting_variables(self):
+    def set_waiting_variables(self) -> bool:
         App.set_variables(self)
         while True:
             try:
-                self.n = Network(self.game_info)
+                if self.game_id_state.get() == -1:
+                    self.n = Network(self.game_info)
+                else:
+                    self.n = Network(self.game_id_state.get())
+                    if isinstance(self.n.data, bool): # The server sends a boolean if the game id is not valid
+                        if self.n.data:
+                            logging.error('Game id requested is being played')
+                            messagebox.showerror('Game is being played', 'The game id you requested is being played')
+                        else:
+                            logging.error('Game id requested does not exist')
+                            messagebox.showerror('Game does not exist', 'The game id you requested does not exist')
+                        return False
             except:
                 logging.error(f'There was an error while connecting to the server\n{traceback.format_exc()}')
                 if not messagebox.askretrycancel('Connection error', 'There was an error while connecting to the server'):
@@ -67,10 +78,21 @@ class MultiplayerApp(SinglePlayerApp):
         self.player_left = False
         self.online_game: OnlineGame = self.n.send_data('get')
         self.player = self.n.data
+        return True
     
-    def draw_all(self):
-        super().draw_all()
+    def draw(self):
+        super().draw()
+
         self.play_button.config(command=self.draw_all_waiting)
+        self.play_button.pack_forget()
+
+        self.game_id_state = IntVar()
+
+        Label(self, text='Or, enter a game id below, -1 means it will not use it').pack()
+        Spinbox(self, textvariable=self.game_id_state, width=4, from_=-1, to=constants.GAME_ID_MAX).pack()
+        self.game_id_state.set(-1)
+        self.play_button.pack(pady=(0, 20))
+
         self.title('Multiplayer Game Loader')
     
     def draw_all_waiting(self, *_):
@@ -78,16 +100,31 @@ class MultiplayerApp(SinglePlayerApp):
             return
 
         self.game_info = OnlineGameInfo(self.difficulty.get(), self.mines.get(), self.chord_state.get())
+        logging.info(f'{self.game_id_state.get() = }')
         logging.info('Waiting for player...')
+        if not self.set_waiting_variables():
+            return
         self.clear()
-        self.set_waiting_variables()
         self.draw_waiting()
         self.draw_waiting_menubar()
         self.wait_for_game_mainloop()
     
     def set_keyboard_shorcuts(self):
+        App.set_keyboard_shorcuts(self)
+        bind_widget(self, '<Control-a>', True, func=lambda _: self.chord_state.set(not self.chord_state.get()))
         bind_widget(self, '<Control-r>', all_=True, func=lambda _: self.n.restart())
         bind_widget(self, '<space>', True, self.draw_all_waiting)
+    
+    def validate_game(self, game) -> bool:
+        if (not self.game_id_state.get() > constants.GAME_ID_MIN and
+                self.game_id_state.get() < constants.GAME_ID_MAX and
+                self.game_id_state.get() != -1):
+            messagebox.showerror('Invalid Game Id', f'Game id must be between {constants.GAME_ID_MIN} and {constants.GAME_ID_MAX}')
+            return False
+        elif self.game_id_state.get() == -1:
+            return super().validate_game(game)
+        else:
+            return True
     
     def create_game(self, *_):
         logging.info('Player joined, starting game')
@@ -194,10 +231,10 @@ class MultiplayerApp(SinglePlayerApp):
         if self.connected:
             self.leave_game()
             self.after_cancel(self.after_cancel_code)
-        elif not self.connected and not self.online_game.available:
+        elif not self.connected and not self.online_game.is_full:
             self.online_game = self.n.send_data('get')
             self.progress_bar.step()
-        elif self.online_game.available and not self.connected:
+        elif self.online_game.is_full and not self.connected:
             self.after_cancel(self.after_cancel_code)
             self.create_game()
     
