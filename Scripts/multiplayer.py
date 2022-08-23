@@ -71,8 +71,12 @@ class MultiplayerApp(SinglePlayerApp):
     def draw_all(self):
         super().draw_all()
         self.play_button.config(command=self.draw_all_waiting)
+        self.title('Multiplayer Game Loader')
     
     def draw_all_waiting(self, *_):
+        if not self.validate_game(None):
+            return
+
         self.game_info = OnlineGameInfo(self.difficulty.get(), self.mines.get(), self.chord_state.get())
         logging.info('Waiting for player...')
         self.clear()

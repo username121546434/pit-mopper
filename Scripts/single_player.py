@@ -104,7 +104,7 @@ class SinglePlayerApp(App):
         self.game_size = StringVar(self, f'You game size will be {self.difficulty.get()[0]} rows and {self.difficulty.get()[1]} columns')
     
     def draw_all(self):
-        self.title('Game Loader')
+        self.title('Single Player Game Loader')
         super().draw_all()
     
     def draw(self):
@@ -158,27 +158,30 @@ class SinglePlayerApp(App):
             self.difficulty.set((self.rows.get(), self.cols.get()))
         self.game_size.set(f'Your game size will be {self.difficulty.get()[0]} rows and {self.difficulty.get()[1]} columns')
     
-    def create_game(self, _ = None, game: PickleGame | None = None):
-        zeros_checked = []
+    def validate_game(self, game) -> bool:
         if game is None:
             if self.difficulty.get() == (None, None) or self.difficulty.get() == ('None', 'None'):
                 logging.error('Game size not chosen')
                 messagebox.showerror(title='Game Size not chosen', message='You have not chosen a game size!')
-                return
+                return False
             elif self.difficulty.get() >= (60, 60):
                 logging.warning(f'Size too big {self.difficulty.get()}')
                 messagebox.showwarning(title='Size too big', message='Warning: When the game is a size of 60x60 or above, the expierence might be so laggy it is unplayable.')
             elif self.mines.get() > (self.difficulty.get()[0] * self.difficulty.get()[1]) - 10:
                 logging.error(f'Mines too high, game size {self.difficulty.get()}, mines: {self.mines.get()}')
                 messagebox.showerror(title='Mines too high', message='You have chosen too many mines.')
-                return
+                return False
             elif self.mines.get() == 0 or self.mines.get() < -1:
                 logging.error(f'Mines too low ({self.mines.get()})')
                 messagebox.showerror('Mines too low', 'You cannot have a mine count below 0 with -1 being a special number')
-                return
-            elif self.mines.get() > ((self.difficulty.get()[0] * self.difficulty.get()[1])/2):
-                logging.warning(f'Number of mines high, game size {self.difficulty.get()}, mines: {self.mines.get()}')
-                messagebox.showwarning(title='Number of mines high', message='You have chosen a high amount of mines, so it might take a long time to place them all')
+                return False
+        return True
+    
+    def create_game(self, _ = None, game: PickleGame | None = None):
+        zeros_checked = []
+
+        if not self.validate_game(game):
+            return
 
         self.clear()
         self.title('Pit Mopper')
