@@ -74,6 +74,7 @@ class MultiplayerApp(SinglePlayerApp):
         self.player_left = False
         self.online_game: OnlineGame = self.n.send_data('get')
         self.player = self.n.data
+        self.game_info = self.online_game.game_info
         return True
     
     def draw(self):
@@ -98,6 +99,7 @@ class MultiplayerApp(SinglePlayerApp):
             return
 
         self.game_info = OnlineGameInfo(self.difficulty.get(), self.mines.get(), self.chord_state.get())
+        logging.info(f'{self.game_info = }')
         logging.info(f'{self.game_id_state.get() = }')
         logging.info('Waiting for player...')
         if not self.set_waiting_variables():
@@ -139,7 +141,14 @@ class MultiplayerApp(SinglePlayerApp):
         other_info = Label(self)
         other_info.grid(row=3, column=1)
 
-        grid = ButtonGrid((10, 10), self, row=4, click_random_square=True, dark_mode=self.dark_mode_state.get())
+        grid = ButtonGrid(
+            self.game_info.game_size,
+            num_mines=self.game_info.mine_count,
+            window=self,
+            row=4,
+            click_random_square=True,
+            dark_mode=self.dark_mode_state.get(),
+        )
         self.game = Game(
             grid,
             self_info,

@@ -10,7 +10,8 @@ class ButtonGrid:
     """Creates and stores information of a grid of buttons"""
     __slots__ = ('root', 'dark_mode', 'grid_size', 'num_mines', 'grid')
     def __init__(
-        self, grid_size: tuple[int, int],
+        self,
+        grid_size: tuple[int, int],
         window: Toplevel,
         grid: list[list[PickleSquare]] | None = None,
         dark_mode: bool = False,

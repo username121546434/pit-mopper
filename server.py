@@ -87,7 +87,7 @@ def new_client(conn: socket.socket):
         if game_id not in games[game_info]:
             logging.info(f'Creating new game... {game_id = }')
             player = 1
-            game = OnlineGame(game_id)
+            game = OnlineGame(game_id, game_info)
             games[game_info][game_id] = game
         else:
             logging.info(f'Existing game found, {game_id = }')

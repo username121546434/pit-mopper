@@ -19,9 +19,10 @@ class OnlineGameInfo:
 
 
 class OnlineGame:
-    """Holds data for an online game, this object is constantly passed back and forth between the client and server in a game"""
-    def __init__(self, id) -> None:
-        self.id = id
+    """Holds data for an online game, this object is constantly passed back and forth between the client and server in a multiplayer game"""
+    def __init__(self, game_id, info: OnlineGameInfo) -> None:
+        self.id = game_id
+        self.game_info = info
         self.p1_finished: bool | datetime = False
         self.p2_finished: bool | datetime = False
         self.p1_info = {'timer text': ''}
@@ -63,7 +64,7 @@ class OnlineGame:
     def __repr__(self) -> str:
         items = []
         for prop, value in self.__dict__.items():
-            item = "%s = %r" % (prop, value)
+            item = "%s=%r" % (prop, value)
             items.append(item)
 
         return "%s(%s)" % (self.__class__.__name__, ', '.join(items))
