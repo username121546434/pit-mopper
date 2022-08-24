@@ -4,7 +4,7 @@ from datetime import datetime
 
 if os.name == 'nt':
     # Use the local appdata folder if on Windows
-    APPDATA = os.path.join(os.getenv('LOCALAPPDATA'), 'Pit Mopper')
+    APPDATA: str = os.path.join(os.getenv('LOCALAPPDATA'), 'Pit Mopper')
     # *.xbm is Linux specific, use *.ico instead
     LOGO = "data\\images\\windows_icon.ico"
     DARK_MODE_LOGO = "data\\images\\windows_icon_darkmode.ico"
@@ -13,7 +13,7 @@ if os.name == 'nt':
     SW_SHOW = 5
 else:
     # Otherwise, assume we are are on Linux
-    APPDATA = os.path.join(os.getenv('HOME'), '.pitmopper')
+    APPDATA: str = os.path.join(os.getenv('HOME'), '.pitmopper')
     # *.ico is Windows specific, use *.xbm instead
     # for some reason, on linux the path to the icon has to be prefixed with an "@"
     LOGO = '@' + "data/images/linux_icon.xbm"
@@ -39,6 +39,8 @@ VERSION = '2.0.0-alpha'
 SQUARES_FONT = r"data\fonts\DSEG7ClassicMini-Bold.ttf"
 GAME_ID_MIN = 1000
 GAME_ID_MAX = 9999
+APP_FILE_EXT = '.ptmpr'
+LAST_GAME_FILE = os.path.join(APPDATA, f'last{APP_FILE_EXT}')
 
 dark_mode = False
 del_data = 'none'

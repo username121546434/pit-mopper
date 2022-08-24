@@ -134,7 +134,10 @@ class SinglePlayerApp(App):
         Spinbox(self, textvariable=self.mines, width=4, from_= -1, to = 2000, command=self.change_mines).pack()
 
         self.play_button = Button(self, text='Play!', command=self.create_game)
-        self.play_button.pack(pady=(0, 20))
+        self.play_button.pack()
+
+        self.load_last_button = Button(self, text='Load Last Game', command=lambda: self.load_game(file=constants.LAST_GAME_FILE))
+        self.load_last_button.pack(pady=(0, 20))
 
         if self.dark_mode_state.get():
             self.dark_mode_state.set(True)
@@ -145,6 +148,12 @@ class SinglePlayerApp(App):
         bind_widget(self, '<space>', True, self.create_game)
         bind_widget(self, '<Control-a>', True, func=lambda _: self.chord_state.set(not self.chord_state.get()))
         bind_widget(self, '<Control-h>', True, self.show_highscores)
+    
+    def quit_app(self, *_):
+        if hasattr(self, 'game'):
+            if self.game is not None:
+                self.save_game(constants.LAST_GAME_FILE)
+        super().quit_app()
     
     def change_mines(self):
         self.mines_counter.set(f'Your game will have {self.mines.get()} mines')
@@ -269,7 +278,7 @@ additional_time:       0
         self.menubar.place(x=0, y=0)
         game_menu = SubMenu()
         bind_widget(self, '<Control-s>', True, func=lambda _: self.save_game())
-        bind_widget(self, '<Alt-q>', True, func=lambda _:  [self.clear(), setattr(self.game, 'quit', True), self.draw_all()])
+        bind_widget(self, '<Alt-q>', True, func=lambda _:  [self.save_game(constants.LAST_GAME_FILE), self.clear(), setattr(self.game, 'quit', True), self.draw_all()])
         bind_widget(self, '<Alt-i>', True, func=lambda _: more_info(
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start,  grid.grid_size[0] * grid.grid_size[1]))
         bind_widget(self, '<F11>', all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
@@ -282,7 +291,7 @@ additional_time:       0
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start, grid.grid_size[0] * grid.grid_size[1]),
             accelerator='Alt+I')
         game_menu.add_checkbutton(label='Fullscreen', variable=self.fullscreen_state, accelerator='F11')
-        game_menu.add_command(label='Exit', command=lambda: [self.clear(), setattr(self.game, 'quit', True), self.draw_all()], accelerator='Alt+Q')
+        game_menu.add_command(label='Exit', command=lambda: [self.save_game(constants.LAST_GAME_FILE), self.clear(), setattr(self.game, 'quit', True), self.draw_all()], accelerator='Alt+Q')
 
         self.menubar.add_menu(menu=game_menu, title='Game')
 
@@ -328,7 +337,8 @@ additional_time:       0
         self.fullscreen_state.set(False)
         self.clear()
         self.draw_all()
-        delattr(self, 'game')
+        self.game = None
+        del self.game
     
     def show_highscores(self, *_):
         logging.info('User requested highscores')
@@ -375,18 +385,22 @@ additional_time:       0
     def load_game(self, _=None, file: str|None=None):
         logging.info('Opening game...')
         if file is None:
-            file = filedialog.askopenfilename(filetypes=(('Pit Mopper Game Files', '*.ptmpr'), ('Any File', '*.*')))
-        if not isinstance(file, os.PathLike):
+            file = filedialog.askopenfilename(filetypes=(('Pit Mopper Game Files', f'*{constants.APP_FILE_EXT}'), ('Any File', '*.*')))
+        if not file:
             return
 
         logging.info(f'Reading {file}...')
-        with open(file, 'rb') as f:  # Un Pickling
-            try:
-                data = pickle.load(f)
-            except Exception:
-                messagebox.showerror('Invalid File', 'It seems like this is an invalid file')
-                logging.info(f'Invalid File:\n\n{traceback.format_exc()}')
-                return
+        try:
+            with open(file, 'rb') as f:  # Un Pickling
+                try:
+                    data = pickle.load(f)
+                except Exception:
+                    messagebox.showerror('Invalid File', 'It seems like this is an invalid file')
+                    logging.info(f'Invalid File:\n\n{traceback.format_exc()}')
+                    return
+        except FileNotFoundError:
+            messagebox.showerror('File not found', 'The file does not exist')
+            return
         if not isinstance(data, (PickleGame, dict)):
             messagebox.showerror('Invalid Data', 'It seems like this is a file which has invalid data')
             logging.info(f'Invalid File Data:\n\n{data}')
@@ -438,21 +452,27 @@ additional_time:       0
             if self.game.quit:
                 return True
     
-    def save_game(self):
+    def save_game(self, filename:str=None):
         data = PickleGame.from_game(self.game)
         logging.info(f'''Saving game with the following attributes:
     {data}
     ''')
         logging.info(f'Data to save: {data}')
-        filename = filedialog.asksaveasfilename(filetypes=(('Pit Mopper Game Files', '*.ptmpr'), ('Any File', '*.*')))
+        if filename is None:
+            filename = filedialog.asksaveasfilename(filetypes=(('Pit Mopper Game Files', f'*{constants.APP_FILE_EXT}'), ('Any File', '*.*')))
+            msgboxes = True
+        else:
+            msgboxes = False
         if not filename:
             return
         with open(filename, 'wb') as f:  # Pickling
-            messagebox.showinfo('Save Game', 'You game is being saved right now, this may a few moments. Please wait until another popup comes before closing the game.')
+            if msgboxes:
+                messagebox.showinfo('Save Game', 'You game is being saved right now, this may a few moments. Please wait until another popup comes before closing the game.')
             logging.info('Saving data...')
             pickle.dump(data, f)
             logging.info('Data successfully saved')
-            messagebox.showinfo('Save Game', 'Your game has been saved, you can now close the game.')
+            if msgboxes:
+                messagebox.showinfo('Save Game', 'Your game has been saved, you can now close the game.')
 
 
 def main():

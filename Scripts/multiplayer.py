@@ -80,8 +80,13 @@ class MultiplayerApp(SinglePlayerApp):
         self.player = self.n.data
         return True
     
+    def quit_app(self, *_):
+        return App.quit_app(self)
+    
     def draw(self):
         super().draw()
+
+        self.load_last_button.destroy()
 
         self.play_button.config(command=self.draw_all_waiting)
         self.play_button.pack_forget()
