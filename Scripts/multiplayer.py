@@ -17,10 +17,6 @@ import logging
 init_logger()
 
 
-class DummyGame:
-    available = False
-
-
 class MultiplayerApp(SinglePlayerApp):
     """Subclass of `SinglePlayerApp`"""
     def __init__(self, title: str) -> None:
@@ -31,7 +27,7 @@ class MultiplayerApp(SinglePlayerApp):
             self.n.disconnect()
         except Exception:
             pass
-        return super().quit_app(*_)
+        return App.quit_app(self)
     
     def draw_waiting(self):
         self.label = Label(self, text=f'Waiting for player... Game id: {self.online_game.id}')
@@ -79,9 +75,6 @@ class MultiplayerApp(SinglePlayerApp):
         self.online_game: OnlineGame = self.n.send_data('get')
         self.player = self.n.data
         return True
-    
-    def quit_app(self, *_):
-        return App.quit_app(self)
     
     def draw(self):
         super().draw()
