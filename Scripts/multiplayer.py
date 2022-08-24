@@ -105,7 +105,7 @@ class MultiplayerApp(SinglePlayerApp):
         self.clear()
         self.draw_waiting()
         self.draw_waiting_menubar()
-        self.wait_for_game_mainloop()
+        self.after_cancel_code = self.after(1, self.wait_for_game_mainloop)
     
     def set_keyboard_shorcuts(self):
         App.set_keyboard_shorcuts(self)
@@ -225,7 +225,6 @@ class MultiplayerApp(SinglePlayerApp):
         self.draw_all()
     
     def wait_for_game_mainloop(self):
-        self.after_cancel_code = self.after(10, lambda: self.wait_for_game_mainloop())
         if self.connected:
             self.leave_game()
             self.after_cancel(self.after_cancel_code)
@@ -235,6 +234,7 @@ class MultiplayerApp(SinglePlayerApp):
         elif self.online_game.is_full and not self.connected:
             self.after_cancel(self.after_cancel_code)
             self.create_game()
+        self.after_cancel_code = self.after(10, self.wait_for_game_mainloop)
     
     def leave_waiting(self):
         self.after_cancel(self.after_cancel_code)
