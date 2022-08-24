@@ -41,11 +41,11 @@ if '-s' in sys.argv:
 elif '-m' in sys.argv:
     logging.info('-m command arg given, loading multiplayer...')
     multiplayer.main()
-else:
-    for arg in sys.argv[1:]:
-        if os.path.exists(arg):
-            single_player.main()
-            break
+elif len(sys.argv) > 1:
+    if os.path.exists(sys.argv[1]):
+        single_player.main()
+    elif sys.argv[1].isdigit():
+        multiplayer.main()
 
 window = App('Pit Mopper')
 

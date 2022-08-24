@@ -480,8 +480,8 @@ def main():
 
     window = SinglePlayerApp('Game Loader')
     
-    for arg in sys.argv[1:]:
-        if os.path.exists(arg):
+    if len(sys.argv) > 1:
+        if os.path.exists(sys.argv[1]):
             logging.info('User opened app with a file')
             window.load_game(file=sys.argv[1])
 

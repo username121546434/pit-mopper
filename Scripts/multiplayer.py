@@ -23,10 +23,6 @@ class MultiplayerApp(SinglePlayerApp):
         super().__init__(title)
 
     def quit_app(self, *_):
-        try:
-            self.n.disconnect()
-        except Exception:
-            pass
         return App.quit_app(self)
     
     def draw_waiting(self):
@@ -260,5 +256,9 @@ def main():
     window = MultiplayerApp('Pit Mopper Multiplayer')
 
     logging.info('GUI successfully created')
-    logging.info('Waiting for player...')
+    if len(sys.argv) > 1:
+        if sys.argv[1].isdigit():
+            window.game_id_state.set(int(sys.argv[1]))
+            window.draw_all_waiting()
+
     window.mainloop()
