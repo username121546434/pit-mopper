@@ -219,12 +219,14 @@ class MultiplayerApp(SinglePlayerApp):
             messagebox.showerror('Connection Error', 'It seems that the other player disconnected')
             self.player_left = False
         self.clear()
+        self.after_cancel(self.after_cancel_code)
         self.n.disconnect()
         del self.n
         logging.info('Waiting for new player...')
         self.draw_all()
     
     def wait_for_game_mainloop(self):
+        self.after_cancel_code = self.after(10, self.wait_for_game_mainloop)
         if self.connected:
             self.leave_game()
             self.after_cancel(self.after_cancel_code)
@@ -234,7 +236,6 @@ class MultiplayerApp(SinglePlayerApp):
         elif self.online_game.is_full and not self.connected:
             self.after_cancel(self.after_cancel_code)
             self.create_game()
-        self.after_cancel_code = self.after(10, self.wait_for_game_mainloop)
     
     def leave_waiting(self):
         self.after_cancel(self.after_cancel_code)
