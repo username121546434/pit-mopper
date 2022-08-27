@@ -33,12 +33,7 @@ class Network:
             self.send_data('disconnect')
         except Exception:
             pass
-
-    def restart(self):
-        init_logger()
-        logging.info('Restarting connection...')
-        self.disconnect()
-        time.sleep(1) # Wait for the server to respond to the disconnect
+        time.sleep(0.5) # Wait for the server to respond to the disconnect
 
         # Ideally, the server would have closed the conection for us,
         # but just in case it didn't, we manually leave below
@@ -46,6 +41,11 @@ class Network:
             self.client.close()
         except Exception:
             pass
+
+    def restart(self):
+        init_logger()
+        logging.info('Restarting connection...')
+        self.disconnect()
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect()
 

@@ -214,11 +214,13 @@ class MultiplayerApp(SinglePlayerApp):
                 if self.online_game == 'restart':
                     self.player_left = True
                     break
-        self.leave_game()
+        if self.connected:
+            self.leave_game()
     
     def leave_game(self):
         self.game.quit = True
         self.fullscreen_state.set(False)
+        self.connected = False
         if self.player_left:
             logging.error('It seems like the player has disconnected')
             messagebox.showerror('Connection Error', 'It seems that the other player disconnected')
