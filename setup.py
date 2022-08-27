@@ -14,11 +14,21 @@ executables = [Executable(
 )]
 
 packages = [
-    'html.parser'
+    'html.parser' # Required by the markdown library
 ]
-include_files = [
-    './Scripts/data'
-]
+
+if os.name == 'nt':
+    include_files = [
+        ('./Scripts/data/fonts', 'data/fonts'),
+        ('./Scripts/data/images/windows_icon.ico', 'data/images/windows_icon.ico'),
+        ('./Scripts/data/images/windows_icon_darkmode.ico', 'data/images/windows_icon_darkmode.ico'),
+    ]
+else:
+    include_files = [
+        ('./Scripts/data/images/linux_logo.xbm', 'data/images/linux_logo.xbm'),
+        ('./Scripts/data/images/linux_logo_darkmode.xbm', 'data/images/linux_logo_darkmode.xbm')
+    ]
+
 options = {
     'build_exe': {
         'packages':packages,
