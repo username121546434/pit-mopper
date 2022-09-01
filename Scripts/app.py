@@ -193,21 +193,23 @@ class App(Tk):
             for square in row
             if square.clicked_on
         ]
-
         squares_not_clicked_on = [
             square
             for row in self.game.grid.grid
             for square in row
             if square.clicked_on == False
         ]
+
         if constants.APP_CLOSED:
             try:
                 self.destroy()
             except TclError:
                 pass
             return
+
         now = datetime.now()
         now = now.replace(microsecond=0)
+
         if now > self.game.previous_sec:
             self.game.previous_sec = now
             self.game.seconds = (now - self.game.session_start).total_seconds() + self.game.additional_time
@@ -216,6 +218,7 @@ class App(Tk):
                 self.game.total_time.set(f'Time: {format_second(self.game.seconds)}  🚩 {len(squares_flaged)}/{self.game.num_mines} 💣 ({percent}%)')
             else:
                 self.game.total_time.set(f'You: 🚩 {len(squares_flaged)}/{self.game.num_mines} 💣 ({percent}%)')
+
         for row in self.game.grid.iter_rows():
             # Clicks Zeros
             for square in (square for square in row if (square.num == None) and (square.clicked_on) and (square not in self.game.zeros_checked) and (square.category != 'mine')):
@@ -251,6 +254,7 @@ class App(Tk):
                         for square2 in (square for square in self.game.grid.around_square(*square.position) if not square.clicked_on and square.category != 'mine'):
                             square2.clicked()
                         square.chord = False
+
         squares_clicked_on = [
             square
             for row in self.game.grid.grid
@@ -274,6 +278,7 @@ class App(Tk):
             for row in self.game.grid.grid
             for square in row
         ]
+
         # Counts mines found
         for square in (square for square in squares_flaged if square.category == 'mine'):
             self.game.mines_found += 1
@@ -292,6 +297,7 @@ class App(Tk):
         else:
             game_over = False
             win = False
+
         if game_over:
             self.game.mines_found = 0
             for square, _ in self.game.grid.iter_squares():
@@ -303,6 +309,7 @@ class App(Tk):
                 elif square.num != None and square.cget('text') == '🚩':
                     square.config(text='❌')
             self.game.quit = True
+
         self.game.result = {'seconds': self.game.seconds, 'win': win, 'game over': game_over}
         self.update()
 
