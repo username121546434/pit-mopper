@@ -11,6 +11,7 @@ from tkinter.ttk import Progressbar
 from .squares import Square
 from datetime import datetime
 import os
+from .enums import KBDShortcuts
 from .game import Game
 
 
@@ -54,11 +55,11 @@ class App(Tk):
     
     def set_keyboard_shorcuts(self):
         # Keyboard Shortcuts
-        bind_widget(self, '<Control-i>', True, lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {constants.VERSION}'))
-        bind_widget(self, '<Control-u>', True, lambda _: check_for_updates(self.quit_app))
-        bind_widget(self, '<Control-q>', True, self.quit_app)
-        bind_widget(self, '<Control-d>', True, lambda _: self.dark_mode_state.set(not self.dark_mode_state.get()))
-        bind_widget(self, '<Control-x>', True, lambda _: self.console_open.set(not self.console_open.get()))
+        bind_widget(self, KBDShortcuts.version_info, True, lambda _: messagebox.showinfo(title='Version Info', message=f'Pit Mopper Version: {constants.VERSION}'))
+        bind_widget(self, KBDShortcuts.check_for_updates, True, lambda _: check_for_updates(self.quit_app))
+        bind_widget(self, KBDShortcuts.quit_app, True, self.quit_app)
+        bind_widget(self, KBDShortcuts.toggle_theme, True, lambda _: self.dark_mode_state.set(not self.dark_mode_state.get()))
+        bind_widget(self, KBDShortcuts.toggle_console, True, lambda _: self.console_open.set(not self.console_open.get()))
     
     def draw_menubar(self):
         # create a menubar
@@ -67,20 +68,20 @@ class App(Tk):
 
         # create the file_menu
         self.file_menu = SubMenu()
-        self.file_menu.add_command(label='Exit', command=self.quit_app, accelerator='Ctrl+Q')
+        self.file_menu.add_command(label='Exit', command=self.quit_app, accelerator=format_kbd_shortcut(KBDShortcuts.quit_app))
 
         self.settings = SubMenu()
-        self.settings.add_checkbutton(variable=self.dark_mode_state, label='Dark Mode', accelerator='Ctrl+D')
+        self.settings.add_checkbutton(variable=self.dark_mode_state, label='Dark Mode', accelerator=format_kbd_shortcut(KBDShortcuts.toggle_theme))
         self.settings.add_separator()
-        self.settings.add_command(label='Check for Updates', command=partial(check_for_updates, self.quit_app), accelerator='Ctrl+U')
-        self.settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Pit Mopper Version: {constants.VERSION}'), accelerator='Ctrl+I')
+        self.settings.add_command(label='Check for Updates', command=partial(check_for_updates, self.quit_app), accelerator=format_kbd_shortcut(KBDShortcuts.check_for_updates))
+        self.settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Pit Mopper Version: {constants.VERSION}'), accelerator=format_kbd_shortcut(KBDShortcuts.version_info))
         self.settings.add_separator()
         self.settings.add_command(label='Delete all data', command=clear_all_data)
         self.settings.add_command(label='Delete Debug Logs', command=clear_debug)
         self.settings.add_command(label='Delete Highscore', command=clear_highscore)
 
         self.advanced = SubMenu()
-        self.advanced.add_checkbutton(label='Console', variable=self.console_open, accelerator='Ctrl+X')
+        self.advanced.add_checkbutton(label='Console', variable=self.console_open, accelerator=format_kbd_shortcut(KBDShortcuts.toggle_console))
         self.menubar.add_menu(menu=self.file_menu, title='File')
         self.menubar.add_menu(menu=self.settings, title='Settings')
         self.menubar.add_menu(menu=self.advanced, title='Advanced')

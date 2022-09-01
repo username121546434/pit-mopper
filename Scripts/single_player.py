@@ -18,6 +18,7 @@ from .grid import ButtonGrid
 from .functions import *
 from .app import App
 from .game import Game, PickleGame
+from .enums import KBDShortcuts
 
 
 def more_info(
@@ -88,10 +89,10 @@ class SinglePlayerApp(App):
     def draw_menubar(self):
         super().draw_menubar()
         self.file_menu.add_separator()
-        self.file_menu.add_command(label='Open File', command=self.load_game, accelerator='Ctrl+O')
-        self.file_menu.add_command(label='Highscores', command=self.show_highscores, accelerator='Ctrl+H')
+        self.file_menu.add_command(label='Open File', command=self.load_game, accelerator=format_kbd_shortcut(KBDShortcuts.open_file))
+        self.file_menu.add_command(label='Highscores', command=self.show_highscores, accelerator=format_kbd_shortcut(KBDShortcuts.show_highscores))
         self.settings.add_separator()
-        self.settings.add_checkbutton(variable=self.chord_state, label='Enable Chording', accelerator='Ctrl+A')
+        self.settings.add_checkbutton(variable=self.chord_state, label='Enable Chording', accelerator=format_kbd_shortcut(KBDShortcuts.toggle_chording))
     
     def set_variables(self):
         super().set_variables()
@@ -144,10 +145,10 @@ class SinglePlayerApp(App):
     
     def set_keyboard_shorcuts(self):
         super().set_keyboard_shorcuts()
-        bind_widget(self, '<Control-o>', True, self.load_game)
-        bind_widget(self, '<space>', True, self.create_game)
-        bind_widget(self, '<Control-a>', True, func=lambda _: self.chord_state.set(not self.chord_state.get()))
-        bind_widget(self, '<Control-h>', True, self.show_highscores)
+        bind_widget(self, KBDShortcuts.open_file, True, self.load_game)
+        bind_widget(self, KBDShortcuts.start_game, True, self.create_game)
+        bind_widget(self, KBDShortcuts.toggle_chording, True, func=lambda _: self.chord_state.set(not self.chord_state.get()))
+        bind_widget(self, KBDShortcuts.show_highscores, True, self.show_highscores)
     
     def quit_app(self, *_):
         if hasattr(self, 'game'):
@@ -277,21 +278,21 @@ additional_time:       0
         self.menubar = CustomMenuBar(self)
         self.menubar.place(x=0, y=0)
         game_menu = SubMenu()
-        bind_widget(self, '<Control-s>', True, func=lambda _: self.save_game())
-        bind_widget(self, '<Alt-q>', True, func=lambda _:  [self.save_game(constants.LAST_GAME_FILE), self.clear(), setattr(self.game, 'quit', True), self.draw_all()])
-        bind_widget(self, '<Alt-i>', True, func=lambda _: more_info(
+        bind_widget(self, KBDShortcuts.save_file, True, func=lambda _: self.save_game())
+        bind_widget(self, KBDShortcuts.quit_game, True, func=lambda _:  [self.save_game(constants.LAST_GAME_FILE), self.clear(), setattr(self.game, 'quit', True), self.draw_all()])
+        bind_widget(self, KBDShortcuts.game_info, True, func=lambda _: more_info(
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start,  grid.grid_size[0] * grid.grid_size[1]))
-        bind_widget(self, '<F11>', all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
-        bind_widget(self, '<Control-d>', all_=True, func=lambda *_: self.dark_mode_state.set(not self.dark_mode_state.get()))
+        bind_widget(self, KBDShortcuts.fullscreen, all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
+        bind_widget(self, KBDShortcuts.toggle_theme, all_=True, func=lambda *_: self.dark_mode_state.set(not self.dark_mode_state.get()))
 
-        game_menu.add_checkbutton(label='Dark Mode', accelerator='Ctrl+D', variable=self.dark_mode_state)
+        game_menu.add_checkbutton(label='Dark Mode', accelerator=format_kbd_shortcut(KBDShortcuts.toggle_theme), variable=self.dark_mode_state)
         game_menu.add_separator()
-        game_menu.add_command(label='Save As', accelerator='Ctrl+S', command=self.save_game)
+        game_menu.add_command(label='Save As', accelerator=format_kbd_shortcut(KBDShortcuts.save_file), command=self.save_game)
         game_menu.add_command(label='More Info', command=lambda: more_info(
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start, grid.grid_size[0] * grid.grid_size[1]),
-            accelerator='Alt+I')
-        game_menu.add_checkbutton(label='Fullscreen', variable=self.fullscreen_state, accelerator='F11')
-        game_menu.add_command(label='Exit', command=lambda: [self.save_game(constants.LAST_GAME_FILE), self.clear(), setattr(self.game, 'quit', True), self.draw_all()], accelerator='Alt+Q')
+            accelerator=format_kbd_shortcut(KBDShortcuts.game_info))
+        game_menu.add_checkbutton(label='Fullscreen', variable=self.fullscreen_state, accelerator=format_kbd_shortcut(KBDShortcuts.fullscreen))
+        game_menu.add_command(label='Exit', command=lambda: [self.save_game(constants.LAST_GAME_FILE), self.clear(), setattr(self.game, 'quit', True), self.draw_all()], accelerator=format_kbd_shortcut(KBDShortcuts.quit_game))
 
         self.menubar.add_menu(menu=game_menu, title='Game')
 

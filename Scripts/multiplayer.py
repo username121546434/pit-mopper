@@ -10,6 +10,7 @@ from .game import Game, OnlineGame, OnlineGameInfo
 from tkinter import *
 from . import constants
 from .functions import *
+from .enums import KBDShortcuts
 from .console_window import get_console
 get_console()
 from .base_logger import init_logger
@@ -42,7 +43,7 @@ class MultiplayerApp(SinglePlayerApp):
     def draw_waiting_menubar(self):
         self.draw_menubar()
         self.settings.add_separator()
-        self.settings.add_command(label='Restart connection', command=self.n.restart, accelerator='Ctrl+R')
+        self.settings.add_command(label='Restart connection', command=self.n.restart, accelerator=format_kbd_shortcut(KBDShortcuts.reset_connection))
     
     def set_waiting_variables(self) -> bool:
         App.set_variables(self)
@@ -107,9 +108,9 @@ class MultiplayerApp(SinglePlayerApp):
     
     def set_keyboard_shorcuts(self):
         App.set_keyboard_shorcuts(self)
-        bind_widget(self, '<Control-a>', True, func=lambda _: self.chord_state.set(not self.chord_state.get()))
-        bind_widget(self, '<Control-r>', all_=True, func=lambda _: self.n.restart())
-        bind_widget(self, '<space>', True, self.draw_all_waiting)
+        bind_widget(self, KBDShortcuts.toggle_chording, True, func=lambda _: self.chord_state.set(not self.chord_state.get()))
+        bind_widget(self, KBDShortcuts.reset_connection, all_=True, func=lambda _: self.n.restart())
+        bind_widget(self, KBDShortcuts.start_game, True, self.draw_all_waiting)
     
     def validate_game(self, game) -> bool:
         if (not self.game_id_state.get() > constants.GAME_ID_MIN and
@@ -157,15 +158,15 @@ class MultiplayerApp(SinglePlayerApp):
         self.menubar = CustomMenuBar(self)
         self.menubar.place(x=0, y=0)
         game_menu = SubMenu()
-        game_menu.add_checkbutton(label='Dark Mode', accelerator='Ctrl+D', variable=self.dark_mode_state)
+        game_menu.add_checkbutton(label='Dark Mode', accelerator=format_kbd_shortcut(KBDShortcuts.toggle_theme), variable=self.dark_mode_state)
         game_menu.add_separator()
-        game_menu.add_checkbutton(label='Full Screen', accelerator='F11', variable=self.fullscreen_state)
-        game_menu.add_command(label='Leave', accelerator='Alt+Q', command=self.leave_game)
+        game_menu.add_checkbutton(label='Full Screen', accelerator=format_kbd_shortcut(KBDShortcuts.fullscreen), variable=self.fullscreen_state)
+        game_menu.add_command(label='Leave', accelerator=format_kbd_shortcut(KBDShortcuts.quit_game), command=self.leave_game)
         self.menubar.add_menu('Game', game_menu)
 
-        bind_widget(self, '<Alt-q>', all_=True, func=lambda _: self.leave_game())
-        bind_widget(self, '<F11>', all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
-        bind_widget(self, '<Control-d>', all_=True, func=lambda *_: self.dark_mode_state.set(not self.dark_mode_state.get()))
+        bind_widget(self, KBDShortcuts.quit_game, all_=True, func=lambda _: self.leave_game())
+        bind_widget(self, KBDShortcuts.fullscreen, all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
+        bind_widget(self, KBDShortcuts.toggle_theme, all_=True, func=lambda *_: self.dark_mode_state.set(not self.dark_mode_state.get()))
 
         if self.dark_mode_state.get():
             self._change_theme()

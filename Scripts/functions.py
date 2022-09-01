@@ -9,6 +9,7 @@ import pyperclip
 import logging
 from .base_logger import init_logger
 import webbrowser
+from .enums import KBDShortcuts
 
 
 def handle_exception(exc_type, exc_value, exc_traceback):
@@ -88,7 +89,7 @@ def clear_highscore():
         messagebox.showinfo('Delete Data', 'As soon as you close Pit Mopper, the your highscores will be deleted')
 
 
-def bind_widget(widget: Widget, event, all_:bool=False, func=None):
+def bind_widget(widget: Widget, event: str|KBDShortcuts, all_:bool=False, func=None):
     """
     Set or retrieve the binding for an event on a widget
     taken from https://stackoverflow.com/a/226141/19581763
@@ -96,6 +97,9 @@ def bind_widget(widget: Widget, event, all_:bool=False, func=None):
     has_binding_key = hasattr(widget, 'bindings')
     if not has_binding_key:
         setattr(widget, 'bindings', dict())
+
+    if not isinstance(event, str):
+        event = event.value
 
     if func:
         if not all_:
@@ -111,8 +115,8 @@ def bug_report():
     """Called when an unknown error occurs, and the user accepts the bug report messagebox"""
     new_window = Toplevel()
     new_window.config(padx=20, pady=20)
-    func = bind_widget(new_window.master, '<space>')
-    new_window.master.unbind_all('<space>')
+    func = bind_widget(new_window.master, KBDShortcuts.start_game)
+    new_window.master.unbind_all(KBDShortcuts.start_game.value)
 
     Label(new_window, text='Enter a description of what happenned below, also include information about which platform you are on etc').pack()
     description = Text(new_window, width=1, height=1)
@@ -121,7 +125,7 @@ def bug_report():
     Button(new_window, text='Continue', command=lambda: make_github_issue(body=description.get('1.0', 'end'))).pack()
     new_window.master.wait_window(new_window)
     if func is not None:
-        new_window.master.bind_all('<space>', func)
+        new_window.master.bind_all(KBDShortcuts.start_game.value, func)
 
 
 def make_github_issue(body=None):
@@ -154,3 +158,10 @@ Full Traceback:
     messagebox.showinfo('Bug Report', 'As soon as you press OK, you will be directed to a link where you can report this bug and an auto generated issue will be copied to your clipboard')
     pyperclip.copy(body)
     webbrowser.open('https://github.com/username121546434/pit-mopper/issues/new')
+
+
+def format_kbd_shortcut(shortcut: KBDShortcuts) -> str:
+    """
+    Takes a tkinter binding like `<Control-a>` and turns it into something like `Control-A`
+    """
+    return shortcut.value[1:-1].title()
