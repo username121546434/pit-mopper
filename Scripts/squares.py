@@ -63,6 +63,8 @@ class Square(Button):
         functions.bind_widget(self, '<Button-1>', func=self.clicked)
         functions.bind_widget(self, '<Button-2>', func=self.chord_self)
         functions.bind_widget(self, '<Button-3>', func=self.flag)
+        functions.bind_widget(self, '<Control-1>', func=self.flag)
+        functions.bind_widget(self, '<Alt-1>', func=self.chord_self)
         functions.bind_widget(self, '<Enter>', func=self.hover_enter)
         functions.bind_widget(self, '<Leave>', func=self.hover_leave)
 
