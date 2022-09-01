@@ -86,6 +86,7 @@ class App(Tk):
         self.menubar.add_menu(menu=self.advanced, title='Advanced')
     
     def draw(self):
+        """This is supposed to be overridden by subclasses"""
         pass
     
     def quit_app(self, *_):
@@ -142,6 +143,7 @@ class App(Tk):
         self._change_theme()
 
     def _change_theme(self):
+        """Does the same thing that `change_theme` does but without logging messages"""
         CURRENT_BG = constants.CURRENT_BG
         CURRENT_FG = constants.CURRENT_FG
         self.config(bg=CURRENT_BG)
@@ -180,6 +182,7 @@ class App(Tk):
         self.bindings = {}
 
     def _update_game(self):
+        """Updates one frame of the game, this is called over and over again"""
         self.game: Game
         squares_flaged = [
             square
