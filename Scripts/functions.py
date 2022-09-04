@@ -162,6 +162,6 @@ Full Traceback:
 
 def format_kbd_shortcut(shortcut: KBDShortcuts) -> str:
     """
-    Takes a tkinter binding like `<Control-a>` and turns it into something like `Control-A`
+    Takes a tkinter binding like `<Control-a>` and turns it into something like `Ctrl+A`
     """
-    return shortcut.value[1:-1].title()
+    return shortcut.value[1:-1].lower().replace('control', 'Ctrl').replace('-', '+').title()
