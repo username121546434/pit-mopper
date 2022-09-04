@@ -2,10 +2,12 @@
 import tkinter as tk
 from tkinter import ttk
 
+TABWIDTH = len('\t'.expandtabs())
+
 
 def pad_with_tabs(s,maxlen):
     # https://stackoverflow.com/a/1746241/19581763
-    return s + "\t" * int((maxlen-len(s)-1)/8+1)
+    return s + "\t" * int((maxlen-len(s)-1)/TABWIDTH+1)
 
 
 class SubMenu:
