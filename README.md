@@ -15,13 +15,13 @@ Pit Mopper is a game based on "Minesweeper" that was built in python.
 
 #### Root Directory
 
-| Path To File      | Purpose                                                                                   |
-| ----------------- | ----------------------------------------------------------------------------------------- |
-| ./Pit Mopper.py   | Main Python file, run it to play the game                                                 |
-| ./setup.py        | Python Script which compiles program to an EXE                                            |
-| ./server.py       | Going to be the server for online multiplayer games                                       |
-| ./requirments.txt | List of modules required. Simply use `pip install -r requirments.txt` to install them all |
-| ./LICENSE.txt     | The License for Pit Mopper                                                                |
+| Path To File       | Purpose                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| ./Pit Mopper.py    | Main Python file, run it to play the game                                                  |
+| ./setup.py         | Python Script which compiles program to an EXE                                             |
+| ./server.py        | Going to be the server for online multiplayer games                                        |
+| ./requirements.txt | List of modules required. Simply use `pip install -r requirements.txt` to install them all |
+| ./LICENSE.txt      | The License for Pit Mopper                                                                 |
 
 #### Scripts Directory
 
