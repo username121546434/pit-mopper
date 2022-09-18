@@ -1,7 +1,7 @@
 from __future__ import annotations
 from datetime import datetime
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 from .grid import PickleButtonGrid, ButtonGrid
 
 
@@ -85,7 +85,7 @@ class Game:
     previous_sec: datetime = field(default_factory=datetime.now)
     with_time: bool = True
     quit: bool = False
-    result: dict = field(default_factory=dict)
+    result: dict[Literal['game over', 'seconds', 'win'], str | int | bool] = field(default_factory=dict)
     seconds: int = 0
     start: datetime = field(default_factory=datetime.now)
 
