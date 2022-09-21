@@ -29,12 +29,10 @@ class SubMenu:
         for label in self.parent._lb_list:
             if label.menu._open:
                 if label.menu is self:
-                    self._popup.destroy()
-                    self._open = False
+                    self.destroy()
                     return
                 else:
-                    label.menu._popup.destroy()
-                    label.menu._open = False
+                    label.menu.destroy()
         if not self._open:
             x, y, height = self.label.winfo_rootx(), self.label.winfo_rooty(), self.label.winfo_height()
 
