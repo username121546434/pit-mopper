@@ -129,14 +129,14 @@ class MultiplayerApp(SinglePlayerApp):
         self.connected = True
         self.title('Pit Mopper Multiplayer')
 
-        timer = Label(self, text='Time: 0:00')
-        timer.grid(row=1, column=1)
+        self.game_timer = Label(self, text='Time: 0:00')
+        self.game_timer.grid(row=1, column=1)
 
-        self_info = StringVar(self)
-        Label(self, textvariable=self_info).grid(row=2, column=1)
+        self.self_info = StringVar(self)
+        Label(self, textvariable=self.self_info).grid(row=2, column=1)
 
-        other_info = Label(self)
-        other_info.grid(row=3, column=1)
+        self.other_info = Label(self)
+        self.other_info.grid(row=3, column=1)
 
         grid = ButtonGrid(
             self.game_info.game_size,
@@ -148,13 +148,14 @@ class MultiplayerApp(SinglePlayerApp):
         )
         self.game = Game(
             grid,
-            self_info,
+            self.self_info,
             datetime.now(),
             [],
             grid.num_mines,
             chording=self.game_info.chording,
             with_time=False
         )
+
         self.menubar = CustomMenuBar(self)
         self.menubar.place(x=0, y=0)
         game_menu = SubMenu()
@@ -171,63 +172,78 @@ class MultiplayerApp(SinglePlayerApp):
         if self.dark_mode_state.get():
             self._change_theme()
 
-        self._update_game()
-        while True:
-            if constants.APP_CLOSED:
-                sys.exit()
-            if self.online_game.quit:
-                self.player_left = True
-                break
-            if self.online_game.game_is_tie():
-                messagebox.showinfo('Game Results', f'The game ended with a tie!\nTime taken: {format_second(self.game.result["seconds"])}')
-                logging.info('Game Over, ended in a tie')
-                break
-            elif self.online_game.player_who_won() == self.player:
-                messagebox.showinfo('Game Results', f'You won the game!\nTime taken: {format_second(self.game.result["seconds"])}')
-                logging.info('Game Over, ended in a victory')
-                break
-            elif self.online_game.player_who_won() != 12 and self.online_game.player_who_won() != None and self.online_game.player_who_won() != self.player:
-                messagebox.showinfo('Game Results', f'You lost the game :( Better luck next time!\nTime taken: {format_second(self.game.result["seconds"])}')
-                logging.info('Game Over, ended in a loss')
-                break
-            self._update_game()
-            if constants.APP_CLOSED:
-                sys.exit()
-            try:
-                if self.player == 2:
-                    other_info.config(text=f'Oponent: {self.online_game.p1_info["timer text"]}')
-                else:
-                    other_info.config(text=f'Oponent: {self.online_game.p2_info["timer text"]}')
-            except TclError: # Game left using menubar or Alt + Q
-                break
-            timer.config(text=f'Time: {format_second(self.game.result["seconds"])}')
-            if self.game.result['game over']:
-                reply = self.game.result['win']
-            else:
-                reply = {'timer text': self_info.get()[4:]}
-            try:
-                self.online_game = self.n.send_data(reply)
-            except Exception:
-                logging.error(f'Error while sending data\n{traceback.format_exc()}')
-                if messagebox.askokcancel('Connection Error', 'There was an error while sending data, would you like to leave the game?'):
-                    break
-            else:
-                if self.online_game == 'restart':
-                    self.player_left = True
-                    break
-        if self.connected:
+        self._game()
+    
+    def _game(self):
+        self.game_over = BooleanVar(self, name='game_over')
+        self.game_after_cancel = self.after(50, self._update_game)
+        self.wait_variable('game_over')
+
+    def _update_game(self):
+        super()._update_game(after=False)
+
+        if self.online_game.quit:
+            self.player_left = True
+            self.game.quit = True
             self.leave_game()
+            return
+        if self.online_game.game_is_tie():
+            messagebox.showinfo('Game Results', f'The game ended with a tie!\nTime taken: {format_second(self.game.result["seconds"])}')
+            logging.info('Game Over, ended in a tie')
+            self.game.quit = True
+            self.leave_game()
+            return
+        elif self.online_game.player_who_won() == self.player:
+            messagebox.showinfo('Game Results', f'You won the game!\nTime taken: {format_second(self.game.result["seconds"])}')
+            logging.info('Game Over, ended in a victory')
+            self.game.quit = True
+            self.leave_game()
+            return
+        elif self.online_game.player_who_won() != 12 and self.online_game.player_who_won() != None and self.online_game.player_who_won() != self.player:
+            messagebox.showinfo('Game Results', f'You lost the game :( Better luck next time!\nTime taken: {format_second(self.game.result["seconds"])}')
+            logging.info('Game Over, ended in a loss')
+            self.game.quit = True
+            self.leave_game()
+            return
+
+        if self.player == 2:
+            self.other_info.config(text=f'Oponent: {self.online_game.p1_info["timer text"]}')
+        else:
+            self.other_info.config(text=f'Oponent: {self.online_game.p2_info["timer text"]}')
+
+        self.game_timer.config(text=f'Time: {format_second(self.game.result["seconds"])}')
+        if self.game.result['game over']:
+            reply = self.game.result['win']
+        else:
+            reply = {'timer text': self.self_info.get()[4:]}
+
+        try:
+            self.online_game = self.n.send_data(reply)
+        except Exception:
+            logging.error(f'Error while sending data\n{traceback.format_exc()}')
+            if messagebox.askokcancel('Connection Error', 'There was an error while sending data, would you like to leave the game?'):
+                self.game.quit = True
+                self.leave_game()
+                return
+        else:
+            if self.online_game == 'restart':
+                self.player_left = True
+                self.leave_game()
+                return
+
+        self.game_after_cancel = self.after(50, self._update_game)
     
     def leave_game(self):
-        self.game.quit = True
+        self.after_cancel(self.game_after_cancel)
+        self.game_over.set(True)
         self.fullscreen_state.set(False)
+        self.game = None
         self.connected = False
         if self.player_left:
             logging.error('It seems like the player has disconnected')
             messagebox.showerror('Connection Error', 'It seems that the other player disconnected')
             self.player_left = False
         self.clear()
-        self.after_cancel(self.after_cancel_code)
         self.n.disconnect()
         del self.n
         logging.info('Waiting for new player...')

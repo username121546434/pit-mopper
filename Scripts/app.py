@@ -182,7 +182,7 @@ class App(Tk):
             self.unbind_all(event)
         self.bindings = {}
 
-    def _update_game(self):
+    def _update_game(self, after: bool=True):
         """
         Updates one frame of the game, this is called over and over again
         
@@ -316,5 +316,5 @@ class App(Tk):
 
         self.game.result = {'seconds': self.game.seconds, 'win': win, 'game over': game_over}
         self.update()
-        if not self.game.quit:
+        if not self.game.quit and after:
             self.after(50, self._update_game)
