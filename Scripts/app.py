@@ -208,13 +208,6 @@ class App(Tk):
             if square.clicked_on == False
         ]
 
-        if constants.APP_CLOSED:
-            try:
-                self.destroy()
-            except TclError:
-                pass
-            return
-
         now = datetime.now()
         now = now.replace(microsecond=0)
 
