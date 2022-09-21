@@ -300,7 +300,7 @@ additional_time:       0
         if self.dark_mode_state.get():
             self.dark_mode_state.set(True)
 
-        result = self._game(
+        self._game(
             game,
             grid,
             session_start,
@@ -310,8 +310,6 @@ additional_time:       0
             chording,
             mines_found,
         )
-        if not result:
-            return
         win = self.game.result['win']
         seconds = self.game.result['seconds']
         mines_found = self.game.mines_found
@@ -446,11 +444,9 @@ additional_time:       0
             )
         else:
             self.game = game.to_game(total_time, self)
-        self.after(50, self._update_game())
-        while True:
-            self.after(50, self._update_game())
-            if self.game.quit:
-                return True
+        self.game_over = BooleanVar(self, name='game_over')
+        self.after(50, self._update_game)
+        self.wait_variable('game_over')
     
     def save_game(self, filename:str=None):
         data = PickleGame.from_game(self.game)

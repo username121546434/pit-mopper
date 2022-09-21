@@ -188,7 +188,9 @@ class App(Tk):
         
         Most of the game logic can be found here
         """
+        # Type hints
         self.game: Game
+        self.game_over: BooleanVar
         squares_flaged = [
             square
             for row in self.game.grid.grid
@@ -310,7 +312,9 @@ class App(Tk):
                 elif square.num != None and square.cget('text') == '🚩':
                     square.config(text='❌')
             self.game.quit = True
+            self.game_over.set(True)
 
         self.game.result = {'seconds': self.game.seconds, 'win': win, 'game over': game_over}
         self.update()
-
+        if not self.game.quit:
+            self.after(50, self._update_game)
