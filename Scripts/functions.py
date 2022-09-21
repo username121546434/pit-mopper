@@ -89,6 +89,13 @@ def clear_highscore():
         messagebox.showinfo('Delete Data', 'As soon as you close Pit Mopper, the your highscores will be deleted')
 
 
+def clear_last_game():
+    if messagebox.askyesno('Delete Data', 'Are you sure you want to delete your last game?'):
+        logging.info('Requested to delete last game')
+        os.remove(constants.LAST_GAME_FILE)
+        messagebox.showinfo('Delete Data', 'Data has been deleted')
+
+
 def bind_widget(widget: Widget, event: str|KBDShortcuts, all_:bool=False, func=None):
     """
     Set or retrieve the binding for an event on a widget

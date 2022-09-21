@@ -77,6 +77,7 @@ class App(Tk):
         self.advanced.add_command(label='Delete all data', command=clear_all_data)
         self.advanced.add_command(label='Delete Debug Logs', command=clear_debug)
         self.advanced.add_command(label='Delete Highscore', command=clear_highscore)
+        self.advanced.add_command(label='Delete Last Game', command=clear_last_game)
 
         self.menubar.add_menu(menu=self.file_menu, title='File')
         self.menubar.add_menu(menu=self.settings, title='Settings')
