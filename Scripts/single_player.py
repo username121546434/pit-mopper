@@ -5,12 +5,8 @@ from tkinter import *
 import os
 from datetime import datetime
 from tkinter import filedialog, messagebox
-
 from .custom_menubar import CustomMenuBar, SubMenu
-
 from . import constants
-from .console_window import get_console
-get_console()
 from .base_logger import init_logger
 init_logger()
 from .squares import Square

@@ -11,8 +11,6 @@ from tkinter import *
 from . import constants
 from .functions import *
 from .enums import KBDShortcuts
-from .console_window import get_console
-get_console()
 from .base_logger import init_logger
 import logging
 init_logger()

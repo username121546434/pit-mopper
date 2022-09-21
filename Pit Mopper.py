@@ -6,10 +6,8 @@ from tkinter import messagebox
 from Scripts.app import App
 from Scripts.constants import VERSION, debug_log_file
 from Scripts.network import check_internet
-from Scripts.console_window import get_console
 from Scripts import multiplayer, single_player
 import sys
-get_console()
 
 with open(debug_log_file, 'w') as _:
     pass

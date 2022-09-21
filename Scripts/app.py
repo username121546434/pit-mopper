@@ -3,7 +3,6 @@ from tkinter import *
 from . import constants
 from .custom_menubar import CustomMenuBar, SubMenu
 from .functions import *
-from .console_window import show_console, hide_console
 from functools import partial
 from .updater import check_for_updates
 import shutil
@@ -46,8 +45,6 @@ class App(Tk):
             self._change_theme()
     
     def set_variables(self):
-        self.console_open = BooleanVar(self, False)
-        self.console_open.trace('w', self.console)
         self.dark_mode_state = BooleanVar(self, constants.dark_mode)
         self.dark_mode_state.trace('w', self.change_theme)
         self.fullscreen_state = BooleanVar(self)
@@ -59,7 +56,6 @@ class App(Tk):
         bind_widget(self, KBDShortcuts.check_for_updates, True, lambda _: check_for_updates(self.quit_app))
         bind_widget(self, KBDShortcuts.quit_app, True, self.quit_app)
         bind_widget(self, KBDShortcuts.toggle_theme, True, lambda _: self.dark_mode_state.set(not self.dark_mode_state.get()))
-        bind_widget(self, KBDShortcuts.toggle_console, True, lambda _: self.console_open.set(not self.console_open.get()))
     
     def draw_menubar(self):
         # create a menubar
@@ -76,12 +72,12 @@ class App(Tk):
         self.settings.add_command(label='Check for Updates', command=partial(check_for_updates, self.quit_app), accelerator=format_kbd_shortcut(KBDShortcuts.check_for_updates))
         self.settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Pit Mopper Version: {constants.VERSION}'), accelerator=format_kbd_shortcut(KBDShortcuts.version_info))
         self.settings.add_separator()
-        self.settings.add_command(label='Delete all data', command=clear_all_data)
-        self.settings.add_command(label='Delete Debug Logs', command=clear_debug)
-        self.settings.add_command(label='Delete Highscore', command=clear_highscore)
 
         self.advanced = SubMenu()
-        self.advanced.add_checkbutton(label='Console', variable=self.console_open, accelerator=format_kbd_shortcut(KBDShortcuts.toggle_console))
+        self.advanced.add_command(label='Delete all data', command=clear_all_data)
+        self.advanced.add_command(label='Delete Debug Logs', command=clear_debug)
+        self.advanced.add_command(label='Delete Highscore', command=clear_highscore)
+
         self.menubar.add_menu(menu=self.file_menu, title='File')
         self.menubar.add_menu(menu=self.settings, title='Settings')
         self.menubar.add_menu(menu=self.advanced, title='Advanced')
@@ -119,12 +115,6 @@ class App(Tk):
                 pass
         del self
         os._exit(0)
-
-    def console(self, *_):
-        if not self.console_open.get():
-            hide_console()
-        else:
-            show_console()
 
     def change_theme(self, *_):
         constants.dark_mode = self.dark_mode_state.get()

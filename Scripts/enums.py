@@ -6,7 +6,6 @@ class KBDShortcuts(Enum):
     toggle_theme       =   '<Control-d>'
     check_for_updates  =   '<Control-u>'
     version_info       =   '<Control-i>'
-    toggle_console     =   '<Control-x>'
     toggle_chording    =   '<Control-a>'
     reset_connection   =   '<Control-r>'
     open_file          =   '<Control-o>'
