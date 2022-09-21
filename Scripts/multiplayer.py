@@ -42,6 +42,8 @@ class MultiplayerApp(SinglePlayerApp):
     
     def draw_waiting_menubar(self):
         self.draw_menubar()
+        for _ in range(2):
+            self.settings._menubutton.pop()
         self.settings.add_separator()
         self.settings.add_command(label='Restart connection', command=self.n.restart, accelerator=format_kbd_shortcut(KBDShortcuts.reset_connection))
     
