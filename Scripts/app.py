@@ -183,7 +183,11 @@ class App(Tk):
         self.bindings = {}
 
     def _update_game(self):
-        """Updates one frame of the game, this is called over and over again"""
+        """
+        Updates one frame of the game, this is called over and over again
+        
+        Most of the game logic can be found here
+        """
         self.game: Game
         squares_flaged = [
             square
