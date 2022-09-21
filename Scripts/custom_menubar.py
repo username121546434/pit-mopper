@@ -59,7 +59,7 @@ class SubMenu:
                 self.num += 1
             del self.num
             self._popup.bind('<Leave>', self._leave)
-            self._popup.bind('<FocusOut>', lambda _: (self._popup.destroy(), setattr(self, '_open', False)))
+            self._popup.bind('<FocusOut>', self.destroy)
             self._open = True
         
     def add_checkbutton(self, **kwargs):
@@ -136,8 +136,19 @@ class SubMenu:
         if event.widget is self._popup and \
         (event.x < x or event.x > self._popup.winfo_width() or
         event.y < y or event.y > self._popup.winfo_height()):
-            self._popup.destroy()
-            self._open = False
+            self.destroy()
+    
+    def destroy(self, _=None):
+        """Close the submenu, if it is open"""
+        if not self._open:
+            return
+        self._popup.destroy()
+        self._open = False
+
+
+class _LabelTypeHint(tk.Label):
+    """Label used for type-hinting in IDE's"""
+    menu: SubMenu
 
 
 class CustomMenuBar(tk.Frame):
@@ -151,7 +162,7 @@ class CustomMenuBar(tk.Frame):
         self._fg = kw.pop('fg', kw.pop('foreground', 'black'))
         self._over_bg = kw.pop('overbackground', 'blue')
         super().__init__(master=master, **kw)
-        self._lb_list:list[tk.Label] = []
+        self._lb_list: list[_LabelTypeHint] = []
         self.config(highlightthickness=0)
     
     def _on_press(self, label, command=None):
@@ -160,12 +171,32 @@ class CustomMenuBar(tk.Frame):
         label.menu.on_popup()
         if command: command()  # Calls the function passed to `add_menu` method.
     
+    def _on_hover(self, event: tk.Event):
+        """Internal function.
+        
+        This is called when a label is being hovered on"""
+        if not isinstance(event.widget, tk.Label):
+            return
+        event.widget.config(bg=self._over_bg)
+        
+        for label in self._lb_list:
+            if label.menu._open and label.menu is not event.widget:
+                label.menu.destroy() # Remove the currently open menubar
+                event.widget.menu.on_popup()
+                break
+    
+    def _on_leave(self, event: tk.Event):
+        """Internal function.
+        
+        This is called when a label stops being hovered on"""
+        event.widget.config(bg=self['bg'])
+    
     def add_menu(self, title, menu: SubMenu, command=None):
         """Add menu labels."""
         l = tk.Label(self, text=title, fg=self._fg, bg=self['bg'], padx=2, pady=2)
         l.pack(side='left')
-        l.bind('<Enter>', lambda e: l.config(bg=self._over_bg))
-        l.bind('<Leave>', lambda e: l.config(bg=self['bg']))
+        l.bind('<Enter>', self._on_hover)
+        l.bind('<Leave>', self._on_leave)
         l.menu = menu  # Easy to access menu with the instance 
                        #   of the label saved in the `self._lb_list`
         menu.label = l
