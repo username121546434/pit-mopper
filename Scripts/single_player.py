@@ -339,7 +339,6 @@ additional_time:       0
         self.clear()
         self.draw_all()
         self.game = None
-        del self.game
     
     def show_highscores(self, *_):
         logging.info('User requested highscores')
