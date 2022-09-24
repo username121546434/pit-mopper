@@ -7,33 +7,12 @@ from tkinter import *
 from tkinter.ttk import Progressbar
 from zipfile import ZipFile
 from tkinter import messagebox
-from markdown import Markdown
-from io import StringIO
-
-from Scripts.constants import VERSION
+from markdown import markdown
+from tkinterweb import HtmlFrame
+from .constants import VERSION
 from .network import check_internet
+from tempfile import TemporaryFile
 
-
-def unmark_element(element, stream=None):
-    if stream is None:
-        stream = StringIO()
-    if element.text:
-        stream.write(element.text)
-    for sub in element:
-        unmark_element(sub, stream)
-    if element.tail:
-        stream.write(element.tail)
-    return stream.getvalue()
-
-
-# patching Markdown
-Markdown.output_formats["plain"] = unmark_element
-__md = Markdown(output_format="plain")
-__md.stripTopLevelTags = False
-
-
-def md_to_text(text):
-    return __md.convert(text)
 
 def check_for_updates(app_quit):
     if not check_internet():
@@ -42,18 +21,21 @@ def check_for_updates(app_quit):
     response = requests.get('https://api.github.com/repos/username121546434/pit-mopper/releases')
     response.raise_for_status()
     latest_version = response.json()[0]["tag_name"]
-    body = md_to_text(response.json()[0]['body'])
+    body = response.json()[0]['body']
 
     if Version(latest_version) > Version(VERSION):
         window = Toplevel()
         window.title('Update Available')
         choice = BooleanVar(window)
 
-        text = Text(window, height=len(body.splitlines()), width=max(len(line) for line in [line.strip() for line in body.splitlines()]))
-        text.focus()
-        text.insert('end', f'You have version {VERSION} but {latest_version} is available. Do you want to update?\nPatch notes are below.\n\n{body}')
-        text.config(state='disabled')
-        text.pack()
+        frame = HtmlFrame(window, messages_enabled=False)
+
+        m_html = markdown(body)
+        with TemporaryFile('w', delete=False) as temp_file:
+            temp_file.write(m_html)
+            print(temp_file.name)
+            frame.load_url('file:///' + temp_file.name)
+        frame.pack(fill="both", expand=True)
 
         Checkbutton(window, onvalue=True, offvalue=False, variable=choice, text='Update?').pack()
 
@@ -62,6 +44,8 @@ def check_for_updates(app_quit):
     else:
         messagebox.showinfo(title='Update', message='There are no updates available')
         return
+
+    os.remove(temp_file.name)
     
     if os.name == 'posix' and choice.get():
         messagebox.showinfo('Update', 'Automatic updates are not supported on your platform, but you will be taken to the download link')
