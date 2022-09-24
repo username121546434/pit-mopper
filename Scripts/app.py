@@ -71,7 +71,6 @@ class App(Tk):
         self.settings.add_separator()
         self.settings.add_command(label='Check for Updates', command=partial(check_for_updates, self.quit_app), accelerator=format_kbd_shortcut(KBDShortcuts.check_for_updates))
         self.settings.add_command(label='Version Info', command=partial(messagebox.showinfo, title='Version Info', message=f'Pit Mopper Version: {constants.VERSION}'), accelerator=format_kbd_shortcut(KBDShortcuts.version_info))
-        self.settings.add_separator()
 
         self.advanced = SubMenu()
         self.advanced.add_command(label='Delete all data', command=clear_all_data)
