@@ -43,10 +43,16 @@ elif len(sys.argv) > 1:
     elif sys.argv[1].isdigit():
         multiplayer.main()
 
-window = App('Pit Mopper')
 
-Button(window, text='Single Player', command=run_single_player).pack(pady=(25, 0))
-Button(window, text='Multiplayer', command=run_multiplayer).pack(pady=(0, 20), padx=90)
+def main():
+    window = App('Pit Mopper')
 
-logging.info('Finished loading')
-window.mainloop()
+    Button(window, text='Single Player', command=run_single_player).pack(pady=(25, 0))
+    Button(window, text='Multiplayer', command=run_multiplayer).pack(pady=(0, 20), padx=90)
+
+    logging.info('Finished loading')
+    window.mainloop()
+
+
+if __name__ == '__main__':
+    main()
