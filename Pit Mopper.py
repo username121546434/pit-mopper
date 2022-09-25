@@ -19,14 +19,12 @@ __version__ = VERSION
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'
 
 def run_single_player():
-    window.destroy()
     single_player.main()
     sys.exit()
 
 
 def run_multiplayer():
     if check_internet():
-        window.destroy()
         multiplayer.main()
         sys.exit()
     else:

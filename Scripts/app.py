@@ -1,5 +1,7 @@
 """Defines the `App` class"""
+from __future__ import annotations
 from tkinter import *
+from typing import TYPE_CHECKING
 from . import constants
 from .custom_menubar import CustomMenuBar, SubMenu
 from .functions import *
@@ -13,15 +15,39 @@ import os
 from .enums import KBDShortcuts
 from .game import Game
 
+if TYPE_CHECKING:
+    from .single_player import SinglePlayerApp
+    from .multiplayer import MultiplayerApp
+
 
 class App(Tk):
     """
     Base class for `SinglePlayerApp` and `MultiplayerApp`.
     It defines all keyboard shorcuts, menubar options, and variables common in both
     """
+    _alive: App | None = None
+
+    def __new__(cls: type[App | SinglePlayerApp | MultiplayerApp], *args, **kwargs) -> App | SinglePlayerApp | MultiplayerApp:
+        if App._alive is None:
+            return super().__new__(cls)
+        else:
+            App._alive.clear()
+            if cls == App:
+                cls.init(App._alive, *args, **kwargs)
+                return App._alive
+            else:
+                App._alive.__class__ = cls
+                return cls._alive
+
     def __init__(self, title: str) -> None:
+        if App._alive is None:
+            super().__init__()
+            App._alive = self
+        self.init(title)
+        assert App._alive is self
+    
+    def init(self, title: str):
         logging.info('Loading new app instance...')
-        super().__init__()
         sys.excepthook = handle_exception
         self.report_callback_exception = handle_exception
 
