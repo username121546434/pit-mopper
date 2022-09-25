@@ -16,6 +16,8 @@ from .app import App
 from .game import Game, PickleGame
 from .enums import KBDShortcuts
 
+DEFAULT_TITLE = 'Single Player Game Loader'
+
 
 def more_info(
     num_mines,
@@ -101,7 +103,7 @@ class SinglePlayerApp(App):
         self.game_size = StringVar(self, f'You game size will be {self.difficulty.get()[0]} rows and {self.difficulty.get()[1]} columns')
     
     def draw_all(self):
-        self.title('Single Player Game Loader')
+        self.title(DEFAULT_TITLE)
         super().draw_all()
     
     def draw(self):
@@ -470,7 +472,7 @@ additional_time:       0
 def main():
     logging.info('Loading single player...')
 
-    window = SinglePlayerApp('Game Loader')
+    window = SinglePlayerApp(DEFAULT_TITLE)
     
     if len(sys.argv) > 1:
         if os.path.exists(sys.argv[1]):

@@ -15,12 +15,11 @@ from .base_logger import init_logger
 import logging
 init_logger()
 
+DEFAULT_TITLE = 'Multiplayer Game Loader'
+
 
 class MultiplayerApp(SinglePlayerApp):
     """Subclass of `SinglePlayerApp`"""
-    def __init__(self, title: str) -> None:
-        super().__init__(title)
-
     def quit_app(self, *_):
         return App.quit_app(self)
     
@@ -272,7 +271,7 @@ class MultiplayerApp(SinglePlayerApp):
 def main():
     logging.info('Loading multiplayer...')
 
-    window = MultiplayerApp('Pit Mopper Multiplayer')
+    window = MultiplayerApp(DEFAULT_TITLE)
 
     logging.info('GUI successfully created')
     if len(sys.argv) > 1:
