@@ -292,11 +292,6 @@ class App(Tk):
             for square in row
             if square.flaged
         ]
-        game_overs = [
-            square.game_over
-            for row in self.game.grid.grid
-            for square in row
-        ]
 
         # Counts mines found
         for square in (square for square in squares_flaged if square.category == 'mine'):
@@ -309,7 +304,7 @@ class App(Tk):
                 logging.info('Game has been won because all squares are clicked and all mines flagged')
             else:
                 logging.info('Game has been won because the squares left are mines')
-        elif any(game_overs):
+        elif any(square.game_over for square, _ in self.game.grid.iter_squares()):
             logging.info('The game is over, and it is lost.')
             game_over = True
             win = False
