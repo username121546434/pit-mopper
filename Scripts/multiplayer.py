@@ -172,6 +172,7 @@ class MultiplayerApp(SinglePlayerApp):
             self._change_theme()
 
         self._game()
+        self.leave_game()
     
     def _game(self):
         self.game_over = BooleanVar(self, name='game_over')
@@ -184,25 +185,21 @@ class MultiplayerApp(SinglePlayerApp):
         if self.online_game.quit:
             self.player_left = True
             self.game.quit = True
-            self.leave_game()
             return
         if self.online_game.game_is_tie():
             messagebox.showinfo('Game Results', f'The game ended with a tie!\nTime taken: {format_second(self.game.result["seconds"])}')
             logging.info('Game Over, ended in a tie')
             self.game.quit = True
-            self.leave_game()
             return
         elif self.online_game.player_who_won() == self.player:
             messagebox.showinfo('Game Results', f'You won the game!\nTime taken: {format_second(self.game.result["seconds"])}')
             logging.info('Game Over, ended in a victory')
             self.game.quit = True
-            self.leave_game()
             return
         elif self.online_game.player_who_won() != 12 and self.online_game.player_who_won() != None and self.online_game.player_who_won() != self.player:
             messagebox.showinfo('Game Results', f'You lost the game :( Better luck next time!\nTime taken: {format_second(self.game.result["seconds"])}')
             logging.info('Game Over, ended in a loss')
             self.game.quit = True
-            self.leave_game()
             return
 
         if self.player == 2:
@@ -222,12 +219,10 @@ class MultiplayerApp(SinglePlayerApp):
             logging.error(f'Error while sending data\n{traceback.format_exc()}')
             if messagebox.askokcancel('Connection Error', 'There was an error while sending data, would you like to leave the game?'):
                 self.game.quit = True
-                self.leave_game()
                 return
         else:
             if self.online_game == 'restart':
                 self.player_left = True
-                self.leave_game()
                 return
 
         self.game_after_cancel = self.after(50, self._update_game)
