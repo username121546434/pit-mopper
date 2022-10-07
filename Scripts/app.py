@@ -31,22 +31,16 @@ class App(Tk):
         if App._alive is None:
             return super().__new__(cls)
         else:
-            App._alive.clear()
-            if cls == App:
-                cls.init(App._alive, *args, **kwargs)
-                return App._alive
-            else:
-                App._alive.__class__ = cls
-                return cls._alive
+            App._alive.__class__ = cls
+            return cls._alive
 
     def __init__(self, title: str) -> None:
         if App._alive is None:
             super().__init__()
             App._alive = self
-        self.init(title)
-        assert App._alive is self
-    
-    def init(self, title: str):
+        self.clear()
+        self.initialized = False
+
         logging.info('Loading new app instance...')
         sys.excepthook = handle_exception
         self.report_callback_exception = handle_exception
@@ -59,16 +53,35 @@ class App(Tk):
             self.iconbitmap(constants.LOGO)
 
         self.draw_all()
-
+        self.update()
+        self.width, self.height, _, _, _ = self.winfo_geometry()
+        assert App._alive is self
         self.protocol('WM_DELETE_WINDOW', self.quit_app)
+        self.initialized = True
+    
+    def winfo_geometry(self):
+        """Return geometry as a tuple of (width, height, x, y)
+        the last element is the initial geometry string given by tkinter."""
+        geometry = super().winfo_geometry()
+        width, height_xy = geometry.split('x')
+        height, x, y = height_xy.split('+')
+        width, height, x, y = int(width), int(height), int(x), int(y)
+
+        return width, height, x, y, geometry
     
     def draw_all(self):
         self.set_variables()
         self.draw_menubar()
         self.set_keyboard_shorcuts()
         self.draw()
+
+        self.resizable(False, False)
         if self.dark_mode_state.get():
             self._change_theme()
+        
+        if self.initialized:
+            _, _, x, y, _ = self.winfo_geometry()
+            self.geometry(f'={self.width}x{self.height}+{x}+{y}')
     
     def set_variables(self):
         self.dark_mode_state = BooleanVar(self, constants.dark_mode)
@@ -148,14 +161,11 @@ class App(Tk):
             logging.info('User switched theme to dark mode')
             constants.CURRENT_BG = constants.DARK_MODE_BG
             constants.CURRENT_FG = constants.DARK_MODE_FG
-            dark_title_bar(self)
             self.iconbitmap(constants.DARK_MODE_LOGO)
         else:
             logging.info('User switched theme to light mode')
             constants.CURRENT_BG = constants.DEFAULT_BG
             constants.CURRENT_FG = constants.DEFAULT_FG
-            if os.name == 'nt':
-                self.resizable(True, True)
             self.iconbitmap(constants.LOGO)
         self._change_theme()
 
@@ -164,6 +174,12 @@ class App(Tk):
         CURRENT_BG = constants.CURRENT_BG
         CURRENT_FG = constants.CURRENT_FG
         self.config(bg=CURRENT_BG)
+
+        if CURRENT_BG == constants.DEFAULT_BG:
+            self.resizable(*self.resizable())
+        else:
+            dark_title_bar(self)
+
         for child in self.winfo_children():
             if not isinstance(child, (Toplevel, Spinbox, CustomMenuBar, Progressbar, Frame)):
                 child.config(bg=CURRENT_BG, fg=CURRENT_FG)

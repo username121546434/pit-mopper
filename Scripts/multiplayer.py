@@ -127,6 +127,7 @@ class MultiplayerApp(SinglePlayerApp):
         self.clear()
         self.connected = True
         self.title('Pit Mopper Multiplayer')
+        self.resizable(True, True)
 
         self.game_timer = Label(self, text='Time: 0:00')
         self.game_timer.grid(row=1, column=1)

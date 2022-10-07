@@ -194,6 +194,7 @@ class SinglePlayerApp(App):
 
         self.clear()
         self.title('Pit Mopper')
+        self.resizable(True, True)
         self.grid_columnconfigure(1, weight=1)
         session_start: datetime = datetime.now()
         total_time = StringVar(self)
