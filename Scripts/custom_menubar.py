@@ -1,6 +1,7 @@
 """Has all classes related to the menubar"""
 import tkinter as tk
 from tkinter import ttk
+from typing import Iterable
 
 TABWIDTH = len('\t'.expandtabs())
 
@@ -142,6 +143,24 @@ class SubMenu:
             return
         self._popup.destroy()
         self._open = False
+    
+    def _pop(self, index: int | None=None):
+        if index is None:
+            self._menubutton.pop()
+        else:
+            self._menubutton.pop(index)
+    
+    def pop(self, index: int | None | Iterable[int | None]):
+        """Pop one element from self at `index`.
+
+        If `index` is `None`, then remove the last element.
+
+        If `index` is an iterable, then it will remove all elements in the iterable"""
+        if isinstance(index, int) or index is None:
+            self._pop(index)
+        else:
+            for i in index:
+                self._pop(i)
 
 
 class _LabelTypeHint(tk.Label):

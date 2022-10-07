@@ -34,13 +34,13 @@ class MultiplayerApp(SinglePlayerApp):
     
     def draw_menubar(self):
         super().draw_menubar()
-        for _ in range(3):
-            self.file_menu._menubutton.pop()
+        # Delete the "Open File", "Highscores", and a seperator from the menubar
+        self.file_menu.pop([None, None, None])
     
     def draw_waiting_menubar(self):
         self.draw_menubar()
-        for _ in range(2):
-            self.settings._menubutton.pop()
+        # Remove the "Enable Chording" and a seperator from menubar
+        self.settings.pop([None, None])
         self.settings.add_separator()
         self.settings.add_command(label='Restart connection', command=self.n.restart, accelerator=format_kbd_shortcut(KBDShortcuts.reset_connection))
     
