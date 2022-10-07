@@ -8,6 +8,7 @@ from .grid import PickleButtonGrid, ButtonGrid
 if TYPE_CHECKING:
     from .squares import Square
     from tkinter import StringVar
+    from .app import App
 
 
 @dataclass(slots=True, frozen=True, eq=True)
@@ -111,7 +112,7 @@ class PickleGame:
             chording=game.chording
         )
     
-    def to_game(self, total_time: StringVar, window):
+    def to_game(self, total_time: StringVar, window: App):
         return Game(
             grid=self.grid.to_grid(window),
             start=self.start,
