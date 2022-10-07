@@ -328,4 +328,4 @@ class App(Tk):
         self.game.result = {'seconds': self.game.seconds, 'win': win, 'game over': game_over}
         self.update()
         if not self.game.quit and after:
-            self.after(50, self._update_game)
+            self.game_after_cancel = self.after(50, self._update_game)

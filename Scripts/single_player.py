@@ -334,7 +334,7 @@ additional_time:       0
         self.fullscreen_state.set(False)
         self.clear()
         self.draw_all()
-        self.game = None
+        del self.game
     
     def show_highscores(self, *_):
         logging.info('User requested highscores')
@@ -445,6 +445,7 @@ additional_time:       0
         self.game_over = BooleanVar(self, name='game_over')
         self.after(50, self._update_game)
         self.wait_variable('game_over')
+        self.after_cancel(self.game_after_cancel)
     
     def save_game(self, filename:str=None):
         data = PickleGame.from_game(self.game)
