@@ -2,7 +2,7 @@
 from tkinter import *
 from .load_font import load_font
 from .constants import DEFAULT_BG, DARK_MODE_BG, SQUARES_FONT
-from . import functions
+from . import functions as funcs
 
 num_colors = {
     1: 'blue',
@@ -60,13 +60,13 @@ class Square(Button):
         _, font_name = load_font(SQUARES_FONT)
         super().__init__(master, text=text, font=(font_name, 12))
 
-        functions.bind_widget(self, '<Button-1>', func=self.clicked)
-        functions.bind_widget(self, '<Button-2>', func=self.chord_self)
-        functions.bind_widget(self, '<Button-3>', func=self.flag)
-        functions.bind_widget(self, '<Control-1>', func=self.flag)
-        functions.bind_widget(self, '<Alt-1>', func=self.chord_self)
-        functions.bind_widget(self, '<Enter>', func=self.hover_enter)
-        functions.bind_widget(self, '<Leave>', func=self.hover_leave)
+        funcs.bind_widget(self, '<Button-1>', func=self.clicked)
+        funcs.bind_widget(self, '<Button-2>', func=self.chord_self)
+        funcs.bind_widget(self, '<Button-3>', func=self.flag)
+        funcs.bind_widget(self, '<Control-1>', func=self.flag)
+        funcs.bind_widget(self, '<Alt-1>', func=self.chord_self)
+        funcs.bind_widget(self, '<Enter>', func=self.hover_enter)
+        funcs.bind_widget(self, '<Leave>', func=self.hover_leave)
 
     def flag(self, _=None):
         if self.cget('text').replace(' ', '') == '':
@@ -88,6 +88,8 @@ class Square(Button):
         self.chord = not self.chord
 
     def clicked(self, _=None):
+        if self.flaged:
+            return
         if self.category == 'mine':
             self.config(text='💣', bg='red')
             self.game_over = True
