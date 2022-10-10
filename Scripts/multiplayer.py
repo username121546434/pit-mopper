@@ -54,8 +54,8 @@ class MultiplayerApp(SinglePlayerApp):
                     self.n = Network(self.game_id_state.get())
                     if isinstance(self.n.data, bool): # The server sends a boolean if the game id is not valid
                         if self.n.data:
-                            logging.error('Game id requested is being played')
-                            messagebox.showerror('Game is being played', 'The game id you requested is being played')
+                            logging.error('Game id requested already started')
+                            messagebox.showerror('Game is being played', 'The game id you requested already started')
                         else:
                             logging.error('Game id requested does not exist')
                             messagebox.showerror('Game does not exist', 'The game id you requested does not exist')
