@@ -63,16 +63,16 @@ def check_for_updates(app_quit):
             asset = [
                 asset
                 for asset in response.json()[0]['assets']
-                if asset['content_type'] == 'application/x-zip-compressed'
+                if asset['content_type'] == 'application/x-zip-compressed' # *.zip file
             ][0]
         else:
             asset = [
                 asset
                 for asset in response.json()[0]['assets']
-                if asset['content_type'] == 'application/x-msdownload'
+                if asset['content_type'] == 'application/x-msdownload' # *.exe file
             ][0]
-        download_url = asset['browser_download_url']
-        filename = asset['name']
+        download_url: str = asset['browser_download_url']
+        filename: str = asset['name']
         progress_window = Toplevel()
         progress_window.config(padx=20, pady=20)
         progress_window.title('Updater')
@@ -83,12 +83,12 @@ def check_for_updates(app_quit):
         progress = Progressbar(progress_window, mode='determinate', length=200)
         progress.pack()
 
-        file = os.path.expanduser(f'~\\Downloads\\{filename}')
+        installer_or_zip_file = os.path.join(os.getenv('TEMP'), filename)
         total_size = int(download.headers.get('content-length'))
         increment = (1 / total_size) * 100
         percent = 0.0
 
-        with open(file, 'wb') as f:
+        with open(installer_or_zip_file, 'wb') as f:
             for data in download.iter_content(chunk_size=1000):
                 progress['value'] += increment * len(data)
                 percent += len(data) / total_size
@@ -100,11 +100,11 @@ def check_for_updates(app_quit):
 
         bat_file = os.path.join(os.getenv('TEMP'), 'Pit Mopper Update.bat')
         if download_zip:
-            with ZipFile(file) as zip_file:
-                dir = filename[:-3]
-                dir = os.path.expanduser(f'~\\Downloads\\{dir}')
+            with ZipFile(installer_or_zip_file) as zip_file:
+                dir = filename.split('.')[0]
+                dir = os.path.join(os.getenv('TEMP'), dir)
                 zip_file.extractall(dir)
-            os.remove(file)
+            os.remove(installer_or_zip_file)
             with open(bat_file, 'w') as bat:
                 bat.write(f'''@echo off
 timeout 3
@@ -112,23 +112,11 @@ robocopy /MOV /MIR {dir} "{os.getcwd()}"
 rmdir {dir} /S /Q
 (goto) 2>nul & del "%~f0"''')
         else:
-            tempfile = os.path.join(os.getenv('TEMP'), f'{randint(34856485, 34534345345445)}.txt')
-            _, tempfile_name = os.path.split(tempfile)
-            with open(tempfile, 'w') as _:
-                pass
             with open(bat_file, 'w') as bat:
                 bat.write(f'''@echo off
 timeout 3
-"{os.path.abspath('./unins000.exe')}" /SILENT /SUPPRESSMSGBOXES
-copy {tempfile} {os.getcwd()}
-if %errorlevel% == 1 (
-    {file} /DIR="{os.getcwd()}" /SILENT /SUPPRESSMSGBOXES /NOCANCEL /FORCECLOSEAPPLICATIONS /ALLUSERS
-) else (
-    del /q {os.path.join(os.getcwd(), tempfile_name)}
-    {file} /DIR="{os.getcwd()}" /SILENT /SUPPRESSMSGBOXES /NOCANCEL /FORCECLOSEAPPLICATIONS /CURRENTUSER
-)
-del /q {file}
-del /q {tempfile}
+{installer_or_zip_file} /SILENT /SUPPRESSMSGBOXES /NOCANCEL /FORCECLOSEAPPLICATIONS
+del /q {installer_or_zip_file}
 (goto) 2>nul & del "%~f0"''')
         os.startfile(bat_file)
         app_quit()
