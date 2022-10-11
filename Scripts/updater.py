@@ -8,7 +8,7 @@ from tkinter.ttk import Progressbar
 from zipfile import ZipFile
 from tkinter import messagebox
 from markdown import markdown
-from tkinterweb import HtmlFrame
+from tkinterweb.htmlwidgets import HtmlFrame
 from .constants import VERSION
 from .network import check_internet
 from tempfile import TemporaryFile
@@ -73,20 +73,31 @@ def check_for_updates(app_quit):
             ][0]
         download_url = asset['browser_download_url']
         filename = asset['name']
-        progress_window = Tk()
+        progress_window = Toplevel()
+        progress_window.config(padx=20, pady=20)
         progress_window.title('Updater')
         download = requests.get(download_url, stream=True)
+
+        label = Label(progress_window, text='Downloading... 0%')
+        label.pack()
         progress = Progressbar(progress_window, mode='determinate', length=200)
         progress.pack()
+
         file = os.path.expanduser(f'~\\Downloads\\{filename}')
         total_size = int(download.headers.get('content-length'))
         increment = (1 / total_size) * 100
+        percent = 0.0
+
         with open(file, 'wb') as f:
             for data in download.iter_content(chunk_size=1000):
                 progress['value'] += increment * len(data)
+                percent += len(data) / total_size
+                label.config(text=f'Downloading... {round(percent * 100, 2)}%')
                 f.write(data)
                 progress_window.update()
+
         progress_window.destroy()
+
         bat_file = os.path.join(os.getenv('TEMP'), 'Pit Mopper Update.bat')
         if download_zip:
             with ZipFile(file) as zip_file:
