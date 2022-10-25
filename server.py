@@ -38,10 +38,7 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 
 
 sys.excepthook = handle_exception
-server = '192.168.2.13' # This may look like I mistakenly put my IP address here but its not
-# This is local address which means that it can only be used in my WIFI network
-# So you can't DDOS me or anything like that
-
+server = 'localhost'
 port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
