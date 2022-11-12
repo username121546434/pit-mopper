@@ -1,27 +1,70 @@
-# Beginning
+# Pit Mopper
 
 Pit Mopper is a game based on "Minesweeper" that was built in python.
 
-Project Structure:
+This was a game that I made for fun to learn more about programming.
 
-- ./Scripts - Python modules
-- ./Scripts/data - Data files for Pit Mopper(ie: Images and Fonts)
-- ./Pit Mopper.py - Main Python file
+Feel free to contribute if you want to!
 
-## Keyboard Shorcuts
+## How to run
 
-1. Ctrl + I - Shows the Version of Pit Mopper
-2. Ctrl + U - Checks for updates
-3. Ctrl + Q - Quits Pit Mopper, same as just closing the game loader
-4. Ctrl + O - Loads a game from a Pit Mopper game file
-5. Ctrl + A - Enables/Disables Chording
-6. Ctrl + D - Enables/Disables Dark Mode
-7. Ctrl + S - Saves the current game, only applicable when a game is being played
-8. Space - Does the same thing that the "Play!" button in the game loader does
-9. Alt + Q - Closes the game, same as clicking the X
-10. Alt + I - Gives extra information about the current game, same as going to File > More Info
-11. Ctrl + H - Shows your highscores
-12. Ctrl + X - Shows/Hides Console window
+Note: You will need Python version 3.10 or above to run it
+
+### Run on Windows
+
+Step 1: Clone this repository using the following command
+
+```text
+git clone https://github.com/username121546434/pit-mopper.git
+```
+
+Step 2: Cd into the directory (if you aren't already there)
+
+```text
+cd ./pit-mopper
+```
+
+Step 3: Install all required modules
+
+```text
+pip install -r requirements.txt
+```
+
+Step 4: Run the main Python file
+
+```text
+py "Pit Mopper.py"
+```
+
+### Run on Linux
+
+Note: This has only been tested on Linux Ubuntu distro, I have not tested it for any other distros
+
+To install python 3.10, you can use this [article](https://computingforgeeks.com/how-to-install-python-on-ubuntu-linux-system/)
+
+Step 1: Clone this repository using the following command
+
+```text
+git clone https://github.com/username121546434/pit-mopper.git
+```
+
+Step 2: Cd into the directory (if you aren't already there)
+
+```text
+cd ./pit-mopper
+```
+
+Step 3: Install all required modules
+
+```text
+python3.10 -m pip install -r requirements.txt
+```
+
+Step 4: Run the main Python file
+
+```text
+python3.10 "Pit Mopper.py"
+```
 
 ## Latest Features in v1.4.0
 
