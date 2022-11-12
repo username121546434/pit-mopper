@@ -1,5 +1,5 @@
 """
-Soon going to the server for online multiplayer pit mopper games.
+Going to the server for online multiplayer pit mopper games.
 """
 from datetime import datetime
 import os
