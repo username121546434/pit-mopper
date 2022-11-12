@@ -76,8 +76,7 @@ class App(Tk):
         self.draw()
 
         self.resizable(False, False)
-        if self.dark_mode_state.get():
-            self._change_theme()
+        self._change_theme()
         
         if self.initialized:
             _, _, x, y, _ = self.winfo_geometry()
