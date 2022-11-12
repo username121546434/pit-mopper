@@ -1,12 +1,12 @@
-certifi==2022.9.14
+certifi==2022.9.24                                                                              
 charset-normalizer==2.1.1
-cx-Freeze==6.11.1
-fonttools==4.37.3
+cx-Freeze==6.13.1
+fonttools==4.38.0
 idna==3.4
-lief==0.12.1
+lief==0.12.3
 Markdown==3.4.1
 packaging==21.3
-Pillow==9.2.0
+Pillow==9.3.0
 pyparsing==3.0.9
 pyperclip==1.8.2
 requests==2.28.1
