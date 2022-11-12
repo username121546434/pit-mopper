@@ -296,8 +296,6 @@ additional_time:       0
         self.menubar.add_menu(menu=game_menu, title='Game')
 
         logging.info('Entering while loop...')
-        if self.dark_mode_state.get():
-            self.dark_mode_state.set(True)
 
         self._game(
             game,
@@ -444,6 +442,7 @@ additional_time:       0
         else:
             self.game = game.to_game(total_time, self)
         self.game_over = BooleanVar(self, name='game_over')
+        self._change_theme()
         self.after(50, self._update_game)
         self.wait_variable('game_over')
         self.after_cancel(self.game_after_cancel)
