@@ -1,8 +1,8 @@
+"""Defines the `Square` and `PickleSquare` class"""
 from tkinter import *
 from .load_font import load_font
-from .constants import DEFAULT_BG, DARK_MODE_BG
-
-font_family, font_name = load_font(r"data\fonts\DSEG7ClassicMini-Bold.ttf")
+from .constants import DEFAULT_BG, DARK_MODE_BG, SQUARES_FONT
+from . import functions as funcs
 
 num_colors = {
     1: 'blue',
@@ -28,6 +28,24 @@ dark_mode_colors = {
 
 
 class Square(Button):
+    """Holds data for a square in the game. `Square` is a subclass of the `Button` class from tkinter"""
+    __slots__ = (
+        'category',
+        'num',
+        'game_over',
+        'flaged',
+        'position',
+        'chord',
+        'completed',
+        'clicked_on',
+        'dark_mode',
+        'last_bg',
+        'last_fg',
+        'tk',
+        '_w',
+        'widgetName',
+        'bindings'
+    )
     def __init__(self, master: Misc | None = ..., text='') -> None:
         self.category: str | None = None
         self.num: int | None = None
@@ -39,11 +57,16 @@ class Square(Button):
         self.clicked_on: bool = False
         self.dark_mode: bool = False
 
+        _, font_name = load_font(SQUARES_FONT)
         super().__init__(master, text=text, font=(font_name, 12))
 
-        self.bind('<Button-1>', self.clicked)
-        self.bind('<Button-2>', self.chord_self)
-        self.bind('<Button-3>', self.flag)
+        funcs.bind_widget(self, '<Button-1>', func=self.clicked)
+        funcs.bind_widget(self, '<Button-2>', func=self.chord_self)
+        funcs.bind_widget(self, '<Button-3>', func=self.flag)
+        funcs.bind_widget(self, '<Control-1>', func=self.flag)
+        funcs.bind_widget(self, '<Alt-1>', func=self.chord_self)
+        funcs.bind_widget(self, '<Enter>', func=self.hover_enter)
+        funcs.bind_widget(self, '<Leave>', func=self.hover_leave)
 
     def flag(self, _=None):
         if self.cget('text').replace(' ', '') == '':
@@ -65,6 +88,8 @@ class Square(Button):
         self.chord = not self.chord
 
     def clicked(self, _=None):
+        if self.flaged:
+            return
         if self.category == 'mine':
             self.config(text='💣', bg='red')
             self.game_over = True
@@ -81,8 +106,11 @@ class Square(Button):
             self.config(text='0')
         self.clicked_on = True
     
-    def switch_theme(self):
-        self.dark_mode = not self.dark_mode
+    def switch_theme(self, theme: bool | None = None):
+        if theme is None:
+            self.dark_mode = not self.dark_mode
+        else:
+            self.dark_mode = theme
         if not self.dark_mode:
             if self.clicked_on and self.num != None:
                 self.config(bg=num_colors[self.num])
@@ -97,12 +125,36 @@ class Square(Button):
                 self.config(fg='white', bg=DARK_MODE_BG)
             else:
                 self.config(bg=DARK_MODE_BG)
+        self.last_bg = self.cget('bg')
+    
+    def hover_enter(self, _):
+        self.last_bg = self.cget('bg')
+        self.last_fg = self.cget('fg')
+        self.config(bg='#bdd1a9')
+    
+    def hover_leave(self, _):
+        self.config(bg=self.last_bg, fg=self.last_fg)
+        if self.flaged:
+            self.flag()
+            self.flag()
+        elif self.clicked_on:
+            self.clicked()
 
 
 class PickleSquare:
-    """Same as `Square` but is used to pickle and save data"""
-
-    def __init__(self, category: str, position: tuple[int, int], num, chord=False, completed=False, clicked_on=False, game_over=False, flaged:bool = False, dark_mode:bool = False) -> None:
+    """Same as `Square` but is has less attributes and can be pickled"""
+    __slots__ = ('chord', 'completed', 'clicked_on', 'category', 'position', 'game_over', 'num', 'flaged')
+    def __init__(
+        self,
+        category: str,
+        position: tuple[int, int],
+        num,
+        chord=False,
+        completed=False,
+        clicked_on=False,
+        game_over=False,
+        flaged:bool = False,
+    ) -> None:
         self.chord: bool = chord
         self.completed: bool = completed
         self.clicked_on: bool = clicked_on
@@ -111,24 +163,17 @@ class PickleSquare:
         self.game_over = game_over
         self.num = num
         self.flaged = flaged
-        self.dark_mode = dark_mode
 
     def to_square(self, master) -> Square:
         square = Square(master)
-        for key, value in self.__dict__.items():
-            square.__dict__[key] = value
+        for key in self.__slots__:
+            value = getattr(self, key)
+            setattr(square, key, value)
         return square
 
     @classmethod
     def from_square(cls, square: Square):
-        return cls(
-            square.category,
-            square.position,
-            square.num,
-            square.chord,
-            square.completed,
-            square.clicked_on,
-            square.game_over,
-            square.flaged,
-            square.dark_mode
-        )
+        new_square = cls(square.category, square.position, square.num)
+        for attr in cls.__slots__:
+            setattr(new_square, attr, getattr(square, attr))
+        return new_square

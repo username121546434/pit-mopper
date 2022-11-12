@@ -1,41 +1,46 @@
 from tkinter import *
-from Scripts.constants import APP_CLOSED
 from .squares import Square, PickleSquare
 import random
 from functools import partial
 from .base_logger import init_logger
 import logging
-init_logger()
 
 
 class ButtonGrid:
+    """Creates and stores information of a grid of buttons"""
+    __slots__ = ('root', 'dark_mode', 'grid_size', 'num_mines', 'grid')
     def __init__(
-        self, grid_size: tuple[int, int],
+        self,
+        grid_size: tuple[int, int],
         window: Toplevel,
         grid: list[list[PickleSquare]] | None = None,
         dark_mode: bool = False,
         num_mines: int = -1,
         row: int = 2,
-        column: int = 1
+        column: int = 1,
+        click_random_square: bool = False
     ):
         self.grid_size = grid_size
         self.root = window
         self.dark_mode = dark_mode
         self.num_mines = num_mines
         if grid == None:
-            self.grid = self.button_grid(row, column)
+            self.grid = self.button_grid(row, column, click_random_square)
         else:
             self.grid = self.setup_grid(grid, row, column)
 
-    def button_grid(self, row_num, col_num) -> list[list[Square]]:
+    def button_grid(self, row_num, col_num, click_random_square: bool = False) -> list[list[Square]]:
+        """Create a new grid of buttons"""
+        init_logger()
         Grid.rowconfigure(self.root, row_num, weight=1)
         Grid.columnconfigure(self.root, col_num, weight=1)
         grid = []
         blank = "   " * 3
-        button_pressed = Variable(self.root.winfo_toplevel(), None, 'button pressed')
+        if not click_random_square:
+            button_pressed = Variable(self.root.winfo_toplevel(), None, 'button pressed')
         # Create & Configure frame
         frame = Frame(self.root)
-        frame.grid(row=2, column=1, sticky=N+S+E+W)
+        frame.grid(row=row_num, column=col_num, sticky=N+S+E+W)
         for row_index in range(self.grid_size[0]):
             Grid.rowconfigure(frame, row_index, weight=1)
             row = []
@@ -48,16 +53,21 @@ class ButtonGrid:
                     btn.switch_theme()
                 # Store row and column indices as a Button attribute
                 btn.position = (row_index, col_index)
-                btn.config(command=partial(button_pressed.set, btn.position))
+                if not click_random_square:
+                    btn.config(command=partial(button_pressed.set, btn.position))
                 row.append(btn)
             grid.append(row)
 
 
         self.grid = grid
-        logging.info('Grid Created, waiting for button press...')
-        self.root.winfo_toplevel().wait_variable('button pressed')
-        coordinates = button_pressed.get()
-        if APP_CLOSED: # Stop message
+        if not click_random_square:
+            logging.info('Grid Created, waiting for button press...')
+            self.root.winfo_toplevel().wait_variable('button pressed')
+            coordinates = button_pressed.get()
+        else:
+            coordinates = (random.randint(0, self.grid_size[0] - 1), random.randint(0, self.grid_size[1] - 1))
+            self.grid[coordinates[0]][coordinates[1]].clicked()
+        if coordinates == 39393: # Stop message
             try:
                 self.root.destroy()
             except TclError:
@@ -67,9 +77,6 @@ class ButtonGrid:
             square.config(command=None)
         self.grid = grid
 
-        not_allowed_coors = [
-            coordinates
-        ]
         if self.num_mines == -1 and self.grid_size == (10, 10):
             self.num_mines = 10
         elif self.num_mines == -1 and self.grid_size == (20, 20):
@@ -79,14 +86,13 @@ class ButtonGrid:
         elif self.num_mines == -1:
             self.num_mines = int((self.grid_size[0] * self.grid_size[1])/9)
 
-        mines_so_far = 0
-        while mines_so_far < self.num_mines:
-            for square, coor in self.iter_squares():
-                dice = random.randint(1, 20)
-                if dice == 2 and square not in self.around_square(*coordinates) and coor not in not_allowed_coors and mines_so_far < self.num_mines:
-                    mines_so_far += 1
-                    not_allowed_coors.append(coor)
-                    square.category = 'mine'
+        squares = [
+            square
+            for square, _ in self.iter_squares()
+            if square != self.grid[coordinates[0]][coordinates[1]] and square not in [square2 for square2 in self.around_square(*coordinates)]
+        ]
+        for square in random.sample(squares, self.num_mines):
+            square.category = 'mine'
 
         self.grid = grid
 
@@ -104,6 +110,7 @@ class ButtonGrid:
         return grid
     
     def setup_grid(self, grid: list[list[PickleSquare]], row_num, col_num) -> list[list[Square]]:
+        """Takes a list `PickleSquare`s and places them on the screen"""
         Grid.rowconfigure(self.root, row_num, weight=1)
         Grid.columnconfigure(self.root, col_num, weight=1)
         new_grid = []
@@ -128,6 +135,7 @@ class ButtonGrid:
         return new_grid
 
     def around_square(self, row_num: int, col_num: int, print_=False):
+        """Return a list of `Square` objects which are next to the coordinates"""
         around:list[Square] = []
         coors = []
 
@@ -171,11 +179,11 @@ class ButtonGrid:
     def iter_squares(self):
         for row in self.grid:
             for square in row:
-                yield square, (self.grid.index(row), row.index(square))
+                yield square, square.position
 
 
 class PickleButtonGrid:
-    """Same as `ButtonGrid` but is used to pickle and save data"""
+    """Same as `ButtonGrid` but has less attributes and can be pickled"""
 
     def __init__(self, grid_size: tuple[int, int], grid: list[list[PickleSquare]]) -> None:
         self.grid_size = grid_size
