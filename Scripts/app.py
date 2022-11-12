@@ -223,6 +223,7 @@ class App(Tk):
         # Type hints
         self.game: Game
         self.game_over: BooleanVar
+
         squares_flaged = [
             square
             for row in self.game.grid.grid
@@ -246,6 +247,7 @@ class App(Tk):
         now = now.replace(microsecond=0)
 
         if now > self.game.previous_sec:
+            # Update timer
             self.game.previous_sec = now
             self.game.seconds = (now - self.game.session_start).total_seconds() + self.game.additional_time
             percent = round(((len(squares_flaged))/self.game.num_mines) * 100, 2)
