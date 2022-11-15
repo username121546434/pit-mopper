@@ -19,9 +19,9 @@ if os.name == 'nt':
     ]
 
     include_files = [
-        ('./Scripts/data/fonts', 'data/fonts'),
-        ('./Scripts/data/images/windows_icon.ico', 'data/images/windows_icon.ico'),
-        ('./Scripts/data/images/windows_icon_darkmode.ico', 'data/images/windows_icon_darkmode.ico'),
+        ('./data/fonts', 'data/fonts'),
+        ('./data/images/windows_icon.ico', 'data/images/windows_icon.ico'),
+        ('./data/images/windows_icon_darkmode.ico', 'data/images/windows_icon_darkmode.ico'),
     ]
 
     options = {
