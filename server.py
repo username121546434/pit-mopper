@@ -45,7 +45,7 @@ port = 5555
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((server, port))
 
-logging.info('Socket binded successfully')
+logging.info(f'Socket binded successfully to: {server}:{port}')
 
 s.listen()
 logging.info('Server started, waiting for connection...')
@@ -178,7 +178,7 @@ def new_client(conn: socket.socket):
 
 while True:
     conn, addr = s.accept()
-    logging.info(f'Connected to: {addr}')
+    logging.info(f'Connected to new client')
     player_count += 1
 
     threading.Thread(target=new_client, args=[conn]).start()

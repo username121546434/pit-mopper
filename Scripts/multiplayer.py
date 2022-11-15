@@ -8,6 +8,7 @@ from .single_player import SinglePlayerApp
 from .network import Network
 from .game import Game, OnlineGame, OnlineGameInfo
 from tkinter import *
+from tkinter import messagebox, simpledialog
 from . import constants
 from .functions import *
 from .enums import KBDShortcuts
@@ -50,9 +51,9 @@ class MultiplayerApp(SinglePlayerApp):
         while True:
             try:
                 if self.game_id_state.get() == -1:
-                    self.n = Network(self.game_info)
+                    self.n = Network(self.game_info, self.server, self.port)
                 else:
-                    self.n = Network(self.game_id_state.get())
+                    self.n = Network(self.game_id_state.get(), self.server, self.port)
                     if isinstance(self.n.data, bool): # The server sends a boolean if the game id is not valid
                         if self.n.data:
                             logging.error('Game id requested already started')
@@ -79,7 +80,7 @@ class MultiplayerApp(SinglePlayerApp):
 
         self.load_last_button.destroy()
 
-        self.play_button.config(command=self.draw_all_waiting)
+        self.play_button.config(command=self.ask_for_server_and_port)
         self.play_button.pack_forget()
 
         self.game_id_state = IntVar()
@@ -90,6 +91,18 @@ class MultiplayerApp(SinglePlayerApp):
         self.play_button.pack(pady=(0, 20))
 
         self.title('Multiplayer Game Loader')
+    
+    def ask_for_server_and_port(self):
+        self.server = simpledialog.askstring('Server', 'Please put a valid server to connect to')
+        if self.server is None:
+            del self.server
+            return
+        self.port = simpledialog.askinteger('Server Port', 'Please put a valid port to connect to in the server')
+        if self.port is None:
+            del self.server
+            del self.port
+            return
+        self.draw_all_waiting()
     
     def draw_all_waiting(self, *_):
         if not self.validate_game(None):
@@ -110,7 +123,7 @@ class MultiplayerApp(SinglePlayerApp):
         App.set_keyboard_shorcuts(self)
         bind_widget(self, KBDShortcuts.toggle_chording, True, func=lambda _: self.chord_state.set(not self.chord_state.get()))
         bind_widget(self, KBDShortcuts.reset_connection, all_=True, func=lambda _: self.n.restart())
-        bind_widget(self, KBDShortcuts.start_game, True, self.draw_all_waiting)
+        bind_widget(self, KBDShortcuts.start_game, True, self.ask_for_server_and_port)
     
     def validate_game(self, game) -> bool:
         if (not self.game_id_state.get() > constants.GAME_ID_MIN and
@@ -270,6 +283,6 @@ def main():
     if len(sys.argv) > 1:
         if sys.argv[1].isdigit():
             window.game_id_state.set(int(sys.argv[1]))
-            window.draw_all_waiting()
+            window.ask_for_server_and_port()
 
     window.mainloop()
