@@ -106,14 +106,14 @@ def check_for_updates(app_quit):
             os.remove(installer_or_zip_file)
             with open(bat_file, 'w') as bat:
                 bat.write(f'''@echo off
-timeout 3
+timeout 3 /NOBREAK
 robocopy /MOV /MIR {dir} "{os.getcwd()}"
 rmdir {dir} /S /Q
 (goto) 2>nul & del "%~f0"''')
         else:
             with open(bat_file, 'w') as bat:
                 bat.write(f'''@echo off
-timeout 3
+timeout 3 /NOBREAK
 {installer_or_zip_file} /SILENT /SUPPRESSMSGBOXES /NOCANCEL /FORCECLOSEAPPLICATIONS
 del /q {installer_or_zip_file}
 (goto) 2>nul & del "%~f0"''')
