@@ -29,6 +29,7 @@ class MultiplayerApp(SinglePlayerApp):
 
         self.progress_bar = Progressbar(self, mode='indeterminate', length=200)
         self.progress_bar.pack(padx=50)
+        self.progress_bar.start(10)
 
         Button(self, text='Cancel', command=self.leave_waiting).pack(pady=(0, 20))
     
@@ -175,16 +176,15 @@ class MultiplayerApp(SinglePlayerApp):
     def _game(self):
         self.game_over = BooleanVar(self, name='game_over')
         self.game_after_cancel = self.after(50, self._update_game)
+        self.after(60, self.update_game_sockets)
         self.wait_variable('game_over')
 
-    def _update_game(self):
-        super()._update_game(after=False)
-
+    def update_game_sockets(self):
         if self.online_game.quit:
             self.player_left = True
             self.leave_game()
             return
-        if self.online_game.game_is_tie():
+        elif self.online_game.game_is_tie():
             messagebox.showinfo('Game Results', f'The game ended with a tie!\nTime taken: {format_second(self.game.result["seconds"])}')
             logging.info('Game Over, ended in a tie')
             self.leave_game()
@@ -223,7 +223,7 @@ class MultiplayerApp(SinglePlayerApp):
                 self.player_left = True
                 return
 
-        self.game_after_cancel = self.after(50, self._update_game)
+        self.after(150, self.update_game_sockets)
     
     def leave_game(self):
         self.after_cancel(self.game_after_cancel)
@@ -242,15 +242,15 @@ class MultiplayerApp(SinglePlayerApp):
         self.draw_all()
     
     def wait_for_game_mainloop(self):
-        self.after_cancel_code = self.after(10, self.wait_for_game_mainloop)
+        self.after_cancel_code = self.after(200, self.wait_for_game_mainloop)
         if self.connected:
             self.leave_game()
             self.after_cancel(self.after_cancel_code)
         elif not self.connected and not self.online_game.is_full:
             self.online_game = self.n.send_data('get')
-            self.progress_bar.step()
         elif self.online_game.is_full and not self.connected:
             self.after_cancel(self.after_cancel_code)
+            self.progress_bar.stop()
             self.create_game()
     
     def leave_waiting(self):

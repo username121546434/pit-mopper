@@ -89,7 +89,7 @@ def create_or_join_game(game_info: OnlineGameInfo) -> tuple[Literal[1, 2], int]:
     return player, game_id
 
 
-def join_game_from_id(conn: socket.socket, game_id: int) -> Literal[False] | tuple[Literal[2], int]:
+def join_game_from_id(conn: socket.socket, game_id: int) -> Literal[False] | tuple[Literal[2], OnlineGameInfo]:
     logging.info(f'Getting game from id...')
     game_info = get_game_from_id(game_id)
     if game_info is None: # Game does not exist
@@ -103,7 +103,7 @@ def join_game_from_id(conn: socket.socket, game_id: int) -> Literal[False] | tup
             conn.send(pickle.dumps(True))
             time.sleep(0.5) # Give the client time to respond
             return False
-        return 2, game_id
+        return 2, game_info
 
 
 def get_game_from_id(id_to_search: int, /):
@@ -121,9 +121,10 @@ def new_client(conn: socket.socket):
     if isinstance(game_info, OnlineGameInfo): # client wants to join any game with the same settings or create a new game
         player, game_id = create_or_join_game(game_info)
     else: # client wants to join a specific game using a game id
-        x = join_game_from_id(conn, game_info)
+        game_id = game_info + 1 - 1
+        x = join_game_from_id(conn, game_id)
         if x:
-            player, game_id = x
+            player, game_info = x
         else:
             player_count -= 1
             return
