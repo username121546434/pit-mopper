@@ -1,5 +1,4 @@
 import os
-from random import randint
 import webbrowser
 import requests
 from packaging.version import Version
