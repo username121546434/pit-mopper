@@ -30,7 +30,7 @@ def check_for_updates(app_quit):
         frame = HtmlFrame(window, messages_enabled=False)
 
         m_html = markdown(body)
-        with TemporaryFile('w', delete=False) as temp_file:
+        with TemporaryFile('w') as temp_file:
             temp_file.write(m_html)
             print(temp_file.name)
             frame.load_url('file:///' + temp_file.name)
@@ -43,8 +43,6 @@ def check_for_updates(app_quit):
     else:
         messagebox.showinfo(title='Update', message='There are no updates available')
         return
-
-    os.remove(temp_file.name)
     
     if os.name == 'posix' and choice.get():
         messagebox.showinfo('Update', 'Automatic updates are not supported on your platform, but you will be taken to the download link')
@@ -75,6 +73,8 @@ def check_for_updates(app_quit):
         progress_window = Toplevel()
         progress_window.config(padx=20, pady=20)
         progress_window.title('Updater')
+        progress_window.master.attributes('-disabled', True)
+        progress_window.attributes('-disabled', True)
         download = requests.get(download_url, stream=True)
 
         label = Label(progress_window, text='Downloading... 0%')
@@ -121,3 +121,4 @@ del /q {installer_or_zip_file}
         app_quit()
     else:
         messagebox.showinfo(title='Update Rejected', message='You have rejected the update')
+        return
