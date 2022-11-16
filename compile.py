@@ -15,7 +15,8 @@ if os.name == 'nt':
     )]
 
     packages = [
-        'html.parser' # Required by the markdown library
+        'html.parser', # Required by the markdown library
+        'tkinterweb'
     ]
 
     include_files = [
