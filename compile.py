@@ -40,4 +40,4 @@ if os.name == 'nt':
         executables = executables
     ) 
 else:
-    os.system('pyinstaller --add-data "./data/images/linux_icon_darkmode.xbm:data/images/linux_icon_darkmode.xbm" --add-data "data/images/linux_icon.xbm:data/images/linux_icon.xbm" -i data/images/linux_icon.xbm -D -w "./Pit Mopper.py"')
+    os.system('pyinstaller --collect-all tkinterweb --add-data "./data/images/linux_icon_darkmode.xbm:data/images/linux_icon_darkmode.xbm" --add-data "data/images/linux_icon.xbm:data/images/linux_icon.xbm" -i data/images/linux_icon.xbm -D -w "./Pit Mopper.py"')
