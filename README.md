@@ -1,4 +1,16 @@
-# Pit Mopper
+<h1 align='center'>Pit Mopper</h1>
+
+<div align='center'>
+  <a href=https://github.com/username121546434/pit-mopper/releases/latest>
+    <img src='https://img.shields.io/github/v/release/username121546434/pit-mopper?include_prereleases&label=Latest%20Release'/>
+  </a>
+  <a href = 'https://github.com/username121546434/pit-mopper/pulls'>
+    <img src = 'https://img.shields.io/github/issues-pr/username121546434/pit-mopper?label=Pull%20Requests'/>
+  </a>
+  <a href = 'https://github.com/username121546434/pit-mopper/issues'>
+    <img src = 'https://img.shields.io/github/issues/username121546434/pit-mopper?label=Issues'/>
+  </a>
+</div>
 
 Pit Mopper is a game based on "Minesweeper" that was built in python.
 
