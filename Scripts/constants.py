@@ -26,7 +26,7 @@ if not os.path.exists(DEBUG):
 
 STRFTIME = r'%A %B %d, %I:%M %p %Y %Z'
 HIGHSCORE_TXT = os.path.join(APPDATA, 'highscore.txt')
-MAX_ROWS_AND_COLS = 75
+MAX_ROWS_AND_COLS = float('inf')
 MIN_ROWS_AND_COLS = 4
 DARK_MODE_BG = '#282828'
 DARK_MODE_FG = '#FFFFFF'
