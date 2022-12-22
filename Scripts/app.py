@@ -53,8 +53,6 @@ class App(Tk):
             self.iconbitmap(constants.LOGO)
 
         self.draw_all()
-        self.update()
-        self.width, self.height, _, _, _ = self.winfo_geometry()
         assert App._alive is self
         self.protocol('WM_DELETE_WINDOW', self.quit_app)
         self.initialized = True
@@ -75,12 +73,15 @@ class App(Tk):
         self.set_keyboard_shorcuts()
         self.draw()
 
+        if self.initialized:
+            if os.name == 'nt':
+                self.state('normal')
+            else:
+                self.attributes('-zoomed', False)
+            self.geometry('')
+
         self.resizable(False, False)
         self._change_theme()
-        
-        if self.initialized:
-            _, _, x, y, _ = self.winfo_geometry()
-            self.geometry(f'={self.width}x{self.height}+{x}+{y}')
     
     def set_variables(self):
         self.dark_mode_state = BooleanVar(self, constants.dark_mode)
@@ -344,5 +345,7 @@ class App(Tk):
 
         self.game.result = {'seconds': self.game.seconds, 'win': win, 'game over': game_over}
         self.update()
-        if not self.game.quit and after:
+        if hasattr(self, 'game') and \
+           self.game is not None and \
+           not self.game.quit and after:
             self.game_after_cancel = self.after(50, self._update_game)
