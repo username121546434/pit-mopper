@@ -242,7 +242,7 @@ class MultiplayerApp(SinglePlayerApp):
         self.after_cancel(self.game_after_cancel)
         self.game_over.set(True)
         self.fullscreen_state.set(False)
-        self.game = None
+        del self.game
         self.connected = False
         if self.player_left:
             logging.error('It seems like the player has disconnected')
