@@ -14,6 +14,17 @@ with open(debug_log_file, 'w') as _:
 from Scripts.base_logger import init_logger
 init_logger()
 
+
+if getattr(sys, 'frozen', False):
+    # when compiled to exe file
+    app_dir = os.path.dirname(sys.executable)
+else:
+    # when running from normal python file
+    app_dir = os.path.dirname(os.path.realpath(__file__))
+
+if os.getcwd() != app_dir:
+    os.chdir(app_dir)
+
 logging.info('Loading...')
 __version__ = VERSION
 __license__ = 'GNU GPL v3, see LICENSE.txt for more info'

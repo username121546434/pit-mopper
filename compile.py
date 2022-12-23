@@ -38,7 +38,7 @@ if os.name == 'nt':
         version = VERSION,
         description = '',
         executables = executables
-    ) 
+    )
 else:
     os.system(
         'pyinstaller --collect-all tkinterweb ' \
