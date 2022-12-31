@@ -18,9 +18,9 @@ def check_for_updates(app_quit):
     if not check_internet():
         messagebox.showerror('No internet', 'You can only check for updates with an internet connection')
         return
-    response = requests.get('https://api.github.com/repos/username121546434/pit-mopper/releases')
+    response = requests.get('https://api.github.com/repos/username121546434/pit-mopper/releases/latest')
     response.raise_for_status()
-    latest_version_info = response.json()[0]
+    latest_version_info = response.json()
     latest_version = latest_version_info["tag_name"]
     body = latest_version_info['body']
     title = latest_version_info['name']
