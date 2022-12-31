@@ -29,11 +29,9 @@ def check_for_updates(app_quit):
 
         frame = HtmlFrame(window, messages_enabled=False)
 
-        m_html = markdown(body)
-        with TemporaryFile('w') as temp_file:
-            temp_file.write(m_html)
-            print(temp_file.name)
-            frame.load_url('file:///' + temp_file.name)
+        m_html = f'<center><h1>{title}</h1></center>' + markdown(body)
+        frame.load_html(m_html)
+        frame.on_link_click(webbrowser.open)
         frame.pack(fill="both", expand=True)
 
         Checkbutton(window, onvalue=True, offvalue=False, variable=choice, text='Update?').pack()
