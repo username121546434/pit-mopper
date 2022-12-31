@@ -1,4 +1,6 @@
 import os
+import subprocess
+import sys
 import webbrowser
 import requests
 from packaging.version import Version
@@ -10,7 +12,6 @@ from markdown import markdown
 from tkinterweb.htmlwidgets import HtmlFrame
 from .constants import VERSION
 from .network import check_internet
-from tempfile import TemporaryFile
 
 
 def check_for_updates(app_quit):
@@ -19,8 +20,10 @@ def check_for_updates(app_quit):
         return
     response = requests.get('https://api.github.com/repos/username121546434/pit-mopper/releases')
     response.raise_for_status()
-    latest_version = response.json()[0]["tag_name"]
-    body = response.json()[0]['body']
+    latest_version_info = response.json()[0]
+    latest_version = latest_version_info["tag_name"]
+    body = latest_version_info['body']
+    title = latest_version_info['name']
 
     if Version(latest_version) > Version(VERSION):
         window = Toplevel()
@@ -34,9 +37,9 @@ def check_for_updates(app_quit):
         frame.on_link_click(webbrowser.open)
         frame.pack(fill="both", expand=True)
 
-        Checkbutton(window, onvalue=True, offvalue=False, variable=choice, text='Update?').pack()
+        Checkbutton(window, onvalue=True, offvalue=False, variable=choice, text='Update?', font=('Arial', 15, 'bold')).pack()
 
-        Button(window, text='Continue', command=window.destroy).pack()
+        Button(window, text='Continue', command=window.destroy, font=('Arial', 15)).pack()
         window.master.wait_window(window)
     else:
         messagebox.showinfo(title='Update', message='There are no updates available')
@@ -48,22 +51,18 @@ def check_for_updates(app_quit):
 
     elif os.name == 'nt' and choice.get():
         messagebox.showinfo(title='Update', message='Press "Ok" to update Pit Mopper')
-        if os.path.exists('unins000.exe'):
-            download_zip = False
-        else:
-            download_zip = True
+        download_zip = not os.path.exists('unins0000.exe')
 
-        response = requests.get('https://api.github.com/repos/username121546434/pit-mopper/releases')
         if download_zip:
             asset = [
                 asset
-                for asset in response.json()[0]['assets']
+                for asset in latest_version_info['assets']
                 if asset['content_type'] == 'application/x-zip-compressed' # *.zip file
             ][0]
         else:
             asset = [
                 asset
-                for asset in response.json()[0]['assets']
+                for asset in latest_version_info['assets']
                 if asset['content_type'] == 'application/x-msdownload' # *.exe file
             ][0]
         download_url: str = asset['browser_download_url']
@@ -89,7 +88,7 @@ def check_for_updates(app_quit):
             for data in download.iter_content(chunk_size=1000):
                 progress['value'] += increment * len(data)
                 percent += len(data) / total_size
-                label.config(text=f'Downloading... {round(percent * 100, 2)}%')
+                label.config(text=f'Downloading... {percent:.2%}')
                 f.write(data)
                 progress_window.update()
 
@@ -98,24 +97,27 @@ def check_for_updates(app_quit):
         bat_file = os.path.join(os.getenv('TEMP'), 'Pit Mopper Update.bat')
         if download_zip:
             with ZipFile(installer_or_zip_file) as zip_file:
-                dir = filename.split('.')[0]
-                dir = os.path.join(os.getenv('TEMP'), dir)
-                zip_file.extractall(dir)
+                directory = filename.split('.')[0]
+                directory = os.path.join(os.getenv('TEMP'), directory)
+                zip_file.extractall(directory)
             os.remove(installer_or_zip_file)
             with open(bat_file, 'w') as bat:
                 bat.write(f'''@echo off
 timeout 3 /NOBREAK
-robocopy /MOV /MIR {dir} "{os.getcwd()}"
-rmdir {dir} /S /Q
+robocopy /MOV /MIR {directory} "{os.getcwd()}"
+rmdir {directory} /S /Q
+start "Pit Mopper" "{os.path.join(os.path.split(sys.executable)[0], 'Pit Mopper.exe')}"
 (goto) 2>nul & del "%~f0"''')
         else:
             with open(bat_file, 'w') as bat:
                 bat.write(f'''@echo off
 timeout 3 /NOBREAK
-{installer_or_zip_file} /SILENT /SUPPRESSMSGBOXES /NOCANCEL /FORCECLOSEAPPLICATIONS
-del /q {installer_or_zip_file}
+"{installer_or_zip_file}" /SILENT /SUPPRESSMSGBOXES /NOCANCEL /FORCECLOSEAPPLICATIONS
+del /q "{installer_or_zip_file}"
+start "Pit Mopper" "{os.path.join(os.path.split(sys.executable)[0], 'Pit Mopper.exe')}"
 (goto) 2>nul & del "%~f0"''')
-        os.startfile(bat_file)
+        subprocess.Popen(['cmd', '/C', bat_file], creationflags=subprocess.CREATE_NO_WINDOW,
+                 start_new_session=True)
         app_quit()
     else:
         messagebox.showinfo(title='Update Rejected', message='You have rejected the update')
