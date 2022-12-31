@@ -42,8 +42,8 @@ if os.name == 'nt':
 else:
     os.system(
         'pyinstaller --collect-all tkinterweb ' \
-        '--add-data "./data/images/linux_icon_darkmode.xbm:data/images/linux_icon_darkmode.xbm" ' \
-        '--add-data "data/images/linux_icon.xbm:data/images/linux_icon.xbm" ' \
+        '--add-data "./data/images/linux_icon_darkmode.xbm:data/images" ' \
+        '--add-data "data/images/linux_icon.xbm:data/images" ' \
         '-i data/images/linux_icon.xbm ' \
         '-D --noconsole "./Pit Mopper.py"'
     )
