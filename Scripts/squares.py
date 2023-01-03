@@ -1,4 +1,5 @@
 """Defines the `Square` and `PickleSquare` class"""
+from __future__ import annotations
 from tkinter import *
 from .load_font import load_font
 from .constants import DEFAULT_BG, DARK_MODE_BG, SQUARES_FONT

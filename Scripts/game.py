@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from .app import App
 
 
-@dataclass(slots=True, frozen=True, eq=True)
+@dataclass(frozen=True, eq=True)
 class OnlineGameInfo:
     """This is initially sent from the client to the server to determine what settings to use"""
     game_size: tuple[int, int]
@@ -71,7 +71,7 @@ class OnlineGame:
         return "%s(%s)" % (self.__class__.__name__, ', '.join(items))
 
 
-@dataclass(slots=True)
+@dataclass
 class Game:
     """Holds all data for a game"""
     grid: ButtonGrid
@@ -91,7 +91,7 @@ class Game:
     start: datetime = field(default_factory=datetime.now)
 
 
-@dataclass(slots=True)
+@dataclass
 class PickleGame:
     """Same as `Game` but it can be pickled and has less attributes"""
     grid: PickleButtonGrid

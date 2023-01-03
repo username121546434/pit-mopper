@@ -1,4 +1,5 @@
 """A module that that has the `SinglePlayerApp` class"""
+from __future__ import annotations
 import pickle
 from functools import partial
 from tkinter import *

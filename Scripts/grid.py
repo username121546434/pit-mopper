@@ -1,3 +1,4 @@
+from __future__ import annotations
 from tkinter import *
 from .squares import Square, PickleSquare
 import random
