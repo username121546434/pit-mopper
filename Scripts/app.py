@@ -176,7 +176,7 @@ class App(Tk):
         self.config(bg=CURRENT_BG)
 
         if CURRENT_BG == constants.DEFAULT_BG:
-            self.resizable(*self.resizable())
+            light_title_bar(self)
         else:
             dark_title_bar(self)
 

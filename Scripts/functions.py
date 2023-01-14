@@ -48,9 +48,9 @@ def format_second(seconds: int | float):
         return 'None'
 
 
-def dark_title_bar(window):
+def _title_bar(window, value: int):
     """
-    Adds a dark title bar to a tkinter window
+    Adds or removes a dark title bar to a tkinter window depending on the parameter `value`
     
     Apperantely, this is supposed to only work on Windows 11 but sometimes it works on Windows 10
 
@@ -63,10 +63,23 @@ def dark_title_bar(window):
         get_parent = ctypes.windll.user32.GetParent
         hwnd = get_parent(window.winfo_id())
         rendering_policy = DWMWA_USE_IMMERSIVE_DARK_MODE
-        value = 2
         value = ctypes.c_int(value)
         set_window_attribute(hwnd, rendering_policy, ctypes.byref(value),
                             ctypes.sizeof(value))
+
+
+def dark_title_bar(window):
+    """
+    Turn the title of a tkinter window dark
+    """
+    _title_bar(window, 2)
+
+
+def light_title_bar(window):
+    """
+    Undos the dark title bar that was added via `dark_title_bar`
+    """
+    _title_bar(window, 0)
 
 
 def clear_all_data():
