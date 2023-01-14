@@ -4,6 +4,9 @@ import os
 import sys
 from tkinter import messagebox
 from tkinter import *
+from tkinterweb.htmlwidgets import HtmlFrame
+from .squares import Square
+from .custom_menubar import CustomMenuBar
 from . import constants
 import traceback
 import pyperclip
@@ -186,3 +189,68 @@ def format_kbd_shortcut(shortcut: KBDShortcuts) -> str:
     Takes a tkinter binding like `<Control-a>` and turns it into something like `Ctrl+A`
     """
     return shortcut.value[1:-1].lower().replace('control', 'Ctrl').replace('-', '+').title()
+
+
+def change_theme_of_window(window: Tk | Toplevel):
+    """Does almost same thing that `App.change_theme` does but without logging messages"""
+    CURRENT_BG = constants.CURRENT_BG
+    CURRENT_FG = constants.CURRENT_FG
+    window.config(bg=CURRENT_BG)
+
+    if not constants.dark_mode:
+        light_title_bar(window)
+        window.iconbitmap(constants.LOGO)
+    else:
+        dark_title_bar(window)
+        window.iconbitmap(constants.DARK_MODE_LOGO)
+
+    for child in window.winfo_children():
+        if isinstance(child, CustomMenuBar):
+            if CURRENT_BG == constants.DEFAULT_BG:
+                child.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG)
+            else:
+                child.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG, sub_bg='black', sub_fg='white')
+        elif isinstance(child, Spinbox):
+            if CURRENT_BG == constants.DEFAULT_BG:
+                child.config(bg='white', fg=CURRENT_FG)
+            else:
+                child.config(bg=CURRENT_BG, fg=CURRENT_FG)
+        elif isinstance(child, HtmlFrame):
+            if constants.dark_mode:
+                child.add_css(f"""
+            body {{
+                color: {constants.DARK_MODE_FG};
+                background-color: {constants.DARK_MODE_BG};
+            }}
+            """)
+            else:
+                child.add_css(f"""
+            body {{
+                color: {constants.DEFAULT_FG};
+                background-color: {constants.DEFAULT_BG};
+            }}
+            """)
+        elif isinstance(child, CustomMenuBar):
+            child.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG)
+        elif isinstance(child, Frame):
+            for square in child.winfo_children():
+                if isinstance(square, Square):
+                    square.switch_theme(CURRENT_BG != constants.DEFAULT_BG)
+                elif isinstance(square, Label):
+                    square.config(bg=CURRENT_BG, fg=CURRENT_FG)
+        elif isinstance(child, Toplevel):
+            should_continue = False
+            for t in window.menubar.iter_children():
+                if t.window is child:
+                    should_continue = True
+                    break
+            if should_continue:
+                continue
+            # we do all of that because we don't want to change the menubar TopLevel colors
+            # CustomMenuBar.change_bg_fg should handle that
+            change_theme_of_window(child)
+        else:
+            child.configure(bg=CURRENT_BG, fg=CURRENT_FG)
+
+        if isinstance(child, (Checkbutton, Radiobutton)):
+            child.config(selectcolor=CURRENT_BG)

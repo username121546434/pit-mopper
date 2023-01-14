@@ -25,7 +25,6 @@ class SubMenu:
         self.active_bg = 'blue'
         self.active_fg = self.fg
 
-
     def on_popup(self, *_):
         """Called to show the menubar"""
         for label in self.parent._lb_list:
@@ -121,13 +120,12 @@ class SubMenu:
         if isinstance(w, ttk.Separator):
             return
 
-        self._popup.destroy()
-        self._open = False
-
         if w._command is not None:
             w._command()
         if checkbutton:
             w._var.set(not w._var.get())
+        
+        self.destroy()
     
     def _leave(self, event: tk.Event):
         _, height_xy = self._popup.winfo_geometry().split('x')
@@ -143,6 +141,7 @@ class SubMenu:
         if not self._open:
             return
         self._popup.destroy()
+        self._popup = None
         self._open = False
     
     def _pop(self, index: int | None=None):
@@ -162,6 +161,16 @@ class SubMenu:
         else:
             for i in index:
                 self._pop(i)
+    
+    @property
+    def is_open(self):
+        """Whether the menu window is open or not"""
+        return self._open
+
+    @property
+    def window(self):
+        """The `TopLevel` that this menu is associated with, if it is open"""
+        return self._popup
 
 
 class _LabelTypeHint(tk.Label):
@@ -234,6 +243,10 @@ class CustomMenuBar(tk.Frame):
             menu.bg = sub_bg
             menu.fg = sub_fg
             menu.active_bg = sub_overbg
+    
+    def iter_children(self):
+        for label in self._lb_list:
+            yield label.menu
 
 
 def demo():
@@ -255,7 +268,7 @@ def demo():
     editmenu.add_command(label='Copy', accelerator='Ctrl-C')
     editmenu.add_command(label='Paste', accelerator='Ctrl-V')
     editmenu.add_separator()
-    editmenu.add_checkbutton(label='Change Theme', accelerator='Ctrl-D', variable=theme, command=lambda: (mb.change_bg_fg('red', 'white', 'black'), print(theme.get())))
+    editmenu.add_checkbutton(label='Change Theme', accelerator='Ctrl-D', variable=theme, command=lambda: (mb.change_bg_fg('red', 'white', 'black', 'white'), print(theme.get())))
 
     mb.add_menu('File', filemenu)
     mb.add_menu('Edit', editmenu)

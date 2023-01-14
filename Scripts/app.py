@@ -81,7 +81,7 @@ class App(Tk):
             self.geometry('')
 
         self.resizable(False, False)
-        self._change_theme()
+        change_theme_of_window(self)
     
     def set_variables(self):
         self.dark_mode_state = BooleanVar(self, constants.dark_mode)
@@ -161,48 +161,11 @@ class App(Tk):
             logging.info('User switched theme to dark mode')
             constants.CURRENT_BG = constants.DARK_MODE_BG
             constants.CURRENT_FG = constants.DARK_MODE_FG
-            self.iconbitmap(constants.DARK_MODE_LOGO)
         else:
             logging.info('User switched theme to light mode')
             constants.CURRENT_BG = constants.DEFAULT_BG
             constants.CURRENT_FG = constants.DEFAULT_FG
-            self.iconbitmap(constants.LOGO)
-        self._change_theme()
-
-    def _change_theme(self):
-        """Does the same thing that `change_theme` does but without logging messages"""
-        CURRENT_BG = constants.CURRENT_BG
-        CURRENT_FG = constants.CURRENT_FG
-        self.config(bg=CURRENT_BG)
-
-        if CURRENT_BG == constants.DEFAULT_BG:
-            light_title_bar(self)
-        else:
-            dark_title_bar(self)
-
-        for child in self.winfo_children():
-            if not isinstance(child, (Toplevel, Spinbox, CustomMenuBar, Progressbar, Frame)):
-                child.config(bg=CURRENT_BG, fg=CURRENT_FG)
-            elif isinstance(child, CustomMenuBar):
-                if CURRENT_BG == constants.DEFAULT_BG:
-                    child.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG)
-                else:
-                    child.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG, sub_bg='black', sub_fg='white')
-            elif isinstance(child, Spinbox):
-                if CURRENT_BG == constants.DEFAULT_BG:
-                    child.config(bg='white', fg=CURRENT_FG)
-                else:
-                    child.config(bg=CURRENT_BG, fg=CURRENT_FG)
-            elif not isinstance(child, Frame) and not isinstance(child, CustomMenuBar) and not isinstance(child, Progressbar):
-                child.config(bg=CURRENT_BG, fg=CURRENT_FG)
-            elif isinstance(child, CustomMenuBar):
-                child.change_bg_fg(bg=CURRENT_BG, fg=CURRENT_FG)
-            elif isinstance(child, Frame):
-                for square in child.winfo_children():
-                    if isinstance(square, Square):
-                        square.switch_theme(CURRENT_BG != constants.DEFAULT_BG)
-                    elif isinstance(square, Label):
-                        square.config(bg=CURRENT_BG, fg=CURRENT_FG)
+        change_theme_of_window(self)
 
     def clear(self):
         """Clears everything on the window, including bindings"""

@@ -4,14 +4,15 @@ import sys
 import webbrowser
 import requests
 from packaging.version import Version
-from tkinter import *
+from tkinter import Toplevel, BooleanVar, Checkbutton, Button, Label
 from tkinter.ttk import Progressbar
 from zipfile import ZipFile
-from tkinter import messagebox
 from markdown import markdown
 from tkinterweb.htmlwidgets import HtmlFrame
+import tkinter.messagebox as messagebox
 from .constants import VERSION
 from .network import check_internet
+from .functions import change_theme_of_window
 
 
 def check_for_updates(app_quit):
@@ -32,7 +33,7 @@ def check_for_updates(app_quit):
 
         frame = HtmlFrame(window, messages_enabled=False)
 
-        m_html = f'<center><h1>{title}</h1></center>' + markdown(body)
+        m_html = f'<center><h1>{title}</h1></center>' + markdown(body,)
         frame.load_html(m_html)
         frame.on_link_click(webbrowser.open)
         frame.pack(fill="both", expand=True)
@@ -40,6 +41,7 @@ def check_for_updates(app_quit):
         Checkbutton(window, onvalue=True, offvalue=False, variable=choice, text='Update?', font=('Arial', 15, 'bold')).pack()
 
         Button(window, text='Continue', command=window.destroy, font=('Arial', 15)).pack()
+        change_theme_of_window(window)
         window.master.wait_window(window)
     else:
         messagebox.showinfo(title='Update', message='There are no updates available')
@@ -83,6 +85,8 @@ def check_for_updates(app_quit):
         total_size = int(download.headers.get('content-length'))
         increment = (1 / total_size) * 100
         percent = 0.0
+
+        change_theme_of_window(progress_window)
 
         with open(installer_or_zip_file, 'wb') as f:
             for data in download.iter_content(chunk_size=1000):

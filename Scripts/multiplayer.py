@@ -183,7 +183,7 @@ class MultiplayerApp(SinglePlayerApp):
         bind_widget(self, KBDShortcuts.fullscreen, all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
         bind_widget(self, KBDShortcuts.toggle_theme, all_=True, func=lambda *_: self.dark_mode_state.set(not self.dark_mode_state.get()))
 
-        self._change_theme()
+        change_theme_of_window(self)
         self._game()
     
     def _game(self):
