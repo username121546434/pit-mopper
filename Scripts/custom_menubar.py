@@ -109,7 +109,7 @@ class SubMenu:
         if checkbutton:
             mb._var = var
             if var.get():
-                mb.config(text=f'✔ {pad_with_tabs(label, self.max_len)}  {accelerator if accelerator is not None else ""}')
+                mb.config(text=f'✔ {mb.cget("text")}')
             mb.bind('<Button-1>', lambda e: self._on_command(e, True))
         else:
             mb.bind('<Button-1>', self._on_command)
