@@ -8,9 +8,6 @@ if os.name == 'nt':
     # *.xbm is Linux specific, use *.ico instead
     LOGO = "data\\images\\windows_icon.ico"
     DARK_MODE_LOGO = "data\\images\\windows_icon_darkmode.ico"
-    # Below is console related info
-    SW_HIDE = 0
-    SW_SHOW = 5
 else:
     # Otherwise, assume we are are on Linux
     APPDATA: str = os.path.join(os.getenv('HOME'), '.pitmopper')
