@@ -121,7 +121,7 @@ class SubMenu:
             return
 
         if w._command is not None:
-            w._command()
+            self._popup.master.after(10, w._command)
         if checkbutton:
             w._var.set(not w._var.get())
         

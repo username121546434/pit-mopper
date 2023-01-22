@@ -49,7 +49,7 @@ def check_for_updates(app_quit):
     
     if os.name == 'posix' and choice.get():
         messagebox.showinfo('Update', 'Automatic updates are not supported on your platform, but you will be taken to the download link')
-        webbrowser.open('https://github.com/username121546434/pit-mopper/releases/latest')
+        webbrowser.open(f'https://github.com/username121546434/pit-mopper/releases/tag/{latest_version}/')
 
     elif os.name == 'nt' and choice.get():
         messagebox.showinfo(title='Update', message='Press "Ok" to update Pit Mopper')
@@ -124,5 +124,5 @@ start "Pit Mopper" "{os.path.join(os.path.split(sys.executable)[0], 'Pit Mopper.
                  start_new_session=True)
         app_quit()
     else:
-        messagebox.showinfo(title='Update Rejected', message='You have rejected the update')
+        messagebox.showinfo('Update Rejected', 'You have rejected the update')
         return
