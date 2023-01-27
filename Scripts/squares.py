@@ -16,17 +16,6 @@ num_colors = {
     8: 'gray',
 }
 
-dark_mode_colors = {
-    1: 'DarkBlue',
-    2: 'DarkGreen',
-    3: 'DarkMagenta',
-    4: 'DarkOrange',
-    5: 'DeepPink',
-    6: 'DarkRed',
-    7: 'Goldenrod',
-    8: 'DarkGrey'
-}
-
 
 class Square(Button):
     """Holds data for a square in the game. `Square` is a subclass of the `Button` class from tkinter"""
@@ -95,10 +84,7 @@ class Square(Button):
             self.config(text='💣', bg='red')
             self.game_over = True
         elif self.num != None:
-            if self.dark_mode:
-                self.config(text=str(self.num), bg=dark_mode_colors[self.num], fg=DARK_MODE_BG)
-            else:
-                self.config(text=str(self.num), bg=num_colors[self.num], fg='black')
+            self.config(text=str(self.num), bg=num_colors[self.num], fg='black')
         else:
             if self.dark_mode:
                 self.config(bg=DARK_MODE_BG)
@@ -112,20 +98,21 @@ class Square(Button):
             self.dark_mode = not self.dark_mode
         else:
             self.dark_mode = theme
+
         if not self.dark_mode:
-            if self.clicked_on and self.num != None:
-                self.config(bg=num_colors[self.num])
-            elif self.flaged:
+            if self.flaged:
                 self.config(fg='black', bg=DEFAULT_BG)
             else:
                 self.config(bg=DEFAULT_BG)
         elif self.dark_mode:
-            if self.clicked_on and self.num != None:
-                self.config(bg=dark_mode_colors[self.num])
-            elif self.flaged:
+            if self.flaged:
                 self.config(fg='white', bg=DARK_MODE_BG)
             else:
                 self.config(bg=DARK_MODE_BG)
+
+        if self.clicked_on and self.num != None:
+            self.config(bg=num_colors[self.num], fg='black')
+
         self.last_bg = self.cget('bg')
     
     def hover_enter(self, _):
