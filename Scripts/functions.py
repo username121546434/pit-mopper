@@ -5,7 +5,6 @@ import sys
 from tkinter import messagebox
 from tkinter import *
 from tkinterweb.htmlwidgets import HtmlFrame
-from .squares import Square
 from .custom_menubar import CustomMenuBar
 from . import constants
 import traceback
@@ -193,6 +192,7 @@ def format_kbd_shortcut(shortcut: KBDShortcuts) -> str:
 
 def change_theme_of_window(window: Tk | Toplevel):
     """Does almost same thing that `App.change_theme` does but without logging messages"""
+    from .squares import Square
     CURRENT_BG = constants.CURRENT_BG
     CURRENT_FG = constants.CURRENT_FG
     window.config(bg=CURRENT_BG)
