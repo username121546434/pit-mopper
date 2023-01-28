@@ -42,8 +42,8 @@ class MultiplayerApp(SinglePlayerApp):
     def draw_waiting_menubar(self):
         self.draw_menubar()
         # Remove the "Enable Chording" and a seperator from menubar
-        self.settings.pop([None, None])
-        self.settings.add_separator()
+        self.settings.pop([None] * 4)
+        self.menubar.remove_menu(self.advanced)
         self.settings.add_command(label='Restart connection', command=self.n.restart, accelerator=format_kbd_shortcut(KBDShortcuts.reset_connection))
     
     def set_waiting_variables(self) -> bool:
@@ -74,6 +74,11 @@ class MultiplayerApp(SinglePlayerApp):
         self.player = self.n.data
         self.game_info = self.online_game.game_info
         return True
+    
+    def set_waiting_keyboard_shorcuts(self):
+        bind_widget(self, KBDShortcuts.toggle_theme, True, lambda _: self.dark_mode_state.set(not self.dark_mode_state.get()))
+        bind_widget(self, KBDShortcuts.reset_connection, True, lambda e: self.n.restart())
+        bind_widget(self, KBDShortcuts.quit_app, True, self.quit_app)
     
     def draw(self):
         super().draw()
@@ -115,6 +120,7 @@ class MultiplayerApp(SinglePlayerApp):
         if not self.set_waiting_variables():
             return
         self.clear()
+        self.set_waiting_keyboard_shorcuts()
         self.draw_waiting()
         self.draw_waiting_menubar()
         change_theme_of_window(self)
@@ -123,7 +129,6 @@ class MultiplayerApp(SinglePlayerApp):
     def set_keyboard_shorcuts(self):
         App.set_keyboard_shorcuts(self)
         bind_widget(self, KBDShortcuts.toggle_chording, True, func=lambda _: self.chord_state.set(not self.chord_state.get()))
-        bind_widget(self, KBDShortcuts.reset_connection, all_=True, func=lambda _: self.n.restart())
         bind_widget(self, KBDShortcuts.start_game, True, lambda e: self.ask_for_server_and_port())
     
     def validate_game(self, game) -> bool:

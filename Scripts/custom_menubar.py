@@ -231,6 +231,15 @@ class CustomMenuBar(tk.Frame):
         l.bind('<1>', lambda e: self._on_press(l, command))
         self._lb_list.append(l)
     
+    def remove_menu(self, menu: SubMenu):
+        new_list = []
+        for label in self._lb_list:
+            if label.menu is menu:
+                label.destroy()
+            else:
+                new_list.append(label)
+        self._lb_list = new_list
+    
     def change_bg_fg(self, bg=None, fg=None, sub_bg='white', sub_fg='black', sub_overbg='blue'):
         """Changes the background/foreground of the menu"""
         if not bg == None:

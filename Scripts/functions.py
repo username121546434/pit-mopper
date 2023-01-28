@@ -4,6 +4,7 @@ import os
 import sys
 from tkinter import messagebox
 from tkinter import *
+from tkinter.ttk import Progressbar, Style
 from tkinterweb.htmlwidgets import HtmlFrame
 from .custom_menubar import CustomMenuBar
 from . import constants
