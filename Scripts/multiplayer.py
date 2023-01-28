@@ -123,7 +123,7 @@ class MultiplayerApp(SinglePlayerApp):
         App.set_keyboard_shorcuts(self)
         bind_widget(self, KBDShortcuts.toggle_chording, True, func=lambda _: self.chord_state.set(not self.chord_state.get()))
         bind_widget(self, KBDShortcuts.reset_connection, all_=True, func=lambda _: self.n.restart())
-        bind_widget(self, KBDShortcuts.start_game, True, self.ask_for_server_and_port)
+        bind_widget(self, KBDShortcuts.start_game, True, lambda e: self.ask_for_server_and_port())
     
     def validate_game(self, game) -> bool:
         if (not self.game_id_state.get() > constants.GAME_ID_MIN and
