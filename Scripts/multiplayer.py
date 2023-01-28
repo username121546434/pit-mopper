@@ -117,6 +117,7 @@ class MultiplayerApp(SinglePlayerApp):
         self.clear()
         self.draw_waiting()
         self.draw_waiting_menubar()
+        change_theme_of_window(self)
         self.after_cancel_code = self.after(1, self.wait_for_game_mainloop)
     
     def set_keyboard_shorcuts(self):

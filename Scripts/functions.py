@@ -249,6 +249,15 @@ def change_theme_of_window(window: Tk | Toplevel):
             # we do all of that because we don't want to change the menubar TopLevel colors
             # CustomMenuBar.change_bg_fg should handle that
             change_theme_of_window(child)
+        elif isinstance(child, Progressbar):
+            style = Style()
+            if constants.dark_mode:
+                style.theme_use('clam')
+            else:
+                style.theme_use('default')
+                
+            style.configure("Horizontal.TProgressbar", foreground=CURRENT_BG, background=CURRENT_BG)
+            child.config(style='Horizontal.TProgressbar')
         else:
             child.configure(bg=CURRENT_BG, fg=CURRENT_FG)
 
