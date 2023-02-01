@@ -246,10 +246,11 @@ class App(Tk):
                             precolors.append(square2.cget('bg'))
                             square2.config(bg='brown')
                         self.update()
-                        self.after(1000)
+                        self.after(500)
                         for square2 in squares:
                             precolor = precolors[squares.index(square2)]
                             square2.config(bg=precolor)
+                        square.chord = False
                     else:
                         for square2 in (square for square in self.game.grid.around_square(*square.position) if not square.clicked_on and square.category != 'mine'):
                             square2.clicked()
