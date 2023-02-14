@@ -1,6 +1,8 @@
 """A module that that has the `MultiplayerApp` class"""
 from datetime import datetime
 from tkinter.ttk import Progressbar
+
+from .url_protocol import parse_url
 from .custom_menubar import CustomMenuBar, SubMenu
 from .app import App
 from .grid import ButtonGrid
@@ -290,5 +292,12 @@ def main():
         if sys.argv[1].isdigit():
             window.game_id_state.set(int(sys.argv[1]))
             window.ask_for_server_and_port()
+        elif url := parse_url(sys.argv[1]):
+            mode, server, port, id_ = url
+            if server and port and id_:
+                window.server = server
+                window.port = port
+                window.game_id_state.set(id_)
+                window.draw_all_waiting()
 
     window.mainloop()

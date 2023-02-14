@@ -1,6 +1,7 @@
 """Has all constants and variable for all of the files"""
 import os
 from datetime import datetime
+import sys
 
 if os.name == 'nt':
     # Use the local appdata folder if on Windows
@@ -17,6 +18,7 @@ else:
     DARK_MODE_LOGO = '@' + 'data/images/linux_icon_darkmode.xbm'
 
 DEBUG = os.path.join(APPDATA, 'debug')
+HOME: str = os.getenv('HOME')
 
 if not os.path.exists(DEBUG):
     os.makedirs(DEBUG)
@@ -42,3 +44,15 @@ LAST_GAME_FILE = os.path.join(APPDATA, f'last{APP_FILE_EXT}')
 dark_mode = False
 del_data = 'none'
 debug_log_file = os.path.join(DEBUG, f"{datetime.now():{STRFTIME.replace(':', '-')}}.log")
+
+PROTOCOL = 'ptmpr'
+IS_COMPILED: bool = getattr(sys, 'frozen', False)
+
+if IS_COMPILED:
+    # when compiled to exe file
+    APP_EXE = sys.executable
+else:
+    # when running from normal python file
+    APP_EXE = os.path.realpath(__file__)
+
+APP_DIR = os.path.dirname(APP_EXE)
