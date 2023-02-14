@@ -200,10 +200,8 @@ def change_theme_of_window(window: Tk | Toplevel):
 
     if not constants.dark_mode:
         light_title_bar(window)
-        window.iconbitmap(constants.LOGO)
     else:
         dark_title_bar(window)
-        window.iconbitmap(constants.DARK_MODE_LOGO)
 
     for child in window.winfo_children():
         if isinstance(child, CustomMenuBar):

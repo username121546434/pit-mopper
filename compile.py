@@ -24,10 +24,8 @@ include_files = [
 
 if os.name == 'nt':
     include_files.append(('./data/images/windows_icon.ico', 'data/images/windows_icon.ico'))
-    include_files.append(('./data/images/windows_icon_darkmode.ico', 'data/images/windows_icon_darkmode.ico'))
 else:
     include_files.append(('./data/images/linux_icon.xbm', './data/images/linux_icon.xbm'))
-    include_files.append(('./data/images/linux_icon_darkmode.xbm', './data/images/linux_icon_darkmode.xbm'))
 
 options = {
     'build_exe': {
