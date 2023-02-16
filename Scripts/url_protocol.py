@@ -1,6 +1,7 @@
 import os
 import re
 import subprocess
+from typing import Literal, overload
 if os.name == 'nt':
     import winreg
 from .constants import PROTOCOL, APP_EXE, HOME, LOGO
@@ -115,17 +116,17 @@ def register_protocol():
         return _register_protocol_ubuntu()
 
 
-def parse_url(s: str):
-    pattern = re.compile(r'ptmpr://(s|m)/?([^:]+)?:?(\d+)?/?(\d+)?$')
+def parse_url(s: str) -> tuple[Literal['m'], str | None, int | None, int | None] | tuple[Literal['s'], None, None, None]:
+    pattern = re.compile(r'ptmpr://(?P<mode>s|m)/(?P<server>[^:]+)?:?(?P<port>\d+)?/?(?P<id>\d+)?$')
     match = pattern.search(s)
     if match:
-        mode, server, port, id = match.groups()
+        mode = match.group('mode')
         if mode == "m":
-            server = server if server else None
-            port = int(port) if port else None
-            id = int(id) if id else None
+            server = match.group('server') if match.group('server') else None
+            port = int(match.group('port')) if match.group('port') else None
+            id = int(match.group('id')) if match.group('id') else None
             return (mode, server, port, id)
         else:
             return (mode, None, None, None)
     else:
-        return None
+        return (None, None, None, None)

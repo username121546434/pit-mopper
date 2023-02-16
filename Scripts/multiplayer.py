@@ -294,7 +294,7 @@ def main():
             window.ask_for_server_and_port()
         elif url := parse_url(sys.argv[1]):
             mode, server, port, id_ = url
-            if server and port and id_:
+            if server and port and id_ and mode == 'm':
                 window.server = server
                 window.port = port
                 window.game_id_state.set(id_)
