@@ -100,15 +100,14 @@ class MultiplayerApp(SinglePlayerApp):
         self.title('Multiplayer Game Loader')
     
     def ask_for_server_and_port(self):
-        self.server = simpledialog.askstring('Server', 'Please put a valid server to connect to')
-        if self.server is None:
-            del self.server
+        server = simpledialog.askstring('Server and Port', 'Please put a valid server and port to connect to')
+        if server is None:
             return
-        self.port = simpledialog.askinteger('Server Port', 'Please put a valid port to connect to in the server')
-        if self.port is None:
-            del self.server
-            del self.port
-            return
+        try:
+            self.server, port = server.split(':')
+            self.port = int(port)
+        except Exception:
+            messagebox.showerror('Invalid Server', 'The server and port you entered is incorrect')
         self.draw_all_waiting()
     
     def draw_all_waiting(self, *_):
