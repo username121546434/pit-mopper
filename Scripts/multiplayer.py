@@ -16,6 +16,7 @@ from .functions import *
 from .enums import KBDShortcuts
 from .base_logger import init_logger
 import logging
+import pyperclip
 init_logger()
 
 DEFAULT_TITLE = 'Multiplayer Game Loader'
@@ -34,7 +35,8 @@ class MultiplayerApp(SinglePlayerApp):
         self.progress_bar.pack(padx=50)
         self.progress_bar.start(10)
 
-        Button(self, text='Cancel', command=self.leave_waiting).pack(pady=(0, 20))
+        Button(self, text='Cancel', command=self.leave_waiting).pack()
+        Button(self, text='Copy Invite Link', command=pyperclip.copy(f'{constants.PROTOCOL}://m/{self.server}:{self.port}/{self.online_game.id}')).pack(pady=(0, 20))
     
     def draw_menubar(self):
         super().draw_menubar()
