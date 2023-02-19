@@ -50,13 +50,13 @@ logging.info(f'Socket binded successfully to: {server}:{port}')
 s.listen()
 logging.info('Server started, waiting for connection...')
 
-#              +-----------------------------------> The game info (with info: game size, mine count, and chording)
-#              |             +---------------------> Mapping of game ID to a game
-#              |             |    +----------------> The ID of the game
-#              |             |    |      +---------> The game object that is shared between both clients
-#              |             |    |      |
-#              |             |    |      |
-#              |             |    |      |
+#              ╭───────────────────────────────────> The game info (with info: game size, mine count, and chording)
+#              │             ╭─────────────────────> Mapping of game ID to a game
+#              │             │    ╭────────────────> The ID of the game
+#              │             │    │      ╭─────────> The game object that is shared between both clients
+#              │             │    │      │
+#              │             │    │      │
+#              │             │    │      │
 games: dict[OnlineGameInfo, dict[int, OnlineGame]] = {}
 player_count = 0
 
