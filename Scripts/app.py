@@ -8,8 +8,6 @@ from .functions import *
 from functools import partial
 from .updater import check_for_updates
 import shutil
-from tkinter.ttk import Progressbar
-from .squares import Square
 from datetime import datetime
 import os
 from .enums import KBDShortcuts
