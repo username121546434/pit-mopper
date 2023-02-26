@@ -78,8 +78,16 @@ Step 4: Run the main Python file
 python3.10 "Pit Mopper.py"
 ```
 
-## Latest Features in v1.4.0
+## Version 2.0.2
 
-1. Added debug logging to help fight bugs
-2. Added a console window
-3. You can now delete data that it stores
+**Note**: This is a minor bugfix update, so don't expect that many changes
+
+### Bug Fixes
+ - Fixed bug where the updater would fail to get patch notes
+ - Fixed an error where the updater will crash the whole game on Ubuntu
+
+### Other Changes
+ - Made various changes to the updater, including making it work with dark mode
+ - Made a slight change to dark mode during a game, the squares with numbers (other than 0) will not be darker than the ones in light mode to improve readability
+
+**GitHub Changelog**: https://github.com/username121546434/pit-mopper/compare/v2.0.1...v2.0.2
