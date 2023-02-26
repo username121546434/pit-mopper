@@ -1,7 +1,9 @@
 """Defines the `App` class"""
 from __future__ import annotations
-from tkinter import *
+from tkinter import BooleanVar
 from typing import TYPE_CHECKING
+
+from .types import GameResult
 from . import constants
 from .custom_menubar import CustomMenuBar, SubMenu
 from .functions import *
@@ -30,7 +32,7 @@ class App(Tk):
             return super().__new__(cls)
         else:
             App._alive.__class__ = cls
-            return cls._alive
+            return App._alive
 
     def __init__(self, title: str) -> None:
         if App._alive is None:
@@ -127,7 +129,7 @@ class App(Tk):
         constants.APP_CLOSED = True
         logging.info('Closing Pit Mopper...')
         try:
-            self.setvar('button pressed', 39393)
+            self.setvar('button pressed', '39393')
         except Exception:
             pass
         try:
@@ -305,7 +307,7 @@ class App(Tk):
             self.game.quit = True
             self.game_over.set(True)
 
-        self.game.result = {'seconds': self.game.seconds, 'win': win, 'game over': game_over}
+        self.game.result = GameResult(game_over=game_over, seconds=self.game.seconds, win=win)
         self.update()
         if hasattr(self, 'game') and \
            self.game is not None and \

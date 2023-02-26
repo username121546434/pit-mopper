@@ -1,6 +1,6 @@
 """Defines the `Square` and `PickleSquare` class"""
 from __future__ import annotations
-from tkinter import *
+from tkinter import Button, Misc
 from .load_font import load_font
 from .constants import DEFAULT_BG, DARK_MODE_BG, SQUARES_FONT
 from . import functions as funcs
@@ -47,7 +47,8 @@ class Square(Button):
         self.clicked_on: bool = False
         self.dark_mode: bool = False
 
-        _, font_name = load_font(SQUARES_FONT)
+        font_name = load_font(SQUARES_FONT)
+        print(font_name)
         super().__init__(master, text=text, font=(font_name, 12))
 
         funcs.bind_widget(self, '<Button-1>', func=self.clicked)
@@ -134,7 +135,7 @@ class PickleSquare:
     __slots__ = ('chord', 'completed', 'clicked_on', 'category', 'position', 'game_over', 'num', 'flaged')
     def __init__(
         self,
-        category: str,
+        category: str | None,
         position: tuple[int, int],
         num,
         chord=False,

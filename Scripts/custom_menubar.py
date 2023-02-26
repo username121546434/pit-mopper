@@ -2,7 +2,11 @@
 from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
-from typing import Iterable
+from typing import Iterable, TYPE_CHECKING
+from .types import MenubarItem, MenubarSeperator, MenubarCommand
+
+if TYPE_CHECKING:
+    from typing_extensions import Unpack
 
 TABWIDTH = len('\t'.expandtabs())
 
@@ -16,9 +20,9 @@ class SubMenu:
     """Acts as a submenu for the `CustomMenuBar` class"""
     def __init__(self):
         self._popup = None
-        self._menubutton: list[dict[str]] = []
-        self.label: tk.Label = None
-        self.parent: CustomMenuBar = None
+        self._menubutton: list[MenubarItem] = []
+        self.label: tk.Label | None = None
+        self.parent: CustomMenuBar | None = None
         self._open = False
         self.bg = 'white'
         self.fg = 'black'
@@ -27,6 +31,7 @@ class SubMenu:
 
     def on_popup(self, *_):
         """Called to show the menubar"""
+        assert self.parent and self.label
         for label in self.parent._lb_list:
             if label.menu._open:
                 if label.menu is self:
@@ -54,19 +59,19 @@ class SubMenu:
                 if kwargs.get(tk.SEPARATOR, False):
                     self._add_separator()
                 else:
-                    self._add_command(**kwargs)
+                    self._add_command(kwargs) # type: ignore
                 self.num += 1
             del self.num
             self._popup.bind('<Leave>', self._leave)
             self._popup.bind('<FocusOut>', self.destroy)
             self._open = True
         
-    def add_checkbutton(self, **kwargs):
+    def add_checkbutton(self, **kwargs: Unpack[MenubarCommand]):
         """Add a checkbutton, accepts same arguments as `add_command` but `variable` is a required argument now"""
         kwargs[tk.CHECKBUTTON] = True
         self._menubutton.append(kwargs)
 
-    def add_command(self, **kwargs):
+    def add_command(self, **kwargs: Unpack[MenubarCommand]):
         """
         Add a command to the menubar.
 
@@ -85,15 +90,15 @@ class SubMenu:
     
     def add_separator(self):
         """Add a seperator"""
-        self._menubutton.append({tk.SEPARATOR: True})
+        self._menubutton.append(MenubarSeperator(separator=True))
 
-    def _add_command(self, **kwargs):
+    def _add_command(self, kwargs: MenubarCommand):
         command = kwargs.pop('command', None)
         checkbutton = kwargs.pop(tk.CHECKBUTTON, False)
         var = kwargs.pop('variable', None)
-
         accelerator = kwargs.pop('accelerator', None)
-        label = kwargs.pop('label')
+        label = kwargs.get('label')
+
         mb = tk.Menubutton(self._popup, text=label,
                            bg=self.bg,
                            fg=self.fg,
@@ -101,14 +106,13 @@ class SubMenu:
                            activeforeground=self.active_fg,
                            borderwidth=0,
                            anchor='w',
-                           **kwargs
                         )
         mb.config(text=f'{pad_with_tabs(label, self.max_len)}  {accelerator if accelerator is not None else ""}')
         
-        mb._command = command
+        mb._command = command # type: ignore
         if checkbutton:
-            mb._var = var
-            if var.get():
+            mb._var = var # type: ignore
+            if var.get(): # type: ignore
                 mb.config(text=f'✔ {mb.cget("text")}')
             mb.bind('<Button-1>', lambda e: self._on_command(e, True))
         else:
@@ -116,6 +120,7 @@ class SubMenu:
         mb.grid(sticky=tk.NSEW, row=self.num, column=0)
 
     def _on_command(self, event: tk.Event, checkbutton: bool=False):
+        assert self._popup
         w = event.widget
         if isinstance(w, ttk.Separator):
             return
@@ -128,6 +133,8 @@ class SubMenu:
         self.destroy()
     
     def _leave(self, event: tk.Event):
+        assert self._popup
+
         _, height_xy = self._popup.winfo_geometry().split('x')
         _, x, y = height_xy[1:].split('+')
         x, y = int(x), int(y)
@@ -140,6 +147,7 @@ class SubMenu:
         """Close the submenu, if it is open"""
         if not self._open:
             return
+        assert self._popup
         self._popup.destroy()
         self._popup = None
         self._open = False
@@ -184,7 +192,7 @@ class CustomMenuBar(tk.Frame):
     """
     def __init__(self, master=None, cnf={}, **kw):
         """Arguments are: `foreground` and overbackground"""
-        kw = tk._cnfmerge((cnf, kw))
+        kw = tk._cnfmerge((cnf, kw)) # type: ignore
         kw['relief'] = kw.get('relief', 'raised')
         self._fg = kw.pop('fg', kw.pop('foreground', 'black'))
         self._over_bg = kw.pop('overbackground', 'blue')
@@ -209,7 +217,7 @@ class CustomMenuBar(tk.Frame):
         for label in self._lb_list:
             if label.menu._open and label.menu is not event.widget:
                 label.menu.destroy() # Remove the currently open menubar
-                event.widget.menu.on_popup()
+                event.widget.menu.on_popup() # type: ignore
                 break
     
     def _on_leave(self, event: tk.Event):
@@ -224,12 +232,13 @@ class CustomMenuBar(tk.Frame):
         l.pack(side='left')
         l.bind('<Enter>', self._on_hover)
         l.bind('<Leave>', self._on_leave)
-        l.menu = menu  # Easy to access menu with the instance 
+        l.menu = menu  # type: ignore
+                       # Easy to access menu with the instance 
                        #   of the label saved in the `self._lb_list`
         menu.label = l
         menu.parent = self
         l.bind('<1>', lambda e: self._on_press(l, command))
-        self._lb_list.append(l)
+        self._lb_list.append(l) # type: ignore
     
     def remove_menu(self, menu: SubMenu):
         new_list = []

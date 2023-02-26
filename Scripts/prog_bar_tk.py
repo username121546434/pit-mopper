@@ -1,10 +1,10 @@
-from tkinter import *
+from tkinter import Toplevel, Label
 import os
 from tkinter.ttk import Progressbar
-from typing import Iterable, TypeVar
+from typing import Iterable, Sized, TypeVar, Sequence
 from .functions import change_theme_of_window
 
-T = TypeVar('T')
+T = TypeVar('T', Sized, Sequence)
 
 
 def progress_bar_window(iterable: Iterable[T], total_size: int, text_format: str='Loading... {}', title: str='Loading...') -> Iterable[T]:
@@ -22,7 +22,7 @@ def progress_bar_window(iterable: Iterable[T], total_size: int, text_format: str
     progress_window.config(padx=20, pady=20)
     progress_window.title(title)
     if os.name == 'nt':
-        progress_window.master.attributes('-disabled', True)
+        progress_window.master.attributes('-disabled', True) # type: ignore
         progress_window.attributes('-disabled', True)
 
     label = Label(progress_window, text=text_format.format('0%'))

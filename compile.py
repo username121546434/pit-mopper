@@ -18,7 +18,7 @@ packages = [
     'tkinterweb'
 ]
 
-include_files = [
+include_files: list[tuple[str, str]] = [
     ('./data/fonts', 'data/fonts'),
 ]
 

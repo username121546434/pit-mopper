@@ -1,4 +1,9 @@
-from enum import Enum
+import sys
+
+if sys.version_info <= (3, 10):
+    from enum import Enum
+else:
+    from enum import StrEnum as Enum
 
 
 class KBDShortcuts(Enum):

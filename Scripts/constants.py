@@ -5,7 +5,7 @@ import sys
 
 if os.name == 'nt':
     # Use the local appdata folder if on Windows
-    APPDATA: str = os.path.join(os.getenv('LOCALAPPDATA'), 'Pit Mopper')
+    APPDATA: str = os.path.join(os.getenv('LOCALAPPDATA'), 'Pit Mopper') # type: ignore
     # *.xbm is Linux specific, use *.ico instead
     LOGO = "data\\images\\windows_icon.ico"
 else:
@@ -16,7 +16,7 @@ else:
     LOGO = '@' + "data/images/linux_icon.xbm"
 
 DEBUG = os.path.join(APPDATA, 'debug')
-HOME: str = os.getenv('HOME')
+HOME: str = os.getenv('HOME') # type: ignore
 
 if not os.path.exists(DEBUG):
     os.makedirs(DEBUG)

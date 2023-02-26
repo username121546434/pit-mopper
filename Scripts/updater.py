@@ -43,7 +43,9 @@ def download(download_url: str, extension: str | None=None) -> str:
     Returns: The path to the file where it was written
     """
     download = requests.get(download_url, stream=True)
-    total_size = int(download.headers.get('content-length'))
+    header = download.headers.get('content-length')
+    assert header
+    total_size = int(header)
 
     filename = tempfile.mkstemp(suffix=extension)
     f = os.fdopen(filename[0], 'wb')
@@ -78,7 +80,7 @@ def update_windows(app_quit, assets: list):
 
     installer_or_zip_file = download(download_url, file_extension)
 
-    bat_file = os.path.join(os.getenv('TEMP'), 'Pit Mopper Update.bat')
+    bat_file = os.path.join(os.getenv('TEMP'), 'Pit Mopper Update.bat') # type: ignore
     if download_zip:
         extract_dir = tempfile.mkdtemp()
         shutil.unpack_archive(installer_or_zip_file, extract_dir, 'zip')

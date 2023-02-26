@@ -9,8 +9,7 @@ from .grid import ButtonGrid
 from .single_player import SinglePlayerApp
 from .network import Network
 from .game import Game, OnlineGame, OnlineGameInfo
-from tkinter import *
-from tkinter import messagebox, simpledialog
+from tkinter import messagebox, simpledialog, IntVar, StringVar, BooleanVar
 from . import constants
 from .functions import *
 from .enums import KBDShortcuts
@@ -36,7 +35,7 @@ class MultiplayerApp(SinglePlayerApp):
         self.progress_bar.start(10)
 
         Button(self, text='Cancel', command=self.leave_waiting).pack()
-        Button(self, text='Copy Invite Link', command=pyperclip.copy(f'{constants.PROTOCOL}://m/{self.server}:{self.port}/{self.online_game.id}')).pack(pady=(0, 20))
+        Button(self, text='Copy Invite Link', command=lambda: pyperclip.copy(f'{constants.PROTOCOL}://m/{self.server}:{self.port}/{self.online_game.id}')).pack(pady=(0, 20))
     
     def draw_menubar(self):
         super().draw_menubar()
@@ -228,7 +227,7 @@ class MultiplayerApp(SinglePlayerApp):
             self.other_info.config(text=f'Oponent: {self.online_game.p2_info["timer text"]}')
 
         self.game_timer.config(text=f'Time: {format_second(self.game.result["seconds"])}')
-        if self.game.result['game over']:
+        if self.game.result['game_over']:
             reply = self.game.result['win']
         else:
             reply = {'timer text': self.self_info.get()[4:]}

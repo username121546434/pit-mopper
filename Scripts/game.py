@@ -1,7 +1,9 @@
 from __future__ import annotations
 from datetime import datetime
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
+
+from .types import GameResult
 from .grid import PickleButtonGrid, ButtonGrid
 
 
@@ -24,8 +26,8 @@ class OnlineGame:
     def __init__(self, game_id, info: OnlineGameInfo) -> None:
         self.id = game_id
         self.game_info = info
-        self.p1_finished: bool | datetime = False
-        self.p2_finished: bool | datetime = False
+        self.p1_finished: Literal[False] | datetime = False
+        self.p2_finished: Literal[False] | datetime = False
         self.p1_info = {'timer text': ''}
         self.p2_info = {'timer text': ''}
         self.p1_won: bool | None = None
@@ -49,6 +51,7 @@ class OnlineGame:
         if self.game_is_tie():
             return 12
         elif self.both_finished() and not self.game_is_tie():
+            assert isinstance(self.p1_finished, datetime) and isinstance(self.p2_finished, datetime)
             if self.p1_finished < self.p2_finished and self.p1_won:
                 return 1
             elif self.p1_finished > self.p2_finished and self.p2_won:
@@ -86,8 +89,8 @@ class Game:
     previous_sec: datetime = field(default_factory=datetime.now)
     with_time: bool = True
     quit: bool = False
-    result: dict[Literal['game over', 'seconds', 'win'], str | int | bool] = field(default_factory=dict)
-    seconds: int = 0
+    result: GameResult = field(default_factory=GameResult(game_over=False, seconds=0, win=False).copy)
+    seconds: float = 0
     start: datetime = field(default_factory=datetime.now)
 
 
@@ -98,7 +101,7 @@ class PickleGame:
     start: datetime
     num_mines: int
     additional_time: float = 0.0
-    seconds: int = 0
+    seconds: float = 0
     chording: bool = False
     
     @classmethod
@@ -123,7 +126,7 @@ class PickleGame:
         )
     
     @classmethod
-    def from_dict(cls, data: dict[str]):
+    def from_dict(cls, data: dict[str, Any]):
         return cls(
             grid=data['grid'],
             start=data['start'],

@@ -1,7 +1,7 @@
 """Main Python file, run it to play the game"""
 import logging
 import os
-from tkinter import *
+from tkinter import Button
 from tkinter import messagebox
 from Scripts.app import App
 from Scripts.constants import VERSION, debug_log_file, APP_DIR, IS_COMPILED

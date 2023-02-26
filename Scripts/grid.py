@@ -1,5 +1,6 @@
 from __future__ import annotations
-from tkinter import *
+import os
+from tkinter import Variable, Tk, Frame, N, S, E, W, TclError
 from .squares import Square, PickleSquare
 import random
 from functools import partial
@@ -13,7 +14,7 @@ class ButtonGrid:
     def __init__(
         self,
         grid_size: tuple[int, int],
-        window: Toplevel,
+        window: Tk,
         grid: list[list[PickleSquare]] | None = None,
         dark_mode: bool = False,
         num_mines: int = -1,
@@ -33,8 +34,8 @@ class ButtonGrid:
     def button_grid(self, row_num, col_num, click_random_square: bool = False) -> list[list[Square]]:
         """Create a new grid of buttons"""
         init_logger()
-        Grid.rowconfigure(self.root, row_num, weight=1)
-        Grid.columnconfigure(self.root, col_num, weight=1)
+        self.root.rowconfigure(row_num, weight=1)
+        self.root.columnconfigure(col_num, weight=1)
         grid = []
         blank = "   " * 3
         if not click_random_square:
@@ -43,10 +44,10 @@ class ButtonGrid:
         frame = Frame(self.root)
         frame.grid(row=row_num, column=col_num, sticky=N+S+E+W)
         for row_index in range(self.grid_size[0]):
-            Grid.rowconfigure(frame, row_index, weight=1)
+            frame.rowconfigure(row_index, weight=1)
             row = []
             for col_index in range(self.grid_size[1]):
-                Grid.columnconfigure(frame, col_index, weight=1)
+                frame.columnconfigure(col_index, weight=1)
                 # create a button inside frame
                 btn = Square(master=frame, text=blank)
                 btn.grid(row=row_index, column=col_index, sticky=N+S+E+W)
@@ -55,7 +56,7 @@ class ButtonGrid:
                 # Store row and column indices as a Button attribute
                 btn.position = (row_index, col_index)
                 if not click_random_square:
-                    btn.config(command=partial(button_pressed.set, btn.position))
+                    btn.config(command=partial(button_pressed.set, btn.position)) # type: ignore
                 row.append(btn)
             grid.append(row)
 
@@ -64,18 +65,18 @@ class ButtonGrid:
         if not click_random_square:
             logging.info('Grid Created, waiting for button press...')
             self.root.winfo_toplevel().wait_variable('button pressed')
-            coordinates = button_pressed.get()
+            coordinates: tuple[int, int] = button_pressed.get() # type: ignore
         else:
             coordinates = (random.randint(0, self.grid_size[0] - 1), random.randint(0, self.grid_size[1] - 1))
             self.grid[coordinates[0]][coordinates[1]].clicked()
-        if coordinates == 39393: # Stop message
+        if coordinates == '39393': # Stop message
             try:
                 self.root.destroy()
             except TclError:
-                return
+                os._exit(0)
 
         for square, _ in self.iter_squares():
-            square.config(command=None)
+            square.config(command=None) # type: ignore
         self.grid = grid
 
         if self.num_mines == -1 and self.grid_size == (10, 10):
@@ -104,7 +105,7 @@ class ButtonGrid:
                     if around_square.category == 'mine':
                         num_mines += 1
                 if num_mines == 0:
-                    square.category == 'blank'
+                    square.category = 'blank'
                 else:
                     square.num = num_mines
 
@@ -112,20 +113,20 @@ class ButtonGrid:
     
     def setup_grid(self, grid: list[list[PickleSquare]], row_num, col_num) -> list[list[Square]]:
         """Takes a list `PickleSquare`s and places them on the screen"""
-        Grid.rowconfigure(self.root, row_num, weight=1)
-        Grid.columnconfigure(self.root, col_num, weight=1)
+        self.root.rowconfigure(row_num, weight=1)
+        self.root.columnconfigure(col_num, weight=1)
         new_grid = []
         # Create & Configure frame
         frame = Frame(self.root)
         frame.grid(row=2, column=1, sticky=N+S+E+W)
         for row_index in range(self.grid_size[0]):
-            Grid.rowconfigure(frame, row_index, weight=1)
+            frame.rowconfigure(row_index, weight=1)
             row = grid[row_index]
             new_row = []
             for col_index in range(self.grid_size[1]):
                 btn = row[col_index]
                 new_btn = btn.to_square(frame)
-                Grid.columnconfigure(frame, col_index, weight=1)
+                frame.columnconfigure(col_index, weight=1)
                 new_btn.grid(row=row_index, column=col_index, sticky=N+S+E+W)
                 if new_btn.flaged:
                     new_btn.flag()
@@ -135,7 +136,7 @@ class ButtonGrid:
             new_grid.append(new_row)
         return new_grid
 
-    def around_square(self, row_num: int, col_num: int, print_=False):
+    def around_square(self, row_num: int, col_num: int):
         """Return a list of `Square` objects which are next to the coordinates"""
         around:list[Square] = []
         coors = []
@@ -160,9 +161,6 @@ class ButtonGrid:
                 if coor[0] >= 0 and coor[1] >= 0:
                     filtered_coors.append(coor)
         
-        if print_:
-            print(f'\nFor y:{row_num} x:{col_num}\n{filtered_coors}')
-
         for coor in filtered_coors:
             row, col = coor
             try:

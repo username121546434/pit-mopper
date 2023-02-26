@@ -3,8 +3,9 @@ import ctypes
 import os
 import sys
 from tkinter import messagebox
-from tkinter import *
+from tkinter import Widget, Tk, Misc, Toplevel, Label, Text, Checkbutton, Radiobutton, Button, Frame, Spinbox
 from tkinter.ttk import Progressbar, Style
+from typing import TYPE_CHECKING
 from tkinterweb.htmlwidgets import HtmlFrame
 from .custom_menubar import CustomMenuBar
 from . import constants
@@ -14,6 +15,9 @@ import logging
 from .base_logger import init_logger
 import webbrowser
 from .enums import KBDShortcuts
+
+if TYPE_CHECKING:
+    from .app import App
 
 
 def handle_exception(exc_type, exc_value, exc_traceback):
@@ -33,7 +37,7 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 sys.excepthook = handle_exception
 
 
-def format_second(seconds: int | float):
+def format_second(seconds: float):
     """
     Takes a number like 12 and formats it like it would on a clock
     
@@ -66,9 +70,9 @@ def _title_bar(window, value: int):
         get_parent = ctypes.windll.user32.GetParent
         hwnd = get_parent(window.winfo_id())
         rendering_policy = DWMWA_USE_IMMERSIVE_DARK_MODE
-        value = ctypes.c_int(value)
-        set_window_attribute(hwnd, rendering_policy, ctypes.byref(value),
-                            ctypes.sizeof(value))
+        c_value = ctypes.c_int(value)
+        set_window_attribute(hwnd, rendering_policy, ctypes.byref(c_value),
+                            ctypes.sizeof(c_value))
 
 
 def dark_title_bar(window):
@@ -113,7 +117,7 @@ def clear_last_game():
         messagebox.showinfo('Delete Data', 'Data has been deleted')
 
 
-def bind_widget(widget: Widget, event: str|KBDShortcuts, all_:bool=False, func=None):
+def bind_widget(widget: Widget | Tk | Misc, event: str | KBDShortcuts, all_:bool=False, func=None):
     """
     Set or retrieve the binding for an event on a widget
     taken from https://stackoverflow.com/a/226141/19581763
@@ -123,16 +127,18 @@ def bind_widget(widget: Widget, event: str|KBDShortcuts, all_:bool=False, func=N
         setattr(widget, 'bindings', dict())
 
     if not isinstance(event, str):
-        event = event.value
+        ev: str = event.value
+    else:
+        ev = event
 
     if func:
         if not all_:
-            widget.bind(event, func)
+            widget.bind(ev, func)
         else:
-            widget.bind_all(event, func)
-        widget.bindings[event] = func
+            widget.bind_all(ev, func)
+        widget.bindings[ev] = func # type: ignore
     else:
-        return widget.bindings.get(event, None)
+        return widget.bindings.get(ev, None) # type: ignore
 
 
 def bug_report():
@@ -191,7 +197,7 @@ def format_kbd_shortcut(shortcut: KBDShortcuts) -> str:
     return shortcut.value[1:-1].lower().replace('control', 'Ctrl').replace('-', '+').title()
 
 
-def change_theme_of_window(window: Tk | Toplevel):
+def change_theme_of_window(window: App | Toplevel):
     """Does almost same thing that `App.change_theme` does but without logging messages"""
     from .squares import Square
     CURRENT_BG = constants.CURRENT_BG
@@ -238,6 +244,8 @@ def change_theme_of_window(window: Tk | Toplevel):
                 elif isinstance(square, Label):
                     square.config(bg=CURRENT_BG, fg=CURRENT_FG)
         elif isinstance(child, Toplevel):
+            if isinstance(window, Toplevel):
+                continue
             should_continue = False
             for t in window.menubar.iter_children():
                 if t.window is child:
@@ -258,7 +266,7 @@ def change_theme_of_window(window: Tk | Toplevel):
             style.configure("Horizontal.TProgressbar", foreground=CURRENT_BG, background=CURRENT_BG)
             child.config(style='Horizontal.TProgressbar')
         else:
-            child.configure(bg=CURRENT_BG, fg=CURRENT_FG)
+            child.configure(bg=CURRENT_BG, fg=CURRENT_FG) # type: ignore
 
         if isinstance(child, (Checkbutton, Radiobutton)):
             child.config(selectcolor=CURRENT_BG)

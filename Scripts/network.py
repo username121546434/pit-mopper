@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class Network:
     """Acts as a socket connection to the server for multiplayer games."""
-    def __init__(self, game_info: OnlineGameInfo, server: str, port: int) -> None:
+    def __init__(self, game_info: OnlineGameInfo | int, server: str, port: int) -> None:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server = server
         self.port = port

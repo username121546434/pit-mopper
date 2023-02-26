@@ -2,7 +2,7 @@
 from __future__ import annotations
 import pickle
 from functools import partial
-from tkinter import *
+from tkinter import IntVar, BooleanVar, Variable, StringVar, N, S, E, W, TclError
 import os
 from datetime import datetime
 from tkinter import filedialog, messagebox
@@ -11,7 +11,7 @@ from . import constants
 from .base_logger import init_logger
 init_logger()
 from .squares import Square
-from .grid import ButtonGrid
+from .grid import ButtonGrid, PickleButtonGrid
 from .functions import *
 from .app import App
 from .game import Game, PickleGame
@@ -188,7 +188,7 @@ class SinglePlayerApp(App):
         return True
     
     def create_game(self, _ = None, game: PickleGame | None = None):
-        zeros_checked = []
+        zeros_checked: list[Square] = []
 
         if not self.validate_game(game):
             return
@@ -232,8 +232,7 @@ mines_found:           {mines_found}
 additional_time:       0
 ''')
             game_size_str = 'x'.join(str(i) for i in self.difficulty.get())
-
-        if isinstance(game, PickleGame):
+        elif isinstance(game, PickleGame):
             start = game.start
             chording = game.chording
             num_mines = game.num_mines
@@ -305,7 +304,7 @@ additional_time:       0
             total_time,
             zeros_checked,
             num_mines,
-            chording,
+            chording, 
             mines_found,
         )
         win = self.game.result['win']
@@ -363,9 +362,9 @@ additional_time:       0
                 fg_of_labels = constants.DEFAULT_FG
 
             for y, row in enumerate(data):
-                Grid.rowconfigure(frame, y, weight=1)
+                frame.rowconfigure(y, weight=1)
                 for x, item in enumerate(row):
-                    Grid.columnconfigure(frame, x, weight=1)
+                    frame.columnconfigure(x, weight=1)
                     Label(frame, text=str(item), bg=bg_of_labels, fg=fg_of_labels).grid(row=y, column=x, padx=1, pady=1, sticky='nsew')
             Button(self,
                     text='Exit', 
@@ -418,18 +417,19 @@ additional_time:       0
     def _game(
         self,
         game: PickleGame | None,
-        grid: ButtonGrid | None,
+        grid: ButtonGrid | PickleButtonGrid,
         session_start: datetime,
         total_time: StringVar,
-        zeros_checked: list[Square] = None,
+        zeros_checked: list[Square] | None = None,
         num_mines: int = 0,
-        chording: bool = None,
+        chording: bool = False,
         mines_found: int = 0,
         additional_time: float = 0.0,
     ):
         if zeros_checked == None:
             zeros_checked = []
         if game is None:
+            assert isinstance(grid, ButtonGrid)
             self.game = Game(
                 grid,
                 total_time,
@@ -448,7 +448,7 @@ additional_time:       0
         self.wait_variable('game_over')
         self.after_cancel(self.game_after_cancel)
     
-    def save_game(self, filename:str=None):
+    def save_game(self, filename: str | None = None):
         data = PickleGame.from_game(self.game)
         logging.info(f'''Saving game with the following attributes:
     {data}
