@@ -56,6 +56,7 @@ class SubMenu:
 
             self.num = 0
             for kwargs in self._menubutton:
+                print(kwargs)
                 if kwargs.get(tk.SEPARATOR, False):
                     self._add_separator()
                 else:
@@ -93,10 +94,10 @@ class SubMenu:
         self._menubutton.append(MenubarSeperator(separator=True))
 
     def _add_command(self, kwargs: MenubarCommand):
-        command = kwargs.pop('command', None)
-        checkbutton = kwargs.pop(tk.CHECKBUTTON, False)
-        var = kwargs.pop('variable', None)
-        accelerator = kwargs.pop('accelerator', None)
+        command = kwargs.get('command', None)
+        checkbutton = kwargs.get(tk.CHECKBUTTON, False)
+        var = kwargs.get('variable', None)
+        accelerator = kwargs.get('accelerator', None)
         label = kwargs.get('label')
 
         mb = tk.Menubutton(self._popup, text=label,
@@ -126,7 +127,7 @@ class SubMenu:
             return
 
         if w._command is not None:
-            self._popup.master.after(10, w._command)
+            self._popup.master.after(1, w._command)
         if checkbutton:
             w._var.set(not w._var.get())
         
