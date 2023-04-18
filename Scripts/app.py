@@ -117,9 +117,17 @@ class App(Tk):
         self.advanced.add_command(label='Delete Highscore', command=clear_highscore)
         self.advanced.add_command(label='Delete Last Game', command=clear_last_game)
 
+        self.help_about = SubMenu()
+        self.help_about.add_command(label='Wiki', command=partial(webbrowser.open, 'https://github.com/username121546434/pit-mopper/wiki'))
+        self.help_about.add_command(label='Keyboard Shortcuts', command=partial(webbrowser.open, 'https://github.com/username121546434/pit-mopper/wiki/Keyboard-Shortcuts'))
+        self.help_about.add_command(label='How to Play', command=partial(webbrowser.open, 'https://github.com/username121546434/pit-mopper/wiki/How-to-play'))
+        self.help_about.add_separator()
+        self.help_about.add_command(label='Join the discord server', command=partial(webbrowser.open, 'https://discord.gg/AetMeBTyMx'))
+
         self.menubar.add_menu(menu=self.file_menu, title='File')
         self.menubar.add_menu(menu=self.settings, title='Settings')
         self.menubar.add_menu(menu=self.advanced, title='Advanced')
+        self.menubar.add_menu(menu=self.help_about, title='Help/About')
     
     def draw(self):
         """This is supposed to be overridden by subclasses"""
