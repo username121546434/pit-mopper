@@ -56,7 +56,6 @@ class SubMenu:
 
             self.num = 0
             for kwargs in self._menubutton:
-                print(kwargs)
                 if kwargs.get(tk.SEPARATOR, False):
                     self._add_separator()
                 else:
