@@ -47,9 +47,8 @@ class Square(Button):
         self.clicked_on: bool = False
         self.dark_mode: bool = False
 
-        font_name = load_font(SQUARES_FONT)
-        print(font_name)
-        super().__init__(master, text=text, font=(font_name, 12))
+        load_font(SQUARES_FONT)
+        super().__init__(master, text=text, font=('DSEG7 Classic Mini', 12))
 
         funcs.bind_widget(self, '<Button-1>', func=self.clicked)
         funcs.bind_widget(self, '<Button-2>', func=self.chord_self)
