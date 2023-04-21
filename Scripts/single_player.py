@@ -90,6 +90,8 @@ class SinglePlayerApp(App):
         self.file_menu.add_separator()
         self.file_menu.add_command(label='Open File', command=self.load_game, accelerator=format_kbd_shortcut(KBDShortcuts.open_file))
         self.file_menu.add_command(label='Highscores', command=self.show_highscores, accelerator=format_kbd_shortcut(KBDShortcuts.show_highscores))
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label='Switch to Multiplayer', command=self.switch_multiplayer)
         self.settings.add_separator()
         self.settings.add_checkbutton(variable=self.chord_state, label='Enable Chording', accelerator=format_kbd_shortcut(KBDShortcuts.toggle_chording))
     

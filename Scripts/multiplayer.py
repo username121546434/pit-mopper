@@ -39,8 +39,10 @@ class MultiplayerApp(SinglePlayerApp):
     
     def draw_menubar(self):
         super().draw_menubar()
-        # Delete the "Open File", "Highscores", and a seperator from the menubar
-        self.file_menu.pop([None, None, None])
+        # Delete the "Open File", "Highscores", 2 seperators, and the switch to multiplayer command from the menubar
+        self.file_menu.pop([None] * 5)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label='Switch to Single Player', command=self.switch_singleplayer)
     
     def draw_waiting_menubar(self):
         self.draw_menubar()

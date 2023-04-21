@@ -67,6 +67,14 @@ class App(Tk):
 
         return width, height, x, y, geometry
     
+    def switch_multiplayer(self):
+        from .multiplayer import MultiplayerApp, DEFAULT_TITLE
+        MultiplayerApp(DEFAULT_TITLE)
+
+    def switch_singleplayer(self):
+        from .single_player import SinglePlayerApp, DEFAULT_TITLE
+        SinglePlayerApp(DEFAULT_TITLE)
+    
     def draw_all(self):
         self.set_variables()
         self.draw_menubar()
