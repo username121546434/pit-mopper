@@ -1,4 +1,3 @@
-import glob
 import os
 import subprocess
 import sys
@@ -51,7 +50,7 @@ def download(download_url: str, extension: str | None=None) -> str:
     f = os.fdopen(filename[0], 'wb')
 
     try:
-        for data in progress_bar_window(download.iter_content(chunk_size=1_000), total_size, 'Downloading... {}'):
+        for data in progress_bar_window(download.iter_content(chunk_size=10_000), total_size, 'Downloading... {}'):
             f.write(data)
     finally:
         f.close()
@@ -131,6 +130,10 @@ def update_ubuntu(app_quit, assets: list):
     shutil.move(extract_dir, os.path.split(curr_dir)[0])
     shutil.rmtree(tmp_dir)
 
+    messagebox.showinfo(
+        'Update Complete',
+        'You can find the new version in the same directory. Pit Mopper will now close.'
+    )
     app_quit()
 
 
