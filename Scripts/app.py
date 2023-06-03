@@ -129,6 +129,7 @@ class App(Tk):
         self.help_about.add_command(label='Wiki', command=partial(webbrowser.open, 'https://github.com/username121546434/pit-mopper/wiki'))
         self.help_about.add_command(label='Keyboard Shortcuts', command=partial(webbrowser.open, 'https://github.com/username121546434/pit-mopper/wiki/Keyboard-Shortcuts'))
         self.help_about.add_command(label='How to Play', command=partial(webbrowser.open, 'https://github.com/username121546434/pit-mopper/wiki/How-to-play'))
+        self.help_about.add_command(label='GitHub Repo', command=partial(webbrowser.open, 'https://github.com/username121546434/pit-mopper'))
         self.help_about.add_separator()
         self.help_about.add_command(label='Join the discord server', command=partial(webbrowser.open, 'https://discord.gg/AetMeBTyMx'))
 
