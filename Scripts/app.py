@@ -3,7 +3,7 @@ from __future__ import annotations
 from tkinter import BooleanVar
 from typing import TYPE_CHECKING
 
-from .types import GameResult
+from .game_types import GameResult
 from . import constants
 from .custom_menubar import CustomMenuBar, SubMenu
 from .functions import *

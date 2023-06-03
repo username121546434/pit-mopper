@@ -3,7 +3,7 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
 from typing import Iterable, TYPE_CHECKING
-from .types import MenubarItem, MenubarSeperator, MenubarCommand
+from .game_types import MenubarItem, MenubarSeperator, MenubarCommand
 
 if TYPE_CHECKING:
     from typing_extensions import Unpack

@@ -3,7 +3,7 @@ from datetime import datetime
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
-from .types import GameResult
+from .game_types import GameResult
 from .grid import PickleButtonGrid, ButtonGrid
 
 
