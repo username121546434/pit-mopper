@@ -18,7 +18,7 @@ This was a game that I made for fun to learn more about programming.
 
 Feel free to contribute if you want to!
 
-## How to run
+## How to run python version
 
 Note: You will need Python version 3.10 or above to run it
 
@@ -39,7 +39,7 @@ cd ./pit-mopper
 Step 3: Install all required modules
 
 ```text
-pip install -r requirements.txt
+pip install -r requirements/win.txt
 ```
 
 Step 4: Run the main Python file
@@ -69,7 +69,7 @@ cd ./pit-mopper
 Step 3: Install all required modules
 
 ```text
-python3.10 -m pip install -r requirements.txt
+python3.10 -m pip install -r requirements/linux.txt
 ```
 
 Step 4: Run the main Python file
@@ -83,11 +83,13 @@ python3.10 "Pit Mopper.py"
 **Note**: This is a minor bugfix update, so don't expect that many changes
 
 ### Bug Fixes
- - Fixed bug where the updater would fail to get patch notes
- - Fixed an error where the updater will crash the whole game on Ubuntu
+
+- Fixed bug where the updater would fail to get patch notes
+- Fixed an error where the updater will crash the whole game on Ubuntu
 
 ### Other Changes
- - Made various changes to the updater, including making it work with dark mode
- - Made a slight change to dark mode during a game, the squares with numbers (other than 0) will not be darker than the ones in light mode to improve readability
 
-**GitHub Changelog**: https://github.com/username121546434/pit-mopper/compare/v2.0.1...v2.0.2
+- Made various changes to the updater, including making it work with dark mode
+- Made a slight change to dark mode during a game, the squares with numbers (other than 0) will not be darker than the ones in light mode to improve readability
+
+**GitHub Changelog**: <https://github.com/username121546434/pit-mopper/compare/v2.0.1...v2.0.2>

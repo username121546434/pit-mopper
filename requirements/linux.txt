@@ -1,0 +1,3 @@
+# Linux Dependencies
+-r common.txt
+pyalsaaudio==0.10.0
