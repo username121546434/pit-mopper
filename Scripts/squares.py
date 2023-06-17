@@ -4,7 +4,12 @@ from tkinter import Button, Misc
 from .load_font import load_font
 from .constants import DEFAULT_BG, DARK_MODE_BG, SQUARES_FONT, CLICK_SOUND
 from . import functions as funcs
-from .sound import play_file
+import os
+
+if os.name == 'nt':
+    from .sound.windows import play
+else:
+    from .sound.linux import play
 
 num_colors = {
     1: 'blue',
@@ -87,7 +92,7 @@ class Square(Button):
         elif self.num != None:
             self.config(text=str(self.num), bg=num_colors[self.num], fg='black')
             if ev:
-                play_file(CLICK_SOUND)
+                play(CLICK_SOUND)
         else:
             if self.dark_mode:
                 self.config(bg=DARK_MODE_BG)

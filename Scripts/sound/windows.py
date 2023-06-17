@@ -3,7 +3,7 @@ import queue
 import sys
 import soundfile as sf
 
-from .decorators import thread
+from ..decorators import thread
 
 
 def callback(outdata, frames: int, time, status: sd.CallbackFlags, q: queue.Queue, blocksize: int):
@@ -26,7 +26,7 @@ def callback(outdata, frames: int, time, status: sd.CallbackFlags, q: queue.Queu
 
 
 @thread()
-def play_file(filename: str):
+def play(filename: str):
     block_size = 2048
     buffer_size = 20
 
