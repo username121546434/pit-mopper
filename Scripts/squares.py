@@ -2,14 +2,10 @@
 from __future__ import annotations
 from tkinter import Button, Misc
 from .load_font import load_font
-from .constants import DEFAULT_BG, DARK_MODE_BG, SQUARES_FONT, CLICK_SOUND
+from .constants import DEFAULT_BG, DARK_MODE_BG, SQUARES_FONT, CLICK_SOUND, FLAG_SOUND
 from . import functions as funcs
+from .sound import play
 import os
-
-if os.name == 'nt':
-    from .sound.windows import play
-else:
-    from .sound.linux import play
 
 num_colors = {
     1: 'blue',
@@ -64,7 +60,7 @@ class Square(Button):
         funcs.bind_widget(self, '<Enter>', func=self.hover_enter)
         funcs.bind_widget(self, '<Leave>', func=self.hover_leave)
 
-    def flag(self, _=None):
+    def flag(self, ev=None):
         if self.cget('text').replace(' ', '') == '':
             if self.dark_mode:
                 self.config(fg='white')
@@ -73,6 +69,8 @@ class Square(Button):
             self.config(text='🚩')
             self.clicked_on = True
             self.flaged = True
+            if ev:
+                play(FLAG_SOUND)
         elif self.cget('text') == '🚩':
             if self.dark_mode:
                 self.config(fg='black')

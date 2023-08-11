@@ -41,6 +41,7 @@ LAST_GAME_FILE = os.path.join(APPDATA, f'last{APP_FILE_EXT}')
 
 # sound effects
 CLICK_SOUND = 'data/sounds/click.wav'
+FLAG_SOUND = 'data/sounds/flag.wav'
 
 dark_mode = False
 del_data = 'none'
