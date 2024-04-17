@@ -7,7 +7,6 @@ import os
 from datetime import datetime
 from tkinter import filedialog, messagebox
 
-from Scripts.multiplayer import MultiplayerApp
 from .custom_menubar import CustomMenuBar, SubMenu
 from . import constants
 from .base_logger import init_logger
@@ -18,6 +17,8 @@ from .functions import *
 from .app import App
 from .game import Game, PickleGame
 from .enums import KBDShortcuts
+from .sound import play
+from .constants import START_SOUND
 
 DEFAULT_TITLE = 'Single Player Game Loader'
 
@@ -192,6 +193,7 @@ class SinglePlayerApp(App):
         return True
     
     def create_game(self, _ = None, game: PickleGame | None = None):
+        play(START_SOUND)
         zeros_checked: list[Square] = []
 
         if not self.validate_game(game):
