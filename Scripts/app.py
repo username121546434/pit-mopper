@@ -14,6 +14,7 @@ from datetime import datetime
 import os
 from .enums import KBDShortcuts
 from .game import Game
+from typing import overload
 
 if TYPE_CHECKING:
     from .single_player import SinglePlayerApp
@@ -27,9 +28,21 @@ class App(Tk):
     """
     _alive: App | None = None
 
+    @overload
+    def __new__(cls: type[MultiplayerApp], *args, **kw) -> MultiplayerApp:
+        ...
+
+    @overload
+    def __new__(cls: type[SinglePlayerApp], *args, **kw) -> SinglePlayerApp:
+        ...
+
+    @overload
+    def __new__(cls: type[App], *args, **kw) -> App:
+        ...
+
     def __new__(cls: type[App | SinglePlayerApp | MultiplayerApp], *args, **kwargs) -> App | SinglePlayerApp | MultiplayerApp:
         if App._alive is None:
-            return super().__new__(cls)
+            return super().__new__(cls) # type: ignore
         else:
             App._alive.__class__ = cls
             return App._alive
@@ -263,11 +276,12 @@ class App(Tk):
                             precolors.append(square2.cget('bg'))
                             square2.config(bg='brown')
                         self.update()
-                        self.after(500)
-                        for square2 in squares:
-                            precolor = precolors[squares.index(square2)]
-                            square2.config(bg=precolor)
-                        square.chord = False
+                        def undo():
+                            for square2 in squares:
+                                precolor = precolors[squares.index(square2)]
+                                square2.config(bg=precolor)
+                            square.chord = False
+                        self.after(500, undo)
                     else:
                         for square2 in (square for square in self.game.grid.around_square(*square.position) if not square.clicked_on and square.category != 'mine'):
                             square2.clicked()

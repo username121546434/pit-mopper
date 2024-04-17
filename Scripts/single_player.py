@@ -6,6 +6,8 @@ from tkinter import IntVar, BooleanVar, Variable, StringVar, N, S, E, W, TclErro
 import os
 from datetime import datetime
 from tkinter import filedialog, messagebox
+
+from Scripts.multiplayer import MultiplayerApp
 from .custom_menubar import CustomMenuBar, SubMenu
 from . import constants
 from .base_logger import init_logger
@@ -265,7 +267,7 @@ additional_time:       0
         highscore_data = load_highscore()
         self.title(f'{game_size_str} Pit Mopper Game')
         logging.info(f'{game_size_str} Pit Mopper Game starting...')
-        if not isinstance(highscore_data, float):
+        if not isinstance(highscore_data, (float, int)):
             try:
                 highscore = highscore_data[game_size_str]
             except KeyError:

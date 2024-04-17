@@ -38,7 +38,7 @@ class Square(Button):
         'widgetName',
         'bindings'
     )
-    def __init__(self, master: Misc | None = ..., text='') -> None:
+    def __init__(self, master: Misc | None = None, text='') -> None:
         self.category: str | None = None
         self.num: int | None = None
         self.game_over = False
