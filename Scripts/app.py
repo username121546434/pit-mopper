@@ -321,7 +321,6 @@ class App(Tk):
                     square.config(text='✅')
                 elif square.num != None and square.cget('text') == '🚩':
                     square.config(text='❌')
-            self.game.quit = True
             self.game_over.set(True)
 
         self.game.result = GameResult(game_over=game_over, seconds=self.game.seconds, win=win)
