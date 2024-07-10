@@ -20,6 +20,7 @@ packages = [
 
 include_files: list[tuple[str, str]] = [
     ('./data/fonts', 'data/fonts'),
+    ('./data/sounds', 'data/sounds')
 ]
 
 if os.name == 'nt':
