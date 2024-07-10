@@ -2,8 +2,10 @@
 from __future__ import annotations
 from tkinter import Button, Misc
 from .load_font import load_font
-from .constants import DEFAULT_BG, DARK_MODE_BG, SQUARES_FONT
+from .constants import DEFAULT_BG, DARK_MODE_BG, SQUARES_FONT, CLICK_SOUND, FLAG_SOUND
 from . import functions as funcs
+from .sound import play
+import os
 
 num_colors = {
     1: 'blue',
@@ -36,7 +38,7 @@ class Square(Button):
         'widgetName',
         'bindings'
     )
-    def __init__(self, master: Misc | None = ..., text='') -> None:
+    def __init__(self, master: Misc | None = None, text='') -> None:
         self.category: str | None = None
         self.num: int | None = None
         self.game_over = False
@@ -58,7 +60,7 @@ class Square(Button):
         funcs.bind_widget(self, '<Enter>', func=self.hover_enter)
         funcs.bind_widget(self, '<Leave>', func=self.hover_leave)
 
-    def flag(self, _=None):
+    def flag(self, ev=None):
         if self.cget('text').replace(' ', '') == '':
             if self.dark_mode:
                 self.config(fg='white')
@@ -67,6 +69,8 @@ class Square(Button):
             self.config(text='🚩')
             self.clicked_on = True
             self.flaged = True
+            if ev:
+                play(FLAG_SOUND)
         elif self.cget('text') == '🚩':
             if self.dark_mode:
                 self.config(fg='black')
@@ -77,7 +81,7 @@ class Square(Button):
     def chord_self(self, _=None):
         self.chord = not self.chord
 
-    def clicked(self, _=None):
+    def clicked(self, ev=None):
         if self.flaged:
             return
         if self.category == 'mine':
@@ -85,6 +89,8 @@ class Square(Button):
             self.game_over = True
         elif self.num != None:
             self.config(text=str(self.num), bg=num_colors[self.num], fg='black')
+            if ev:
+                play(CLICK_SOUND)
         else:
             if self.dark_mode:
                 self.config(bg=DARK_MODE_BG)

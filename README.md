@@ -18,7 +18,7 @@ This was a game that I made for fun to learn more about programming.
 
 Feel free to contribute if you want to!
 
-## How to run
+## How to run python version
 
 Note: You will need Python version 3.10 or above to run it
 
@@ -39,7 +39,7 @@ cd ./pit-mopper
 Step 3: Install all required modules
 
 ```text
-pip install -r requirements.txt
+pip install -r requirements/win.txt
 ```
 
 Step 4: Run the main Python file
@@ -69,7 +69,7 @@ cd ./pit-mopper
 Step 3: Install all required modules
 
 ```text
-python3.10 -m pip install -r requirements.txt
+python3.10 -m pip install -r requirements/linux.txt
 ```
 
 Step 4: Run the main Python file
@@ -77,5 +77,6 @@ Step 4: Run the main Python file
 ```text
 python3.10 "Pit Mopper.py"
 ```
+
 
 [Version 2.1 Patch Notes](https://github.com/username121546434/pit-mopper/releases/tag/v2.1.0)

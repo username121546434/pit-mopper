@@ -39,6 +39,12 @@ GAME_ID_MAX = 9999
 APP_FILE_EXT = '.ptmpr'
 LAST_GAME_FILE = os.path.join(APPDATA, f'last{APP_FILE_EXT}')
 
+# sound effects
+CLICK_SOUND = 'data/sounds/click.wav'
+FLAG_SOUND = 'data/sounds/flag.wav'
+START_SOUND = 'data/sounds/game_start.wav'
+LOADING_SOUND = 'data/sounds/loading.wav'
+
 dark_mode = False
 del_data = 'none'
 debug_log_file = os.path.join(DEBUG, f"{datetime.now():{STRFTIME.replace(':', '-')}}.log")

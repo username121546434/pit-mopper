@@ -74,6 +74,7 @@ class ButtonGrid:
                 self.root.destroy()
             except TclError:
                 os._exit(0)
+            return []
 
         for square, _ in self.iter_squares():
             square.config(command=None) # type: ignore
