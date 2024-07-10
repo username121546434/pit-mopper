@@ -15,7 +15,8 @@ executables = [Executable(
 
 packages = [
     'html.parser', # Required by the markdown library
-    'tkinterweb'
+    'tkinterweb',
+    'queue'
 ]
 
 include_files: list[tuple[str, str]] = [
