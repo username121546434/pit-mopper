@@ -1,5 +1,6 @@
 """A module that that has the `MultiplayerApp` class"""
 from datetime import datetime
+import random
 from tkinter.ttk import Progressbar
 
 from .url_protocol import parse_url
@@ -16,6 +17,7 @@ from .enums import KBDShortcuts
 from .base_logger import init_logger
 import logging
 import pyperclip
+from .sound import play
 init_logger()
 
 DEFAULT_TITLE = 'Multiplayer Game Loader'
@@ -129,6 +131,7 @@ class MultiplayerApp(SinglePlayerApp):
         self.draw_waiting_menubar()
         change_theme_of_window(self)
         self.after_cancel_code = self.after(1, self.wait_for_game_mainloop)
+        self.after_cancel_sound = self.after(1, self.wait_for_game_sound)
     
     def set_keyboard_shorcuts(self):
         App.set_keyboard_shorcuts(self)
@@ -263,21 +266,29 @@ class MultiplayerApp(SinglePlayerApp):
         del self.n
         logging.info('Waiting for new player...')
         self.draw_all()
+
+    def wait_for_game_sound(self):
+        self.after_cancel_sound = self.after(10_700, self.wait_for_game_sound)
+        logging.info("Playing sound")
+        play(constants.LOADING_SOUND)
     
     def wait_for_game_mainloop(self):
         self.after_cancel_code = self.after(200, self.wait_for_game_mainloop)
         if self.connected:
             self.leave_game()
             self.after_cancel(self.after_cancel_code)
+            self.after_cancel(self.after_cancel_sound)
         elif not self.connected and not self.online_game.is_full:
             self.online_game = self.n.send_data('get')
         elif self.online_game.is_full and not self.connected:
             self.after_cancel(self.after_cancel_code)
+            self.after_cancel(self.after_cancel_sound)
             self.progress_bar.stop()
             self.create_game()
     
     def leave_waiting(self):
         self.after_cancel(self.after_cancel_code)
+        self.after_cancel(self.after_cancel_sound)
         self.n.disconnect()
         del self.n
         self.clear()
