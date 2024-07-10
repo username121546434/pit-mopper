@@ -283,8 +283,15 @@ additional_time:       0
         self.menubar = CustomMenuBar(self)
         self.menubar.place(x=0, y=0)
         game_menu = SubMenu()
+        quit_game = lambda _:  [
+            self.save_game(constants.LAST_GAME_FILE),
+            self.clear(),
+            setattr(self.game, 'quit', True),
+            self.game_over.set(True),
+            self.draw_all()
+        ]
         bind_widget(self, KBDShortcuts.save_file, True, func=lambda _: self.save_game())
-        bind_widget(self, KBDShortcuts.quit_game, True, func=lambda _:  [self.save_game(constants.LAST_GAME_FILE), self.clear(), setattr(self.game, 'quit', True), self.draw_all()])
+        bind_widget(self, KBDShortcuts.quit_game, True, func=quit_game)
         bind_widget(self, KBDShortcuts.game_info, True, func=lambda _: more_info(
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start,  grid.grid_size[0] * grid.grid_size[1]))
         bind_widget(self, KBDShortcuts.fullscreen, all_=True, func=lambda *_: self.fullscreen_state.set(not self.fullscreen_state.get()))
@@ -297,7 +304,7 @@ additional_time:       0
             num_mines, mines_found, squares_clicked_on, squares_not_clicked_on, start, session_start, grid.grid_size[0] * grid.grid_size[1]),
             accelerator=format_kbd_shortcut(KBDShortcuts.game_info))
         game_menu.add_checkbutton(label='Fullscreen', variable=self.fullscreen_state, accelerator=format_kbd_shortcut(KBDShortcuts.fullscreen))
-        game_menu.add_command(label='Exit', command=lambda: [self.save_game(constants.LAST_GAME_FILE), self.clear(), setattr(self.game, 'quit', True), self.draw_all()], accelerator=format_kbd_shortcut(KBDShortcuts.quit_game))
+        game_menu.add_command(label='Exit', command=quit_game)
 
         self.menubar.add_menu(menu=game_menu, title='Game')
 
@@ -321,7 +328,7 @@ additional_time:       0
                 'Game Over',
                 f'Game Over.\nYou won!\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}'
             )
-        else:
+        elif not self.game.quit:
             messagebox.showinfo(
                 'Game Over',
                 f'Game Over.\nYou lost.\nYou found {mines_found} out of {num_mines} mines.\nTime: {format_second(seconds)}\nHighscore: {format_second(highscore)}'
