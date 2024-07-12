@@ -1,7 +1,7 @@
 # Common Dependencies
 cx_Freeze==7.1.1
-Markdown==3.4.1
-packaging==23.1
-pyperclip==1.8.2
-requests==2.28.2
+Markdown==3.6
+packaging==24.1
+pyperclip==1.9.0
+requests==2.32.3
 tkinterweb==3.23.10
